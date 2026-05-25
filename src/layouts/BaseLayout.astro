@@ -1,0 +1,81 @@
+---
+import '~/styles/global.css';
+import Header from '~/components/Header.astro';
+import Sidebar from '~/components/Sidebar.astro';
+import { getCollection } from 'astro:content';
+import type { CategoryKey } from '~/content/config';
+
+interface Props {
+  title: string;
+  description?: string;
+  currentHref?: string;
+}
+const { title, description = '자주 쓰는 프롬프트 · 스킬 · MCP 컬렉션', currentHref } = Astro.props;
+
+const COLLECTIONS: CategoryKey[] = ['prompts', 'skills', 'configs', 'mcps'];
+const lists = await Promise.all(COLLECTIONS.map((c) => getCollection(c, (e: any) => !e.data.hidden)));
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const items = lists.flatMap((entries, idx) => {
+  const category = COLLECTIONS[idx];
+  return entries.map((entry: any) => ({
+    slug: entry.slug,
+    title: entry.data.title,
+    category,
+    order: entry.data.order ?? 100,
+    href: `${base}/${category}/${entry.slug}/`,
+  }));
+});
+---
+
+<!doctype html>
+<html lang="ko" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="theme-color" content="#0e111c" />
+    <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="min-h-screen">
+    <Header />
+    <div class="mx-auto flex max-w-7xl flex-col lg:flex-row">
+      <Sidebar items={items} currentHref={currentHref} />
+      <main class="min-w-0 flex-1 px-4 py-8 lg:px-10">
+        <slot />
+      </main>
+    </div>
+
+    <script>
+      // Copy-to-clipboard wiring for any element with class="pc-copy" and data-target="#id"
+      document.addEventListener('click', async (e) => {
+        const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.pc-copy');
+        if (!btn) return;
+        const targetSel = btn.dataset.target;
+        if (!targetSel) return;
+        const el = document.querySelector(targetSel) as HTMLElement | null;
+        if (!el) return;
+        const text = el.innerText;
+        try {
+          await navigator.clipboard.writeText(text);
+          const labelEl = btn.querySelector('.pc-copy-label');
+          const prev = labelEl?.textContent ?? '복사';
+          if (labelEl) labelEl.textContent = '복사됨';
+          btn.classList.add('!bg-emerald-500');
+          setTimeout(() => {
+            if (labelEl) labelEl.textContent = prev;
+            btn.classList.remove('!bg-emerald-500');
+          }, 1400);
+        } catch {
+          alert('클립보드 복사 실패. 수동 복사해 주세요.');
+        }
+      });
+    </script>
+  </body>
+</html>

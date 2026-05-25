@@ -1,0 +1,50 @@
+---
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const homeHref = base + '/';
+---
+
+<header class="sticky top-0 z-40 border-b border-ink-200 dark:border-ink-800 bg-white/85 dark:bg-ink-950/85 backdrop-blur">
+  <div class="flex h-14 items-center justify-between px-4 lg:px-6">
+    <a href={homeHref} class="flex items-center gap-2 font-semibold tracking-tight">
+      <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-accent-500 text-white font-mono text-sm">pc</span>
+      <span>prompt-collection</span>
+    </a>
+    <div class="flex items-center gap-3">
+      <a
+        href="https://github.com/cskwork"
+        class="text-sm text-ink-600 dark:text-ink-300 hover:text-accent-500"
+        target="_blank"
+        rel="noopener"
+      >GitHub</a>
+      <button
+        id="pc-theme-toggle"
+        type="button"
+        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-ink-100 dark:hover:bg-ink-900 text-ink-700 dark:text-ink-200"
+        aria-label="테마 전환"
+      >
+        <svg class="w-4 h-4 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="4" />
+          <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </svg>
+        <svg class="w-4 h-4 block dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<script is:inline>
+  (function () {
+    const KEY = 'pc-theme';
+    const root = document.documentElement;
+    const saved = localStorage.getItem(KEY);
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) root.classList.add('dark');
+  })();
+  document.getElementById('pc-theme-toggle')?.addEventListener('click', () => {
+    const root = document.documentElement;
+    root.classList.toggle('dark');
+    localStorage.setItem('pc-theme', root.classList.contains('dark') ? 'dark' : 'light');
+  });
+</script>

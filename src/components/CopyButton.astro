@@ -1,0 +1,33 @@
+---
+interface Props {
+  target: string;
+  label?: string;
+  size?: 'sm' | 'md';
+  variant?: 'solid' | 'ghost';
+  class?: string;
+}
+const { target, label = '복사', size = 'sm', variant = 'solid', class: className = '' } = Astro.props;
+
+const base = 'inline-flex items-center gap-1.5 rounded-md font-medium transition-colors disabled:opacity-50';
+const sizes = {
+  sm: 'px-2.5 py-1 text-xs',
+  md: 'px-3 py-1.5 text-sm',
+};
+const variants = {
+  solid: 'bg-accent-500 hover:bg-accent-600 text-white',
+  ghost: 'bg-ink-100 hover:bg-ink-200 text-ink-800 dark:bg-ink-800 dark:hover:bg-ink-700 dark:text-ink-100',
+};
+---
+
+<button
+  type="button"
+  class:list={[base, sizes[size], variants[variant], 'pc-copy', className]}
+  data-target={target}
+  aria-label={label}
+>
+  <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+  </svg>
+  <span class="pc-copy-label">{label}</span>
+</button>
