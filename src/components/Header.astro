@@ -3,23 +3,23 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const homeHref = base + '/';
 ---
 
-<header class="sticky top-0 z-40 border-b border-ink-200 dark:border-ink-800 bg-white/85 dark:bg-ink-950/85 backdrop-blur">
+<header class="sticky top-0 z-40 bg-white/65 dark:bg-ink-950/55 backdrop-blur-[14px] backdrop-saturate-150 border-b border-white/50 dark:border-white/5 shadow-[0_1px_0_rgba(255,255,255,0.4)_inset,0_2px_12px_-6px_rgba(15,20,40,0.12)]">
   <div class="flex h-14 items-center justify-between px-4 lg:px-6">
     <a href={homeHref} class="flex items-center gap-2 font-semibold tracking-tight">
-      <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-accent-500 text-white font-mono text-sm">pc</span>
+      <span class="inline-flex h-7 w-7 items-center justify-center rounded-lg text-white font-mono text-sm bg-gradient-to-br from-accent-400 to-accent-600 shadow-[0_2px_8px_-2px_rgba(90,125,255,0.5)]">pc</span>
       <span>prompt-collection</span>
     </a>
     <div class="flex items-center gap-3">
       <a
         href="https://github.com/cskwork"
-        class="text-sm text-ink-600 dark:text-ink-300 hover:text-accent-500"
+        class="text-sm text-ink-600 dark:text-ink-300 hover:text-accent-500 transition-colors"
         target="_blank"
         rel="noopener"
       >GitHub</a>
       <button
         id="pc-theme-toggle"
         type="button"
-        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-ink-100 dark:hover:bg-ink-900 text-ink-700 dark:text-ink-200"
+        class="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-white/60 dark:hover:bg-ink-800/60 text-ink-700 dark:text-ink-200 transition-colors"
         aria-label="테마 전환"
       >
         <svg class="w-4 h-4 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
