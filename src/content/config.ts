@@ -78,7 +78,17 @@ const harnesses = defineCollection({
   }),
 });
 
-export const collections = { prompts, skills, configs, mcps, plugins, hooks, harnesses };
+const tools = defineCollection({
+  type: 'content',
+  schema: z.object({
+    ...baseFields,
+    languages: z.array(z.string()).default([]),
+    platforms: z.array(z.string()).default([]),
+    install: z.string().optional(),
+  }),
+});
+
+export const collections = { prompts, skills, configs, mcps, plugins, hooks, harnesses, tools };
 
 export const CATEGORY_META = {
   prompts: { label: '프롬프트', description: '바로 복사해 쓰는 프롬프트 템플릿' },
@@ -88,6 +98,7 @@ export const CATEGORY_META = {
   plugins: { label: '플러그인', description: '여러 SKILL/툴을 묶은 코딩 에이전트 플러그인·마켓플레이스' },
   hooks: { label: '훅', description: 'PreToolUse · PostToolUse · Stop 등 에이전트 라이프사이클 훅 스크립트' },
   harnesses: { label: '하네스', description: '코딩 에이전트 그 자체 — Codex CLI · Claude Code · Pi 위에 얹는 워크플로우/툴 레이어' },
+  tools: { label: '도구', description: '코딩 에이전트 작업을 보조하는 CLI · 데스크톱 앱 · 인덱서' },
 } as const;
 
 export type CategoryKey = keyof typeof CATEGORY_META;
