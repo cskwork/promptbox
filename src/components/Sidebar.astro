@@ -1,0 +1,98 @@
+---
+import { CATEGORY_META, type CategoryKey } from '~/content/config';
+
+interface NavItem {
+  slug: string;
+  title: string;
+  category: CategoryKey;
+  href: string;
+  order: number;
+}
+
+interface Props {
+  items: NavItem[];
+  currentHref?: string;
+}
+
+const { items, currentHref } = Astro.props;
+
+const grouped = (Object.keys(CATEGORY_META) as CategoryKey[]).map((key) => ({
+  key,
+  meta: CATEGORY_META[key],
+  entries: items
+    .filter((it) => it.category === key)
+    .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title, 'ko')),
+}));
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const homeHref = base + '/';
+---
+
+<aside class="w-full lg:w-72 lg:shrink-0 lg:sticky lg:top-16 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto border-b lg:border-b-0 lg:border-r border-ink-200 dark:border-ink-800 px-4 py-6 bg-white dark:bg-ink-950">
+  <div class="mb-4">
+    <input
+      type="search"
+      id="pc-search"
+      placeholder="검색 (제목·태그)"
+      class="w-full rounded-md border border-ink-300 dark:border-ink-700 bg-white dark:bg-ink-900 px-3 py-1.5 text-sm placeholder:text-ink-400 focus:outline-none focus:ring-2 focus:ring-accent-500"
+      autocomplete="off"
+    />
+  </div>
+  <nav class="space-y-6 text-sm">
+    <a
+      href={homeHref}
+      class:list={[
+        'block rounded px-2 py-1.5 font-medium',
+        currentHref === homeHref ? 'bg-accent-500/10 text-accent-500' : 'hover:bg-ink-100 dark:hover:bg-ink-900',
+      ]}
+    >전체 카탈로그</a>
+
+    {grouped.map((group) => (
+      <div data-pc-group={group.key}>
+        <div class="flex items-baseline justify-between mb-1.5 px-2">
+          <h3 class="text-[0.7rem] uppercase tracking-wider text-ink-500 font-semibold">{group.meta.label}</h3>
+          <span class="text-[0.7rem] text-ink-400">{group.entries.length}</span>
+        </div>
+        <ul class="space-y-0.5">
+          {group.entries.length === 0 && (
+            <li class="px-2 py-1 text-xs text-ink-400 italic">아직 항목 없음</li>
+          )}
+          {group.entries.map((entry) => (
+            <li>
+              <a
+                href={entry.href}
+                data-pc-item
+                data-pc-title={entry.title}
+                class:list={[
+                  'block rounded px-2 py-1 truncate',
+                  currentHref === entry.href
+                    ? 'bg-accent-500/10 text-accent-500 font-medium'
+                    : 'text-ink-700 dark:text-ink-300 hover:bg-ink-100 dark:hover:bg-ink-900',
+                ]}
+              >{entry.title}</a>
+            </li>
+          ))}
+        </ul>
+      </div>
+    ))}
+  </nav>
+</aside>
+
+<script>
+  const input = document.getElementById('pc-search') as HTMLInputElement | null;
+  if (input) {
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      document.querySelectorAll<HTMLAnchorElement>('[data-pc-item]').forEach((a) => {
+        const t = (a.dataset.pcTitle || '').toLowerCase();
+        (a.parentElement as HTMLElement).style.display = !q || t.includes(q) ? '' : 'none';
+      });
+      document.querySelectorAll<HTMLElement>('[data-pc-group]').forEach((g) => {
+        const visible = g.querySelectorAll<HTMLElement>('li').length === 0
+          ? false
+          : Array.from(g.querySelectorAll<HTMLLIElement>('li')).some((li) => li.style.display !== 'none');
+        g.style.display = q && !visible ? 'none' : '';
+      });
+    });
+  }
+</script>

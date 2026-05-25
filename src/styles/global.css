@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    @apply bg-white text-ink-900;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  html.dark {
+    @apply bg-ink-950 text-ink-100;
+  }
+  body {
+    @apply font-sans antialiased;
+  }
+  code, pre {
+    @apply font-mono;
+  }
+}
+
+@layer components {
+  .prose-pc {
+    @apply max-w-none leading-relaxed;
+  }
+  .prose-pc h1 { @apply text-3xl font-semibold mt-0 mb-4; }
+  .prose-pc h2 { @apply text-2xl font-semibold mt-10 mb-3 border-b border-ink-200 dark:border-ink-800 pb-2; }
+  .prose-pc h3 { @apply text-xl font-semibold mt-8 mb-2; }
+  .prose-pc h4 { @apply text-lg font-semibold mt-6 mb-2; }
+  .prose-pc p  { @apply my-3; }
+  .prose-pc ul { @apply list-disc pl-6 my-3 space-y-1; }
+  .prose-pc ol { @apply list-decimal pl-6 my-3 space-y-1; }
+  .prose-pc a  { @apply text-accent-500 hover:text-accent-400 underline underline-offset-2; }
+  .prose-pc blockquote { @apply border-l-4 border-ink-300 dark:border-ink-700 pl-4 italic my-4 text-ink-600 dark:text-ink-300; }
+  .prose-pc table { @apply w-full border-collapse my-4 text-sm; }
+  .prose-pc th, .prose-pc td { @apply border border-ink-200 dark:border-ink-800 px-3 py-2 text-left; }
+  .prose-pc th { @apply bg-ink-50 dark:bg-ink-900 font-semibold; }
+  .prose-pc :not(pre) > code {
+    @apply rounded bg-ink-100 dark:bg-ink-800 px-1.5 py-0.5 text-[0.9em] text-ink-800 dark:text-ink-100;
+  }
+  .prose-pc pre {
+    @apply rounded-lg p-4 overflow-x-auto text-sm my-4 border border-ink-200 dark:border-ink-800;
+  }
+  .prose-pc hr { @apply my-8 border-ink-200 dark:border-ink-800; }
+}
+
+/* shiki theme override for light mode block bg */
+html:not(.dark) .astro-code {
+  @apply !bg-ink-900 text-ink-100;
+}
