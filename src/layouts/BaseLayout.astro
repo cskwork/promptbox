@@ -12,7 +12,7 @@ interface Props {
 }
 const { title, description = '자주 쓰는 프롬프트 · 스킬 · MCP 컬렉션', currentHref } = Astro.props;
 
-const COLLECTIONS: CategoryKey[] = ['prompts', 'skills', 'plugins', 'configs', 'mcps'];
+const COLLECTIONS: CategoryKey[] = ['prompts', 'skills', 'plugins', 'harnesses', 'hooks', 'configs', 'mcps'];
 const lists = await Promise.all(COLLECTIONS.map((c) => getCollection(c, (e: any) => !e.data.hidden)));
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');

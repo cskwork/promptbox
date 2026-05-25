@@ -5,7 +5,7 @@ import { getCollection } from 'astro:content';
 import { CATEGORY_META, type CategoryKey } from '~/content/config';
 
 export async function getStaticPaths() {
-  const cats: CategoryKey[] = ['prompts', 'skills', 'configs', 'mcps', 'plugins'];
+  const cats: CategoryKey[] = ['prompts', 'skills', 'configs', 'mcps', 'plugins', 'hooks', 'harnesses'];
   const all = await Promise.all(
     cats.map(async (cat) => {
       const entries = await getCollection(cat);
