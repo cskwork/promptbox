@@ -3,7 +3,7 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 import { getCollection } from 'astro:content';
 import { CATEGORY_META, type CategoryKey } from '~/content/config';
 
-const COLLECTIONS: CategoryKey[] = ['prompts', 'skills', 'plugins', 'harnesses', 'hooks', 'configs', 'mcps'];
+const COLLECTIONS: CategoryKey[] = ['prompts', 'skills', 'plugins', 'harnesses', 'hooks', 'configs', 'mcps', 'tools'];
 const lists = await Promise.all(COLLECTIONS.map((c) => getCollection(c, (e: any) => !e.data.hidden)));
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const grouped = COLLECTIONS.map((key, idx) => ({
