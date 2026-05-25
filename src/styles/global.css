@@ -4,46 +4,107 @@
 
 @layer base {
   html {
-    @apply bg-white text-ink-900;
+    @apply text-ink-900;
     font-feature-settings: 'cv11', 'ss01';
   }
   html.dark {
-    @apply bg-ink-950 text-ink-100;
+    @apply text-ink-100;
   }
   body {
-    @apply font-sans antialiased;
+    @apply font-sans antialiased relative;
+    background:
+      radial-gradient(1100px 600px at 88% -8%, rgba(124, 156, 255, 0.18), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(180, 120, 255, 0.16), transparent 55%),
+      linear-gradient(180deg, #f6f8fc 0%, #eef1f8 100%);
+    background-attachment: fixed;
+  }
+  html.dark body {
+    background:
+      radial-gradient(1100px 600px at 88% -8%, rgba(90, 125, 255, 0.28), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(160, 90, 255, 0.22), transparent 55%),
+      linear-gradient(180deg, #070912 0%, #0a0d1c 100%);
+    background-attachment: fixed;
   }
   code, pre {
     @apply font-mono;
   }
+  /* Improve focus visibility on glass surfaces */
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent-500 ring-offset-2 ring-offset-white dark:ring-offset-ink-950;
+  }
 }
 
 @layer components {
+  /* === Glass surfaces ===
+     Moderate blur (10px) keeps GPU cost low on pages with many cards.
+     Borders + inner highlight give the "frosted glass" edge without
+     hurting body-text contrast. */
+  .glass-panel {
+    @apply bg-white/70 dark:bg-ink-900/55
+           backdrop-blur-[10px] backdrop-saturate-150
+           border border-white/60 dark:border-white/10
+           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_-12px_rgba(15,20,40,0.18)]
+           dark:shadow-[0_1px_0_rgba(255,255,255,0.06)_inset,0_8px_24px_-12px_rgba(0,0,0,0.5)];
+  }
+  .glass-card {
+    @apply bg-white/65 dark:bg-ink-900/45
+           backdrop-blur-[10px] backdrop-saturate-150
+           border border-white/55 dark:border-white/10
+           shadow-[0_1px_0_rgba(255,255,255,0.55)_inset,0_6px_18px_-12px_rgba(15,20,40,0.20)]
+           dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_6px_18px_-12px_rgba(0,0,0,0.5)]
+           transition-[transform,box-shadow,border-color,background-color] duration-200;
+  }
+  .glass-card:hover {
+    @apply -translate-y-0.5 bg-white/80 dark:bg-ink-900/65 border-accent-500/60
+           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_14px_30px_-14px_rgba(90,125,255,0.45)];
+  }
+  .glass-chip {
+    @apply bg-white/55 dark:bg-ink-800/55
+           backdrop-blur-[6px]
+           border border-white/50 dark:border-white/10
+           text-ink-700 dark:text-ink-200;
+  }
+  .glass-input {
+    @apply bg-white/70 dark:bg-ink-900/60 backdrop-blur-[6px]
+           border border-white/60 dark:border-white/10
+           placeholder:text-ink-400
+           focus:bg-white/90 dark:focus:bg-ink-900/80
+           focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/30
+           outline-none;
+  }
+
+  /* === Prose tweaks: body content sits on near-opaque surfaces
+     so we keep current contrast and rhythm. */
   .prose-pc {
     @apply max-w-none leading-relaxed;
   }
   .prose-pc h1 { @apply text-3xl font-semibold mt-0 mb-4; }
-  .prose-pc h2 { @apply text-2xl font-semibold mt-10 mb-3 border-b border-ink-200 dark:border-ink-800 pb-2; }
+  .prose-pc h2 { @apply text-2xl font-semibold mt-10 mb-3 border-b border-ink-200/70 dark:border-ink-800/70 pb-2; }
   .prose-pc h3 { @apply text-xl font-semibold mt-8 mb-2; }
   .prose-pc h4 { @apply text-lg font-semibold mt-6 mb-2; }
   .prose-pc p  { @apply my-3; }
   .prose-pc ul { @apply list-disc pl-6 my-3 space-y-1; }
   .prose-pc ol { @apply list-decimal pl-6 my-3 space-y-1; }
   .prose-pc a  { @apply text-accent-500 hover:text-accent-400 underline underline-offset-2; }
-  .prose-pc blockquote { @apply border-l-4 border-ink-300 dark:border-ink-700 pl-4 italic my-4 text-ink-600 dark:text-ink-300; }
+  .prose-pc blockquote { @apply border-l-4 border-accent-500/50 pl-4 italic my-4 text-ink-600 dark:text-ink-300; }
   .prose-pc table { @apply w-full border-collapse my-4 text-sm; }
-  .prose-pc th, .prose-pc td { @apply border border-ink-200 dark:border-ink-800 px-3 py-2 text-left; }
-  .prose-pc th { @apply bg-ink-50 dark:bg-ink-900 font-semibold; }
+  .prose-pc th, .prose-pc td { @apply border border-ink-200/70 dark:border-ink-800/70 px-3 py-2 text-left; }
+  .prose-pc th { @apply bg-ink-50/70 dark:bg-ink-900/70 font-semibold; }
   .prose-pc :not(pre) > code {
-    @apply rounded bg-ink-100 dark:bg-ink-800 px-1.5 py-0.5 text-[0.9em] text-ink-800 dark:text-ink-100;
+    @apply rounded bg-ink-100/80 dark:bg-ink-800/80 px-1.5 py-0.5 text-[0.9em] text-ink-800 dark:text-ink-100;
   }
   .prose-pc pre {
-    @apply rounded-lg p-4 overflow-x-auto text-sm my-4 border border-ink-200 dark:border-ink-800;
+    @apply rounded-lg p-4 overflow-x-auto text-sm my-4 border border-ink-800/70;
   }
-  .prose-pc hr { @apply my-8 border-ink-200 dark:border-ink-800; }
+  .prose-pc hr { @apply my-8 border-ink-200/70 dark:border-ink-800/70; }
 }
 
-/* shiki theme override for light mode block bg */
+/* shiki theme override: keep code blocks on a solid dark surface
+   so syntax-highlighted content stays maximally readable regardless of
+   the translucent surface behind it. */
 html:not(.dark) .astro-code {
   @apply !bg-ink-900 text-ink-100;
+}
+html.dark .astro-code {
+  @apply !bg-ink-950;
 }

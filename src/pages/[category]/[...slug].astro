@@ -35,7 +35,7 @@ const rawText = entry.body || '';
     <span class="text-ink-700 dark:text-ink-200">{entry.data.title}</span>
   </nav>
 
-  <header class="mb-6">
+  <header class="glass-panel mb-6 rounded-2xl p-5 lg:p-6">
     <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
       <h1 class="text-2xl lg:text-3xl font-bold tracking-tight">{entry.data.title}</h1>
       <div class="flex items-center gap-2">
@@ -45,7 +45,7 @@ const rawText = entry.body || '';
             href={entry.data.source}
             target="_blank"
             rel="noopener"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm bg-ink-100 hover:bg-ink-200 dark:bg-ink-800 dark:hover:bg-ink-700 text-ink-800 dark:text-ink-100"
+            class="glass-chip inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm hover:bg-white/80 dark:hover:bg-ink-800/80 transition-colors"
           >원본 보기</a>
         )}
       </div>
@@ -80,13 +80,13 @@ const rawText = entry.body || '';
     {entry.data.tags?.length > 0 && (
       <div class="mt-3 flex flex-wrap gap-1">
         {entry.data.tags.map((t: string) => (
-          <span class="text-[0.7rem] rounded-full bg-ink-100 dark:bg-ink-800 px-2 py-0.5 text-ink-600 dark:text-ink-300">#{t}</span>
+          <span class="glass-chip text-[0.7rem] rounded-full px-2 py-0.5">#{t}</span>
         ))}
       </div>
     )}
   </header>
 
-  <article class="prose-pc">
+  <article class="prose-pc rounded-2xl p-6 lg:p-8 bg-white/90 dark:bg-ink-900/80 border border-white/60 dark:border-white/10 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)]">
     <Content />
   </article>
 
