@@ -1,8 +1,9 @@
 # promptbox — agent instructions
 
 Static collection site (Astro 5 + Tailwind 3 + Content Collections) hosted at
-<https://cskwork.github.io/promptbox/>. It catalogs prompts, skills, plugins, configs,
-and MCP server snippets. New items appear on the site the moment they land on `main`.
+<https://cskwork.github.io/promptbox/>. It catalogs prompts, skills, plugins, harnesses,
+hooks, configs, and MCP server snippets. New items appear on the site the moment
+they land on `main`.
 
 > **If a user gives you a URL or paste and says "add to promptbox" / "save as skill" /
 > "add this prompt", carry out the One-shot add workflow at the bottom of this file
@@ -14,6 +15,8 @@ and MCP server snippets. New items appear on the site the moment they land on `m
 - `prompts/` — reusable LLM prompts (system prompts, transformation templates)
 - `skills/` — single-purpose Claude Code / Codex / Hermes `SKILL.md` definitions
 - `plugins/` — **collections of skills** packaged as a coding-agent plugin / marketplace entry
+- `harnesses/` — **the coding agent itself** (or a workflow layer on top): Codex CLI add-ons, alternative agents, harness builders. Anything that defines *how the agent runs*, not what skill it loads.
+- `hooks/` — lifecycle hook scripts (`PreToolUse` / `PostToolUse` / `Stop`) that gate or augment tool calls. One repo / many scripts in `hooks/` directory + `settings.json` snippet.
 - `configs/` — whole-file agent system prompts (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`)
 - `mcps/` — MCP server install/usage snippets
 
@@ -24,11 +27,16 @@ and MCP server snippets. New items appear on the site the moment they land on `m
 | Plain-text prompt template a user pastes into an LLM chat | `prompts/` |
 | **One** skill definition with `name:` / `description:` / trigger logic | `skills/` |
 | **Multiple** skills bundled as a plugin (`/plugin install …`, `gemini extensions install …`, `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/` layouts) | `plugins/` |
+| A **coding agent itself**, or a workflow/runtime layer (`oh-my-codex`-like) wrapping one, or a harness builder (`Archon`-like) | `harnesses/` |
+| Lifecycle hook scripts — PreToolUse / PostToolUse / Stop / etc., usually shipped as a `hooks/` directory + `settings.json` snippet | `hooks/` |
 | A whole-file agent system prompt (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`) | `configs/` |
 | MCP server install snippet or `mcpServers` JSON config | `mcps/` |
 
 Tie-breaker: **match the artifact's filename / packaging**. A `SKILL.md` goes in
-`skills/`; a repo with `.claude-plugin/` + `skills/<many>/` goes in `plugins/`.
+`skills/`; a repo with `.claude-plugin/` + `skills/<many>/` goes in `plugins/`;
+a repo whose entry point is `omx`/`omp`/`archon` CLI (and the skills are
+secondary) goes in `harnesses/`; a repo whose primary deliverable is
+`hooks/*.sh` + `settings.json` matchers goes in `hooks/`.
 
 If a source repo has no `SKILL.md` but the user says "add this as a skill", **you write
 the SKILL.md** in the body (frontmatter + Markdown matching the SKILL.md spec) so the
@@ -64,6 +72,19 @@ install?: string
 # plugins/
 harnesses?: string[]     # ["Claude Code", "Codex CLI", "Gemini CLI", "OpenCode", "Cursor", ...]
 install?: string         # primary install one-liner; per-harness details in body
+
+# harnesses/
+base_agent?: string      # which agent it wraps or replaces (e.g., "OpenAI Codex CLI", "Claude Code SDK · Codex SDK · Pi", "자체 (Pi fork)")
+languages?: string[]     # implementation languages (["TypeScript", "Rust"])
+platforms?: string[]     # supported OS / runtime (["macOS", "Linux", "Windows", "WSL2", "Zed (ACP)"])
+install?: string         # primary install one-liner
+
+# hooks/
+event?: string           # "PreToolUse" | "PostToolUse" | "Stop" | "SessionStart" — pick the dominant one
+matcher?: string         # e.g. "Bash · WebSearch"
+scope?: 'project' | 'global' | 'both'
+deps?: string[]          # required binaries (["bash", "python3", "xmllint"])
+install?: string
 
 # configs/
 target_file?: string     # filesystem location the agent loads (~/.claude/CLAUDE.md, ...)
@@ -194,6 +215,8 @@ There is no test suite. The build is the validation step.
 - Don't add a new top-level category without updating **all of**:
   `src/content/config.ts` (Zod schema + `CATEGORY_META`), the `COLLECTIONS` arrays in
   `src/pages/index.astro` / `src/pages/[category]/[...slug].astro` / `src/layouts/BaseLayout.astro`.
+  Current order is `['prompts', 'skills', 'plugins', 'harnesses', 'hooks', 'configs', 'mcps']` —
+  keep all three files in sync.
 - Don't rewrite layout/components for a single item. Adjust schema or body content first.
 - Don't commit `.tmp-sources/`, `dist/`, or `node_modules/`. They're gitignored.
 - Don't change `astro.config.mjs`'s default `BASE` (`/promptbox`) unless the GitHub
