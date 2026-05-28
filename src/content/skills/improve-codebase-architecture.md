@@ -1,6 +1,7 @@
 ---
 title: improve-codebase-architecture
-summary: 코드베이스에서 "deepening opportunity"를 찾는 스킬 — shallow 모듈을 deep 모듈로 만드는 리팩토링. CONTEXT.md 도메인 언어와 LANGUAGE.md 아키텍처 용어로 후보를 HTML 리포트로 시각화하고, 사용자가 고른 후보를 grilling으로 깊이 탐구.
+summary: "코드에서 쓸데없이 복잡하게 얽혀 유지보수하기 어려운 부분을 찾아내, 정리 전후를 한눈에 보여주는 시각 리포트로 만들어 주고, 고른 곳을 어떻게 단순하게 고칠지 질문을 주고받으며 함께 다듬어 주는 스킬."
+summary_en: "Finds over-complex code, produces a before/after visual report per candidate, and walks you through whichever refactor you choose."
 tags: [skill, architecture, refactor, deep-modules, html-report, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/improve-codebase-architecture
 author: mattpocock

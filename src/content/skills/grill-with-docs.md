@@ -1,6 +1,7 @@
 ---
 title: grill-with-docs
-summary: grill-me의 강화판 — 계획을 인터뷰하면서 동시에 CONTEXT.md(도메인 용어집)와 docs/adr/(아키텍처 결정)를 인라인으로 업데이트. fuzzy 용어를 sharpen하고, 코드와 대조하고, hard-to-reverse 결정만 ADR로 남긴다.
+summary: "내 계획을 질문으로 파고들면서, 프로젝트에서 쓰는 용어가 흔들리지 않게 그 자리에서 정리해 주는 스킬. 애매한 단어는 정확히 못 박고, 코드와 안 맞는 부분은 짚어 준다."
+summary_en: "Stress-tests your plan with questions, locks in agreed terms, and flags wherever your plan and code disagree."
 tags: [skill, interview, design-review, ddd, context, adr, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/grill-with-docs
 author: mattpocock
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/mattpocock/skills --skill grill-with
 
 ## 한 줄
 
-grill-me + 도메인 인지 — 인터뷰 중 사용자가 쓴 단어가 `CONTEXT.md` 정의와 충돌하면 즉시 challenge하고, 합의된 용어는 그 자리에서 `CONTEXT.md`에 적는다.
+grill-me에 "용어 관리"를 더한 버전 — 인터뷰 중 내가 쓴 단어가 프로젝트 용어집(`CONTEXT.md`) 정의와 충돌하면 바로 지적하고, 합의된 뜻은 그 자리에서 `CONTEXT.md`에 적어 둔다.
+
+*EN: grill-me, but it also keeps your project's words straight — clashes get called out, agreed meanings get written down right away.*
 
 ## 언제 쓰는가
 

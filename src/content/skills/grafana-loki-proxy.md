@@ -1,6 +1,7 @@
 ---
 title: grafana-loki-proxy
-summary: Grafana Data Source Proxy(`/api/ds/query`)로 Loki 로그를 조회하는 헬퍼 — payload preview · curl 생성 · 실제 query · self-contained HTML report. dev/stg/prod 프로필 분리, 큰 stream은 윈도우 분할.
+summary: "Loki 로그를 따로 인증 설정할 필요 없이, 평소 쓰던 Grafana 로그인만으로 명령줄에서 검색하고 보기 좋은 HTML 리포트로 뽑아주는 도구. dev/운영 환경을 나눠 관리하고 큰 조회는 자동으로 쪼개 안전하게 가져온다."
+summary_en: "Search your Loki logs from the command line using just your Grafana login — no separate auth setup — and export a shareable HTML report, with per-environment profiles and auto-chunked large queries."
 tags: [skill, grafana, loki, observability, logql, devops, basic-auth, html-report]
 source: https://github.com/grafana/grafana
 author: cskwork (skill author)
@@ -11,7 +12,9 @@ trigger: "Loki 로그 조회 / Grafana proxy로 LogQL / observability 인증 / l
 
 ## 한 줄
 
-Loki에 직접 붙는 대신 Grafana의 datasource proxy로 가서 — Grafana 계정만 있으면 Loki 인증 따로 셋업 안 해도 LogQL 던질 수 있다. `payload → curl → query → report` 네 모드.
+Loki에 직접 붙는 대신 Grafana를 통해서 조회한다 — Grafana 계정만 있으면 Loki 인증을 따로 셋업하지 않아도 로그를 검색할 수 있다. `payload(요청 미리보기) → curl(명령 생성) → query(실행) → report(HTML 리포트)` 네 모드.
+
+*EN: Query Loki through Grafana, so your existing Grafana account is all the auth you need. Four modes: preview, curl, query, report.*
 
 ## 언제 쓰는가
 

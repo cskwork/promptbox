@@ -1,6 +1,7 @@
 ---
 title: fluid-ssh-setup
-summary: 코딩 에이전트(Claude Code 등)가 원격 서버·Kubernetes 클러스터에 안전하게 SSH/exec 하도록 fluid.sh CLI + MCP server + read-only shell을 단계별로 설치·등록·트러블슈팅. 2중 검증(local allowlist + 서버 blocklist) 아키텍처.
+summary: "Claude Code 같은 AI 코딩 에이전트가 원격 서버나 Kubernetes에 직접 접속해 명령을 실행하게 해주되, 미리 허용한 안전한 조회 명령만 통과시켜 사고를 막아주는 fluid.sh 설치·연결 가이드."
+summary_en: "Wire your AI coding agent to remote servers and Kubernetes clusters, with a two-gate allow-list that blocks anything beyond the read-only commands you approve."
 tags: [skill, ssh, fluid, mcp, kubernetes, read-only, devops, ncloud]
 source: https://github.com/aspectrr/fluid.sh
 author: aspectrr (fluid.sh)
@@ -12,7 +13,9 @@ install: "git clone https://github.com/aspectrr/fluid.sh && cd fluid.sh/fluid-cl
 
 ## 한 줄
 
-`fluid` CLI가 stdio MCP server로 Claude Code에 붙고, 원격 서버에는 `fluid-readonly-shell`이 깔린다 — 둘 다 통과해야 명령 실행. 단계 순서를 어기면 어디서 실패하는지 알기 어렵다.
+내 컴퓨터의 Claude Code와 원격 서버 양쪽에 `fluid`라는 관문을 설치하고, 명령이 두 관문을 모두 통과할 때만 서버에서 실행되도록 묶어주는 가이드 — 안전한 조회 명령만 지나가고 위험한 명령은 막힌다. 단계 순서를 어기면 어디서 실패하는지 알기 어렵다.
+
+*EN: A step-by-step guide to wiring your AI coding agent to a remote server through two safety gates, so only the read-only commands you allow ever run.*
 
 ## 아키텍처
 

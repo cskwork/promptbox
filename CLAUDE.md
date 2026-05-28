@@ -50,7 +50,8 @@ authoritative Zod schema):
 
 ```yaml
 title: string            # display name (sidebar + card heading)
-summary: string          # one-line description (cards, meta description, search)
+summary: string          # one-line KO description (cards, meta description, search)
+summary_en?: string      # natural EN caption shown beneath the KO summary (cards + detail); not a literal translation
 tags: string[]           # kebab-case; first 4 render on cards
 source?: URL             # original repo / site; rendered as card footer link + detail-page button
 author?: string
@@ -104,6 +105,9 @@ The body is both the on-page documentation **and** the clipboard payload (the "�
 button copies `entry.body`). So:
 
 - Lead with 1–3 short H2 sections in Korean: *한 줄 / 언제 쓰는가 / 무엇을 하는가 / 함정*.
+- Gloss each English jargon term once on first use in those KO sections — e.g.
+  `seam(테스트를 끼워 넣는 이음새)`, `repro(재현)`, `deterministic(매번 같은 결과)` — so a
+  beginner who relied on the friendly summary can still read the body. The fenced payload is exempt.
 - Then a fenced code block containing the verbatim original (a `SKILL.md`, a JSON
   snippet, a prompt template). Use the right language tag (`markdown`, `json`, `text`, `yaml`).
 - **Do not paraphrase the original.** Port it exactly so users can paste it back into
@@ -252,5 +256,7 @@ turns green.
 - Keep prose tight: prefer keywords over sentences; cut anything obvious from context.
 - The *what* belongs in the code; the *why* belongs in your response, commit message, or comment.
 - Comments: only when the reasoning is not obvious from the code. One line is usually enough.
-- Curation copy in `src/content/*/*.md` is Korean by default (matches the site's audience);
-  the verbatim original payload stays in its source language.
+- Curation copy in `src/content/*/*.md` is Korean-primary; always add a natural English caption in
+  `summary_en` (rendered beneath the KO summary on cards + detail). Write idiomatic EN, not a literal
+  translation. The verbatim original payload inside the code fence stays in its source language and
+  must round-trip byte-for-byte.

@@ -1,6 +1,7 @@
 ---
 title: triage
-summary: 이슈를 5개 state role(needs-triage / needs-info / ready-for-agent / ready-for-human / wontfix)과 2개 category role(bug / enhancement)의 state machine으로 이동시키는 스킬. AI 댓글에는 disclaimer 필수.
+summary: "쌓인 버그 리포트와 기능 요청을 정해진 라벨(분류·진행 단계)에 따라 정리하고, 다음 작업을 추천하며, 자동 처리할 AI 에이전트가 바로 집어갈 수 있게 다듬어 주는 이슈 분류 도우미."
+summary_en: "Classifies bugs and requests by state label, recommends next steps, and queues issues for an automated agent."
 tags: [skill, triage, issue-management, state-machine, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/triage
 author: mattpocock

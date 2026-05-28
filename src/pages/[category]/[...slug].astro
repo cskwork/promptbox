@@ -1,11 +1,12 @@
 ---
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import CopyButton from '~/components/CopyButton.astro';
+import CategoryIcon from '~/components/CategoryIcon.astro';
 import { getCollection } from 'astro:content';
-import { CATEGORY_META, type CategoryKey } from '~/content/config';
+import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from '~/content/config';
 
 export async function getStaticPaths() {
-  const cats: CategoryKey[] = ['prompts', 'skills', 'configs', 'mcps', 'plugins', 'hooks', 'harnesses', 'tools'];
+  const cats: CategoryKey[] = [...CATEGORY_ORDER];
   const all = await Promise.all(
     cats.map(async (cat) => {
       const entries = await getCollection(cat);
@@ -24,72 +25,142 @@ const meta = CATEGORY_META[category];
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const currentHref = `${base}/${category}/${entry.slug}/`;
 const rawText = entry.body || '';
+const d = entry.data;
+
+// prev / next within the category (for footer navigation)
+const siblings = (await getCollection(category, (e: any) => !e.data.hidden)).sort(
+  (a: any, b: any) => (a.data.order ?? 100) - (b.data.order ?? 100),
+);
+const idx = siblings.findIndex((e: any) => e.slug === entry.slug);
+const prev = idx > 0 ? siblings[idx - 1] : null;
+const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
+
+// Build the bilingual "how to use" rows from whichever category fields exist
+interface Row { label: string; value?: string; mono?: boolean; chips?: string[] }
+const rows: Row[] = [];
+if (d.trigger) rows.push({ label: '트리거 · Trigger', value: d.trigger });
+if (d.use_case) rows.push({ label: '언제 · When to use', value: d.use_case });
+if (d.target_file) rows.push({ label: '어디에 둘까 · Where it goes', value: d.target_file, mono: true });
+if (d.event) rows.push({ label: '이벤트 · Event', value: d.event, mono: true });
+if (d.matcher) rows.push({ label: '대상 · Matcher', value: d.matcher, mono: true });
+if (d.scope) rows.push({ label: '범위 · Scope', value: d.scope, mono: true });
+if (d.transport) rows.push({ label: '전송 · Transport', value: d.transport, mono: true });
+if (d.server_name) rows.push({ label: '서버 · Server', value: d.server_name, mono: true });
+if (d.base_agent) rows.push({ label: '기반 · Base agent', value: d.base_agent });
+if (d.tools?.length) rows.push({ label: '읽는 도구 · Read by', chips: d.tools });
+if (d.harnesses?.length) rows.push({ label: '지원 · Works with', chips: d.harnesses });
+if (d.languages?.length) rows.push({ label: '언어 · Languages', chips: d.languages });
+if (d.platforms?.length) rows.push({ label: '플랫폼 · Platforms', chips: d.platforms });
+if (d.deps?.length) rows.push({ label: '의존성 · Requires', chips: d.deps });
+
+const hasUsage = Boolean(d.install) || rows.length > 0;
 ---
 
-<BaseLayout title={`${entry.data.title} — prompt-collection`} description={entry.data.summary} currentHref={currentHref}>
-  <nav class="mb-4 text-sm text-ink-500">
-    <a href={base + '/'} class="hover:text-accent-500">홈</a>
-    <span class="mx-1.5">›</span>
-    <a href={`${base}/#${category}`} class="hover:text-accent-500">{meta.label}</a>
-    <span class="mx-1.5">›</span>
-    <span class="text-ink-700 dark:text-ink-200">{entry.data.title}</span>
+<BaseLayout title={`${d.title} — promptbox`} description={d.summary} currentHref={currentHref}>
+  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="경로">
+    <a href={base + '/'} class="hover:text-accent-700 dark:hover:text-accent-400">홈</a>
+    <span aria-hidden="true">›</span>
+    <a href={`${base}/#${category}`} class="hover:text-accent-700 dark:hover:text-accent-400">{meta.label}</a>
+    <span aria-hidden="true">›</span>
+    <span class="truncate text-ink-700 dark:text-ink-200">{d.title}</span>
   </nav>
 
-  <header class="glass-panel mb-6 rounded-2xl p-5 lg:p-6">
-    <div class="flex flex-wrap items-start justify-between gap-3 mb-2">
-      <h1 class="text-2xl lg:text-3xl font-bold tracking-tight">{entry.data.title}</h1>
+  <header class:list={['glass-panel mb-5 rounded-2xl p-5 lg:p-6', `cat-${category}`]}>
+    <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
+      <span class="cat-chip">
+        <CategoryIcon icon={meta.icon} class="h-3.5 w-3.5" />
+        {meta.label}<span class="opacity-60">· {meta.label_en}</span>
+      </span>
       <div class="flex items-center gap-2">
         <CopyButton target="#pc-rawtext" label="원문 복사" size="md" />
-        {entry.data.source && (
+        {d.source && (
           <a
-            href={entry.data.source}
+            href={d.source}
             target="_blank"
             rel="noopener"
-            class="glass-chip inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm hover:bg-white/80 dark:hover:bg-ink-800/80 transition-colors"
-          >원본 보기</a>
+            class="btn btn-ghost px-3.5 py-1.5 text-sm"
+          >
+            원본 보기
+            <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
         )}
       </div>
     </div>
-    <p class="text-ink-600 dark:text-ink-300">{entry.data.summary}</p>
-    <dl class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-      {entry.data.author && (
-        <div>
-          <dt class="text-ink-500">작성자</dt>
-          <dd class="font-medium text-ink-800 dark:text-ink-100">{entry.data.author}</dd>
-        </div>
-      )}
-      {entry.data.license && (
-        <div>
-          <dt class="text-ink-500">라이선스</dt>
-          <dd class="font-medium text-ink-800 dark:text-ink-100">{entry.data.license}</dd>
-        </div>
-      )}
-      {entry.data.target_file && (
-        <div>
-          <dt class="text-ink-500">파일 경로</dt>
-          <dd class="font-mono text-ink-800 dark:text-ink-100">{entry.data.target_file}</dd>
-        </div>
-      )}
-      {entry.data.trigger && (
-        <div class="col-span-2 sm:col-span-2">
-          <dt class="text-ink-500">트리거</dt>
-          <dd class="text-ink-800 dark:text-ink-100">{entry.data.trigger}</dd>
-        </div>
-      )}
-    </dl>
-    {entry.data.tags?.length > 0 && (
+    <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">{d.title}</h1>
+    <p class="mt-2 text-pretty leading-relaxed text-ink-600 dark:text-ink-300">{d.summary}</p>
+    {d.summary_en && <p class="mt-1 text-pretty text-sm leading-relaxed text-ink-500 dark:text-ink-400">{d.summary_en}</p>}
+    {d.tags?.length > 0 && (
       <div class="mt-3 flex flex-wrap gap-1">
-        {entry.data.tags.map((t: string) => (
-          <span class="glass-chip text-[0.7rem] rounded-full px-2 py-0.5">#{t}</span>
+        {d.tags.map((t: string) => (
+          <span class="glass-chip rounded-full px-2 py-0.5 font-mono text-[0.7rem]">#{t}</span>
         ))}
       </div>
     )}
   </header>
 
-  <article class="prose-pc rounded-2xl p-6 lg:p-8 bg-white/90 dark:bg-ink-900/80 border border-white/60 dark:border-white/10 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)]">
+  {hasUsage && (
+    <section class="mb-5 rounded-2xl border border-ink-100/90 bg-white/55 p-5 dark:border-white/10 dark:bg-ink-900/40">
+      <div class="mb-3 flex items-baseline gap-2">
+        <h2 class="text-sm font-semibold text-ink-800 dark:text-ink-100">사용법</h2>
+        <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">How to use</span>
+      </div>
+
+      {d.install && (
+        <div class="mb-4">
+          <div class="mb-1.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">설치 · Install</div>
+          <div class="flex items-stretch gap-2">
+            <code id="pc-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{d.install}</code>
+            <CopyButton target="#pc-install" label="복사" size="sm" variant="ghost" class="shrink-0" />
+          </div>
+        </div>
+      )}
+
+      {rows.length > 0 && (
+        <dl class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
+          {rows.map((r) => (
+            <div>
+              <dt class="mb-0.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">{r.label}</dt>
+              {r.chips ? (
+                <dd class="flex flex-wrap gap-1">
+                  {r.chips.map((c) => <span class="glass-chip rounded-full px-2 py-0.5 text-[0.7rem] font-medium">{c}</span>)}
+                </dd>
+              ) : (
+                <dd class:list={['text-sm text-ink-700 dark:text-ink-200', r.mono && 'font-mono text-[0.82rem]']}>{r.value}</dd>
+              )}
+            </div>
+          ))}
+          {(d.author || d.license) && (
+            <div class="sm:col-span-2 flex flex-wrap gap-x-6 gap-y-1 border-t border-ink-100/80 pt-3 text-xs text-ink-500 dark:border-white/10">
+              {d.author && <span>작성자 · Author <strong class="font-medium text-ink-700 dark:text-ink-200">{d.author}</strong></span>}
+              {d.license && <span>라이선스 · License <strong class="font-medium text-ink-700 dark:text-ink-200">{d.license}</strong></span>}
+            </div>
+          )}
+        </dl>
+      )}
+    </section>
+  )}
+
+  <article class="prose-pc rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
     <Content />
   </article>
 
-  <!-- Hidden raw text mirror for "원문 복사" button -->
+  {(prev || next) && (
+    <nav class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="같은 카테고리 이동">
+      {prev ? (
+        <a href={`${base}/${category}/${prev.slug}/`} class="glass-card flex flex-col rounded-xl p-4">
+          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">← 이전 · Prev</span>
+          <span class="mt-1 font-medium text-ink-800 dark:text-ink-100">{prev.data.title}</span>
+        </a>
+      ) : <span></span>}
+      {next && (
+        <a href={`${base}/${category}/${next.slug}/`} class="glass-card flex flex-col rounded-xl p-4 text-right">
+          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">다음 · Next →</span>
+          <span class="mt-1 font-medium text-ink-800 dark:text-ink-100">{next.data.title}</span>
+        </a>
+      )}
+    </nav>
+  )}
+
+  <!-- Hidden raw-text mirror for the "원문 복사" button -->
   <pre id="pc-rawtext" class="sr-only" set:text={rawText}></pre>
 </BaseLayout>

@@ -1,6 +1,7 @@
 ---
 title: gpt-image-2
-summary: 별도 OpenAI API 없이, 사용자가 이미 결제한 ChatGPT Plus / Pro 구독 + 로컬 `codex` CLI로 GPT Image 2 호출. text-to-image · image-to-image · 멀티 레퍼런스 컴포지션 지원.
+summary: "이미 결제 중인 ChatGPT Plus / Pro 구독만으로 GPT Image 2 이미지를 새로 만들거나 편집 — OpenAI API 키 발급도, 이미지 장당 추가 결제도 필요 없다."
+summary_en: "Generate and edit images via your existing ChatGPT Plus or Pro subscription — no API key needed, no per-image charges."
 tags: [skill, codex, image-generation, chatgpt, gpt-image-2, agentspace]
 source: https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
 author: agentspace.so
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/agentspace-so/agent-skills --skill g
 
 ## 한 줄
 
-DALL·E API 키도, Fal/Replicate 토큰도 없이 이미 결제한 **ChatGPT 구독**으로 GPT Image 2를 부른다. `codex exec --enable image_generation`이 핵심.
+유료 이미지 서비스를 따로 결제하거나 API 키를 발급받지 않고, 이미 결제 중인 **ChatGPT 구독**만으로 GPT Image 2를 부른다. `codex exec --enable image_generation`이 핵심.
+
+*EN: No separate image service or API key — just the ChatGPT subscription you already have.*
 
 ## 언제 쓰는가
 

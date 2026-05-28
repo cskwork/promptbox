@@ -2,11 +2,30 @@
 import BaseLayout from '~/layouts/BaseLayout.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
-<BaseLayout title="404 — prompt-collection">
-  <div class="py-20 text-center">
-    <p class="text-6xl font-bold text-ink-300 dark:text-ink-700 mb-3">404</p>
-    <h1 class="text-2xl font-semibold mb-2">페이지를 찾을 수 없습니다</h1>
-    <p class="text-ink-500 mb-6">URL이 바뀌었거나, 컬렉션에서 제거된 항목일 수 있습니다.</p>
-    <a href={base + '/'} class="inline-flex items-center px-4 py-2 rounded-md bg-accent-500 hover:bg-accent-600 text-white font-medium">홈으로</a>
+<BaseLayout title="404 — promptbox">
+  <div class="mx-auto max-w-xl py-12 lg:py-16">
+    <div class="pc-term mb-8" aria-hidden="true">
+      <div class="pc-term-bar">
+        <span class="pc-term-dot bg-[#ff5f57]"></span>
+        <span class="pc-term-dot bg-[#febc2e]"></span>
+        <span class="pc-term-dot bg-[#28c840]"></span>
+        <span class="ml-2 font-mono text-[0.7rem] text-ink-400">promptbox — 404</span>
+      </div>
+      <div class="space-y-2 p-4">
+        <p><span class="text-accent-400">$</span> promptbox open <span class="text-ink-50">{'<this-page>'}</span></p>
+        <p class="text-[#ff6b6b]">error: command not found: 404</p>
+        <p class="text-ink-400"># 페이지를 찾을 수 없습니다 · page not found</p>
+        <p><span class="text-accent-400">&gt;</span> <span class="caret"></span></p>
+      </div>
+    </div>
+
+    <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50">페이지를 찾을 수 없습니다</h1>
+    <p class="mt-1 text-ink-500">That page doesn't exist — the URL may have changed, or the item was removed from the catalog.</p>
+    <p class="mt-1 text-sm text-ink-500">URL이 바뀌었거나 컬렉션에서 제거된 항목일 수 있습니다.</p>
+
+    <div class="mt-6 flex flex-wrap gap-3">
+      <a href={base + '/'} class="btn btn-primary px-5 py-2.5 text-sm">홈으로 · Home</a>
+      <a href={base + '/#catalog'} class="btn btn-ghost px-5 py-2.5 text-sm">카탈로그 둘러보기 · Browse</a>
+    </div>
   </div>
 </BaseLayout>

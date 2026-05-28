@@ -1,6 +1,7 @@
 ---
 title: prototype
-summary: 디자인을 commit 전에 살펴보기 위한 throwaway prototype. 질문이 가지를 결정 — "state/business-logic이 맞나" 면 terminal app, "어떤 모습이어야 하나" 면 한 라우트에서 토글되는 radically different UI variation들.
+summary: 본격 개발 전에 버리는 셈 치고 빠르게 만들어 보며 설계를 확인하는 도구. 동작 로직이 맞는지 궁금하면 터미널에서 돌려 보는 작은 앱을, 화면 모양이 고민이면 한 화면에서 여러 디자인 안을 바꿔 보는 시안을 만들어 준다.
+summary_en: Test a design before you build it — a throwaway terminal app for logic, or switchable UI mockups for looks.
 tags: [skill, prototype, ui, state-machine, throwaway, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/prototype
 author: mattpocock
@@ -12,7 +13,8 @@ install: "npx skills add https://github.com/mattpocock/skills --skill prototype"
 
 ## 한 줄
 
-**Prototype = 질문에 답하는 throwaway code.** 질문이 모양을 결정한다.
+**프로토타입 = 궁금한 점에 답을 얻고 나면 버리는 코드.** 무엇이 궁금한지가 만들 모양을 정한다.
+*EN: A prototype is throwaway code that answers one question — the question decides its shape.*
 
 ## 두 가지 갈래
 

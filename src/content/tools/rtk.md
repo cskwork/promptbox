@@ -1,6 +1,7 @@
 ---
 title: rtk (Rust Token Killer)
-summary: 100+ dev 명령(git, cargo, pytest, docker, aws, npm, kubectl 등)의 출력을 필터·압축·중복 제거해 LLM context에 넣을 토큰을 60-90% 절감. 단일 Rust 바이너리, zero dependencies.
+summary: "git, cargo, docker 같은 명령의 길고 지저분한 출력을 자동으로 줄여, AI 코딩 도구가 읽을 분량(토큰)을 60-90% 아껴주는 도구."
+summary_en: "Trims the verbose output of commands like git and docker so your AI coding assistant consumes 60-90% fewer tokens."
 tags: [tool, cli, rust, token-optimization, claude-code, copilot, cursor, gemini-cli, apache-2.0]
 source: https://github.com/rtk-ai/rtk
 author: rtk-ai
@@ -13,7 +14,9 @@ install: "brew install rtk"
 
 ## 한 줄
 
-`git status`, `cargo test`, `kubectl logs` 같은 명령의 출력은 에이전트 context의 token vacuum. rtk가 사이에 끼어서 필요한 라인만 남기고 줄여준다 — auto-rewrite hook으로 transparent하게 가로채는 모드까지 있음.
+`git status`, `cargo test`, `kubectl logs` 같은 명령의 출력은 길고 반복이 많아 AI가 읽을 분량(토큰)을 통째로 잡아먹는다. rtk가 명령과 AI 사이에 끼어서 꼭 필요한 라인만 남기고 줄여준다 — 명령을 칠 때마다 알아서 가로채 처리하는 자동 모드(hook)까지 있다.
+
+*EN: It sits between your commands and the AI, keeping only the lines that matter.*
 
 ## 언제 쓰는가
 

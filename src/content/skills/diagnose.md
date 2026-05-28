@@ -1,6 +1,7 @@
 ---
 title: diagnose
-summary: 어려운 버그·성능 회귀를 위한 6단계 규율 — feedback loop 구축 → 재현 → 3~5개 가설 랭킹 → 한 변수씩 instrument → regression test와 함께 수정 → cleanup + post-mortem.
+summary: "잡히지 않는 버그와 갑자기 느려진 코드를 6단계로 체계적으로 잡는 디버깅 안내서. 재현 테스트부터 원인 분석, 수정, 재발 방지까지 다룬다."
+summary_en: "Playbook for hard bugs and slow regressions: build a repeatable test, trace the cause, fix it, lock it in."
 tags: [skill, debugging, performance, regression, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/diagnose
 author: mattpocock
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/mattpocock/skills --skill diagnose"
 
 ## 한 줄
 
-**스킬의 본질은 Phase 1 — feedback loop 구축이다.** 빠르고 deterministic하고 agent-runnable한 pass/fail signal만 만들면 나머지는 기계적이다. 코드를 노려본다고 버그가 잡히지 않는다.
+**이 스킬의 핵심은 Phase 1 — "버그를 자동으로 재현하는 테스트"를 먼저 만드는 것이다.** 빠르고 매번 똑같이 통과/실패를 보여주는(deterministic) 신호 하나만 만들면 나머지는 기계적으로 풀린다. 코드를 노려본다고 버그가 잡히지는 않는다.
+
+*EN: The whole skill is Phase 1 — build a test that reproduces the bug on demand; once you have a fast, repeatable pass/fail signal, the rest is mechanical.*
 
 ## 6단계 흐름
 

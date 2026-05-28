@@ -1,6 +1,7 @@
 ---
 title: orca
-summary: 병렬 에이전트 fleet를 다루는 next-gen IDE. Claude Code · Codex · Gemini · 기타 코딩 에이전트를 **사용자 본인의 구독**으로 띄우고, 데스크톱·모바일 양쪽에서 동시 다중 worker로 운영.
+summary: "여러 AI 코딩 도우미(Claude Code·Codex·Gemini)를 한 화면에서 동시에 돌리는 개발 앱. 새 API 키 없이 이미 쓰는 구독으로 띄우고, 데스크톱과 휴대폰 양쪽에서 작업을 맡길 수 있다."
+summary_en: "Run Claude Code, Codex, and Gemini side by side on subscriptions you already have, no extra API keys."
 tags: [tool, ide, agent-orchestration, parallel-agents, claude-code, codex, gemini, mit]
 source: https://github.com/stablyai/orca
 author: stablyai
@@ -13,7 +14,9 @@ install: "https://onOrca.dev 에서 다운로드"
 
 ## 한 줄
 
-VS Code 같은 single-agent IDE가 아니라, **에이전트 fleet 전용 IDE** — 여러 에이전트(Claude Code, Codex, Gemini)를 worktree별로 띄우고 작업을 분배·관찰·합치는 게 1급 UX.
+한 번에 한 명만 부리는 보통 코딩 도구와 달리, **여러 AI 코딩 도우미를 한꺼번에 부리는 데 맞춰진 앱** — Claude Code, Codex, Gemini 같은 에이전트를 여러 개 띄워 작업을 나눠 주고, 진행 상황을 지켜보고, 결과를 합치는 일이 화면 한가운데 놓여 있다.
+
+*EN: An app built for running a whole team of AI coding assistants at once, not just one.*
 
 ## 언제 쓰는가
 

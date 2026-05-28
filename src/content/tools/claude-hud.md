@@ -1,6 +1,7 @@
 ---
 title: claude-hud
-summary: Claude Code 세션 상태(context 사용량, 활성 tool, 실행 중인 subagent, todo 진행, git 상태, usage limit)를 입력 프롬프트 아래에 실시간 표시하는 터미널 HUD 플러그인.
+summary: "Claude Code로 작업할 때 입력창 바로 아래에 진행 상황 한 줄을 띄워 주는 도구 — 대화가 얼마나 찼는지, 무슨 작업이 도는지, 남은 할 일과 git 변경까지 따로 명령 안 쳐도 한눈에 보인다."
+summary_en: "A live status line under your Claude Code prompt that shows how full the chat is, what is running, and your pending tasks at a glance."
 tags: [tool, claude-code, plugin, hud, statusline, context-monitor, mit]
 source: https://github.com/jarrodwatts/claude-hud
 author: jarrodwatts

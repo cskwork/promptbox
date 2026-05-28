@@ -1,6 +1,7 @@
 ---
 title: to-issues
-summary: 계획·spec·PRD를 **vertical slice tracer bullet** 이슈들로 쪼개서 이슈 트래커에 publish. 각 슬라이스는 모든 layer(schema/API/UI/test)를 관통하는 얇고 완결된 path. HITL vs AFK 구분.
+summary: "긴 계획서나 기획 문서를, 하나씩 따로 작업할 수 있는 작은 작업 티켓으로 쪼개 이슈 트래커에 등록해 줍니다. 각 티켓은 화면부터 데이터까지 한 기능이 통째로 동작하는 단위라 따로 테스트하기 쉽습니다."
+summary_en: "Breaks a plan or spec into small, independently-workable issues — each a full end-to-end feature slice."
 tags: [skill, planning, issues, vertical-slice, tracer-bullet, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/to-issues
 author: mattpocock
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/mattpocock/skills --skill to-issues"
 
 ## 한 줄
 
-PRD나 계획을 **얇은 vertical slice**로 분할 — 각 슬라이스는 단일 layer(예: schema만)가 아니라 schema→API→UI→test를 모두 cut through하고, 단독으로 demo/verify 가능해야 함. `setup-matt-pocock-skills` 먼저 실행 필요.
+PRD나 계획을 작은 작업 단위로 쪼개되, "DB만" 또는 "화면만" 같은 한쪽 층이 아니라 데이터→API→화면→테스트가 한 줄로 다 이어지는 얇은 한 기능(이걸 vertical slice라고 부름)으로 나눕니다. 그래야 각 티켓을 단독으로 시연하고 확인할 수 있습니다. `setup-matt-pocock-skills` 먼저 실행 필요.
+
+*EN: Each ticket is one thin feature that runs end to end — not a single layer — so it can be demoed and checked by itself.*
 
 ## 슬라이스 규칙
 

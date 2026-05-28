@@ -1,5 +1,6 @@
 ---
-import { CATEGORY_META, type CategoryKey } from '~/content/config';
+import CategoryIcon from '~/components/CategoryIcon.astro';
+import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from '~/content/config';
 
 interface NavItem {
   slug: string;
@@ -7,6 +8,7 @@ interface NavItem {
   category: CategoryKey;
   href: string;
   order: number;
+  keywords: string;
 }
 
 interface Props {
@@ -16,7 +18,7 @@ interface Props {
 
 const { items, currentHref } = Astro.props;
 
-const grouped = (Object.keys(CATEGORY_META) as CategoryKey[]).map((key) => ({
+const grouped = CATEGORY_ORDER.map((key) => ({
   key,
   meta: CATEGORY_META[key],
   entries: items
@@ -28,48 +30,73 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const homeHref = base + '/';
 ---
 
-<aside class="w-full lg:w-72 lg:shrink-0 lg:sticky lg:top-16 lg:max-h-[calc(100vh-4rem)] lg:overflow-y-auto border-b lg:border-b-0 lg:border-r border-white/50 dark:border-white/5 px-4 py-6 bg-white/55 dark:bg-ink-950/45 backdrop-blur-[12px] backdrop-saturate-150">
-  <div class="mb-4">
+<aside class="w-full border-b border-white/50 bg-white/55 px-4 py-6 backdrop-blur-[12px] backdrop-saturate-150 lg:sticky lg:top-14 lg:max-h-[calc(100vh-3.5rem)] lg:w-72 lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r dark:border-white/5 dark:bg-ink-950/45">
+  <button
+    id="pc-nav-toggle"
+    type="button"
+    aria-expanded="false"
+    aria-controls="pc-nav-body"
+    class="mb-3 flex w-full items-center justify-between rounded-lg border border-ink-200/70 bg-white/60 px-3 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:border-accent-500/40 dark:border-white/10 dark:bg-ink-900/50 dark:text-ink-200 lg:hidden"
+  >
+    <span class="flex items-center gap-2">
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      카테고리 둘러보기<span class="font-mono text-[0.7rem] text-ink-400">Browse</span>
+    </span>
+    <svg class="pc-nav-chev h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+  </button>
+  <div id="pc-nav-body" class="hidden lg:block">
+  <div class="relative mb-5">
+    <label for="pc-search" class="sr-only">제목·요약·태그로 검색</label>
+    <svg class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
     <input
       type="search"
       id="pc-search"
-      placeholder="검색 (제목·태그)"
-      class="glass-input w-full rounded-lg px-3 py-1.5 text-sm"
+      placeholder="검색 · Search"
+      class="glass-input w-full rounded-lg py-1.5 pl-8 pr-9 text-sm"
       autocomplete="off"
     />
+    <kbd class="pc-kbd pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">/</kbd>
   </div>
-  <nav class="space-y-6 text-sm">
+
+  <nav class="space-y-5 text-sm" aria-label="카탈로그">
     <a
       href={homeHref}
       class:list={[
-        'block rounded-lg px-2.5 py-1.5 font-medium transition-colors',
+        'flex items-center gap-2 rounded-lg px-2.5 py-1.5 font-medium transition-colors',
         currentHref === homeHref
-          ? 'bg-accent-500/15 text-accent-500 ring-1 ring-accent-500/30'
-          : 'hover:bg-white/60 dark:hover:bg-ink-900/60',
+          ? 'bg-accent-500/15 text-accent-700 ring-1 ring-accent-500/30 dark:text-accent-300'
+          : 'text-ink-700 hover:bg-white/60 dark:text-ink-200 dark:hover:bg-ink-900/60',
       ]}
-    >전체 카탈로그</a>
+    >
+      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+      전체 카탈로그
+    </a>
 
     {grouped.map((group) => (
-      <div data-pc-group={group.key}>
-        <div class="flex items-baseline justify-between mb-1.5 px-2">
-          <h3 class="text-[0.7rem] uppercase tracking-wider text-ink-500 font-semibold">{group.meta.label}</h3>
-          <span class="text-[0.7rem] text-ink-400">{group.entries.length}</span>
+      <div data-pc-group={group.key} class:list={['space-y-1', `cat-${group.key}`]}>
+        <div class="mb-1 flex items-center gap-2 px-1">
+          <span class="cat-tile h-5 w-5"><CategoryIcon icon={group.meta.icon} class="h-3 w-3" /></span>
+          <span class="text-[0.72rem] font-semibold uppercase tracking-wider text-ink-700 dark:text-ink-200">{group.meta.label}</span>
+          <span class="font-mono text-[0.66rem] text-ink-400">{group.meta.label_en}</span>
+          <span class="ml-auto font-mono text-[0.66rem] text-ink-400">{group.entries.length}</span>
         </div>
         <ul class="space-y-0.5">
           {group.entries.length === 0 && (
-            <li class="px-2 py-1 text-xs text-ink-400 italic">아직 항목 없음</li>
+            <li class="px-2 py-1 text-xs italic text-ink-400">아직 항목이 없습니다 · nothing here yet</li>
           )}
           {group.entries.map((entry) => (
             <li>
               <a
                 href={entry.href}
                 data-pc-item
-                data-pc-title={entry.title}
+                data-pc-keywords={entry.keywords}
                 class:list={[
-                  'block rounded-lg px-2.5 py-1 truncate transition-colors',
+                  'block truncate rounded-lg px-2.5 py-1.5 transition-colors',
                   currentHref === entry.href
-                    ? 'bg-accent-500/15 text-accent-500 font-medium ring-1 ring-accent-500/30'
-                    : 'text-ink-700 dark:text-ink-300 hover:bg-white/60 dark:hover:bg-ink-900/60',
+                    ? 'bg-accent-500/15 font-medium text-accent-700 ring-1 ring-accent-500/30 dark:text-accent-300'
+                    : 'text-ink-600 hover:bg-white/60 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-900/60 dark:hover:text-ink-50',
                 ]}
               >{entry.title}</a>
             </li>
@@ -77,24 +104,61 @@ const homeHref = base + '/';
         </ul>
       </div>
     ))}
+
+    <p id="pc-noresults" class="hidden px-2 py-3 text-xs italic text-ink-400">
+      검색 결과가 없습니다 · No matches
+    </p>
   </nav>
+  </div>
 </aside>
 
 <script>
   const input = document.getElementById('pc-search') as HTMLInputElement | null;
+  const noResults = document.getElementById('pc-noresults');
+
+  // Mobile: collapse/expand the sidebar (full sidebar is always shown on lg+)
+  const navToggle = document.getElementById('pc-nav-toggle');
+  const navBody = document.getElementById('pc-nav-body');
+  navToggle?.addEventListener('click', () => {
+    const open = navBody?.classList.toggle('hidden') === false;
+    navToggle.setAttribute('aria-expanded', String(open));
+    navToggle.querySelector('.pc-nav-chev')?.classList.toggle('rotate-180', open);
+  });
+
+  // "/" focuses search (unless already typing in a field)
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
+    const t = e.target as HTMLElement;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    e.preventDefault();
+    input?.focus();
+  });
+
   if (input) {
     input.addEventListener('input', () => {
       const q = input.value.trim().toLowerCase();
+      let anyVisible = false;
       document.querySelectorAll<HTMLAnchorElement>('[data-pc-item]').forEach((a) => {
-        const t = (a.dataset.pcTitle || '').toLowerCase();
-        (a.parentElement as HTMLElement).style.display = !q || t.includes(q) ? '' : 'none';
+        const hay = a.dataset.pcKeywords || '';
+        const show = !q || hay.includes(q);
+        (a.parentElement as HTMLElement).style.display = show ? '' : 'none';
+        if (show) anyVisible = true;
       });
       document.querySelectorAll<HTMLElement>('[data-pc-group]').forEach((g) => {
-        const visible = g.querySelectorAll<HTMLElement>('li').length === 0
-          ? false
-          : Array.from(g.querySelectorAll<HTMLLIElement>('li')).some((li) => li.style.display !== 'none');
+        const visible = Array.from(g.querySelectorAll<HTMLLIElement>('li')).some(
+          (li) => li.querySelector('[data-pc-item]') && (li as HTMLElement).style.display !== 'none',
+        );
         g.style.display = q && !visible ? 'none' : '';
       });
+      if (noResults) noResults.classList.toggle('hidden', anyVisible || !q);
+    });
+    // Esc clears
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        input.value = '';
+        input.dispatchEvent(new Event('input'));
+        input.blur();
+      }
     });
   }
 </script>

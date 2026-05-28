@@ -1,6 +1,7 @@
 ---
 title: agent-browser
-summary: Rust native CLI 기반 브라우저 자동화. Chrome/Chromium을 CDP로 직접 조작, accessibility-tree 스냅샷과 `@eN` element ref로 신뢰성 있게 클릭·입력·스크린샷·데이터 추출. Playwright/Puppeteer 의존성 없음.
+summary: "AI 에이전트가 직접 크롬 브라우저를 열어 사이트 접속·폼 입력·버튼 클릭·스크린샷·데이터 수집까지 대신 해 주는 CLI 도구. Slack, VS Code 같은 데스크톱 앱도 자동화한다."
+summary_en: "Lets your AI agent control a real Chrome browser to navigate, fill forms, click, screenshot, and scrape — and automate desktop apps like Slack and VS Code."
 tags: [skill, browser, automation, vercel-labs, rust, cdp, accessibility-tree, e2e]
 source: https://github.com/vercel-labs/agent-browser/tree/main/skills/agent-browser
 author: vercel-labs

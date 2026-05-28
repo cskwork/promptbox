@@ -2,10 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   BASE
+   ============================================================ */
 @layer base {
   html {
-    @apply text-ink-900;
+    @apply text-ink-800;
     font-feature-settings: 'cv11', 'ss01';
+    -webkit-tap-highlight-color: transparent;
   }
   html.dark {
     @apply text-ink-100;
@@ -13,95 +17,247 @@
   body {
     @apply font-sans antialiased relative;
     background:
-      radial-gradient(1100px 600px at 88% -8%, rgba(124, 156, 255, 0.18), transparent 60%),
-      radial-gradient(900px 600px at -10% 110%, rgba(180, 120, 255, 0.16), transparent 55%),
-      linear-gradient(180deg, #f6f8fc 0%, #eef1f8 100%);
+      radial-gradient(900px 520px at 92% -10%, rgba(16, 185, 129, 0.14), transparent 60%),
+      radial-gradient(820px 560px at -8% 108%, rgba(45, 212, 191, 0.10), transparent 55%),
+      linear-gradient(180deg, #f7f9f8 0%, #eef2f1 100%);
     background-attachment: fixed;
   }
   html.dark body {
     background:
-      radial-gradient(1100px 600px at 88% -8%, rgba(90, 125, 255, 0.28), transparent 60%),
-      radial-gradient(900px 600px at -10% 110%, rgba(160, 90, 255, 0.22), transparent 55%),
-      linear-gradient(180deg, #070912 0%, #0a0d1c 100%);
+      radial-gradient(950px 540px at 92% -10%, rgba(16, 185, 129, 0.18), transparent 60%),
+      radial-gradient(880px 580px at -8% 108%, rgba(20, 184, 166, 0.12), transparent 55%),
+      linear-gradient(180deg, #060a0c 0%, #080d12 100%);
     background-attachment: fixed;
   }
-  code, pre {
+  code,
+  pre {
     @apply font-mono;
   }
-  /* Improve focus visibility on glass surfaces */
+  ::selection {
+    background: rgba(16, 185, 129, 0.28);
+  }
+  /* Visible keyboard focus on every interactive surface */
   :focus-visible {
-    @apply outline-none ring-2 ring-accent-500 ring-offset-2 ring-offset-white dark:ring-offset-ink-950;
+    @apply outline-none ring-2 ring-accent-600 dark:ring-accent-400 ring-offset-2 ring-offset-white dark:ring-offset-ink-950;
+    border-radius: 0.375rem;
+  }
+  /* Thin, on-brand scrollbar */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120, 134, 154, 0.4) transparent;
   }
 }
 
+/* ============================================================
+   CATEGORY HUES — wayfinding tint per category.
+   PLAIN top-level CSS, NOT @layer base: Tailwind 3 tree-shakes
+   custom-property-only single-class rules out of @layer base.
+   Set `cat-<key>` on a container; children inherit the vars.
+   --cat      : mid tone for fills / icons
+   --cat-text : legible text tone (darker in light, lighter in dark)
+   --cat-soft : translucent fill for chips / icon tiles
+   --cat-line : translucent border
+   ============================================================ */
+.cat-prompts   { --cat: #0ea5e9; --cat-text: #0369a1; }
+.cat-skills    { --cat: #8b5cf6; --cat-text: #6d28d9; }
+.cat-plugins   { --cat: #d946ef; --cat-text: #a21caf; }
+.cat-harnesses { --cat: #f59e0b; --cat-text: #b45309; }
+.cat-hooks     { --cat: #f43f5e; --cat-text: #be123c; }
+.cat-configs   { --cat: #14b8a6; --cat-text: #0f766e; }
+.cat-mcps      { --cat: #6366f1; --cat-text: #4338ca; }
+.cat-tools     { --cat: #3b82f6; --cat-text: #1d4ed8; }
+
+.dark .cat-prompts   { --cat-text: #38bdf8; }
+.dark .cat-skills    { --cat-text: #a78bfa; }
+.dark .cat-plugins   { --cat-text: #e879f9; }
+.dark .cat-harnesses { --cat-text: #fbbf24; }
+.dark .cat-hooks     { --cat-text: #fb7185; }
+.dark .cat-configs   { --cat-text: #2dd4bf; }
+.dark .cat-mcps      { --cat-text: #818cf8; }
+.dark .cat-tools     { --cat-text: #60a5fa; }
+
+/* derive soft/line only on the hue classes (where --cat is defined) */
+.cat-prompts, .cat-skills, .cat-plugins, .cat-harnesses,
+.cat-hooks, .cat-configs, .cat-mcps, .cat-tools {
+  --cat-soft: color-mix(in srgb, var(--cat) 14%, transparent);
+  --cat-line: color-mix(in srgb, var(--cat) 32%, transparent);
+}
+
+/* ============================================================
+   COMPONENTS
+   ============================================================ */
 @layer components {
-  /* === Glass surfaces ===
-     Moderate blur (10px) keeps GPU cost low on pages with many cards.
-     Borders + inner highlight give the "frosted glass" edge without
-     hurting body-text contrast. */
+  /* --- Surfaces ---------------------------------------------------------- */
   .glass-panel {
-    @apply bg-white/70 dark:bg-ink-900/55
+    @apply bg-white/80 dark:bg-ink-900/55
            backdrop-blur-[10px] backdrop-saturate-150
-           border border-white/60 dark:border-white/10
-           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_8px_24px_-12px_rgba(15,20,40,0.18)]
-           dark:shadow-[0_1px_0_rgba(255,255,255,0.06)_inset,0_8px_24px_-12px_rgba(0,0,0,0.5)];
+           border border-white/70 dark:border-white/10
+           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_10px_30px_-16px_rgba(15,20,40,0.22)]
+           dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_10px_30px_-16px_rgba(0,0,0,0.6)];
   }
   .glass-card {
-    @apply bg-white/65 dark:bg-ink-900/45
+    @apply relative bg-white/70 dark:bg-ink-900/45
            backdrop-blur-[10px] backdrop-saturate-150
-           border border-white/55 dark:border-white/10
-           shadow-[0_1px_0_rgba(255,255,255,0.55)_inset,0_6px_18px_-12px_rgba(15,20,40,0.20)]
-           dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_6px_18px_-12px_rgba(0,0,0,0.5)]
+           border border-white/60 dark:border-white/10
+           shadow-[0_1px_0_rgba(255,255,255,0.55)_inset,0_6px_18px_-12px_rgba(15,20,40,0.2)]
+           dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_6px_18px_-12px_rgba(0,0,0,0.55)]
            transition-[transform,box-shadow,border-color,background-color] duration-200;
   }
   .glass-card:hover {
-    @apply -translate-y-0.5 bg-white/80 dark:bg-ink-900/65 border-accent-500/60
-           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_14px_30px_-14px_rgba(90,125,255,0.45)];
+    @apply -translate-y-0.5 bg-white/85 dark:bg-ink-900/65
+           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_16px_34px_-16px_rgba(16,185,129,0.38)];
+    border-color: var(--cat-line, theme('colors.accent.500/0.6'));
   }
   .glass-chip {
-    @apply bg-white/55 dark:bg-ink-800/55
+    @apply bg-white/60 dark:bg-ink-800/55
            backdrop-blur-[6px]
-           border border-white/50 dark:border-white/10
-           text-ink-700 dark:text-ink-200;
+           border border-white/55 dark:border-white/10
+           text-ink-600 dark:text-ink-200;
   }
   .glass-input {
-    @apply bg-white/70 dark:bg-ink-900/60 backdrop-blur-[6px]
+    @apply bg-white/75 dark:bg-ink-900/60 backdrop-blur-[6px]
            border border-white/60 dark:border-white/10
+           text-ink-800 dark:text-ink-100
            placeholder:text-ink-400
-           focus:bg-white/90 dark:focus:bg-ink-900/80
+           focus:bg-white/95 dark:focus:bg-ink-900/85
            focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/30
-           outline-none;
+           outline-none transition-colors;
   }
 
-  /* === Prose tweaks: body content sits on near-opaque surfaces
-     so we keep current contrast and rhythm. */
-  .prose-pc {
-    @apply max-w-none leading-relaxed;
+  /* --- Buttons ----------------------------------------------------------- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg font-medium
+           transition-[transform,background-color,border-color,box-shadow] duration-150
+           disabled:opacity-50 disabled:pointer-events-none;
   }
-  .prose-pc h1 { @apply text-3xl font-semibold mt-0 mb-4; }
-  .prose-pc h2 { @apply text-2xl font-semibold mt-10 mb-3 border-b border-ink-200/70 dark:border-ink-800/70 pb-2; }
-  .prose-pc h3 { @apply text-xl font-semibold mt-8 mb-2; }
-  .prose-pc h4 { @apply text-lg font-semibold mt-6 mb-2; }
+  .btn:active {
+    @apply translate-y-px;
+  }
+  .btn-primary {
+    @apply bg-accent-500 text-ink-950 hover:bg-accent-400
+           shadow-[0_6px_16px_-8px_rgba(16,185,129,0.7)];
+  }
+  .btn-ghost {
+    @apply border border-ink-200/80 dark:border-white/15
+           bg-white/60 dark:bg-ink-900/50 text-ink-700 dark:text-ink-200
+           hover:bg-white/90 dark:hover:bg-ink-800/70 hover:border-accent-500/50;
+  }
+
+  /* --- Category chip (label + dot) -------------------------------------- */
+  .cat-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5
+           text-[0.7rem] font-medium font-mono;
+    color: var(--cat-text);
+    background: var(--cat-soft);
+    border: 1px solid var(--cat-line);
+  }
+  .cat-tile {
+    @apply inline-flex items-center justify-center rounded-lg;
+    color: var(--cat-text);
+    background: var(--cat-soft);
+    border: 1px solid var(--cat-line);
+  }
+
+  /* --- kbd hint ---------------------------------------------------------- */
+  .pc-kbd {
+    @apply inline-flex items-center justify-center min-w-[1.4rem] h-[1.4rem] px-1
+           rounded border border-ink-300/70 dark:border-white/15
+           bg-white/70 dark:bg-ink-800/70 font-mono text-[0.7rem]
+           text-ink-500 dark:text-ink-300 shadow-[0_1px_0_rgba(0,0,0,0.06)];
+  }
+
+  /* --- Terminal block (brand motif: hero command demo) ------------------ */
+  .pc-term {
+    @apply rounded-xl overflow-hidden border border-ink-800/80
+           bg-ink-950 text-ink-100 font-mono text-[0.82rem] leading-relaxed
+           shadow-[0_20px_50px_-24px_rgba(0,0,0,0.65)];
+  }
+  .pc-term-bar {
+    @apply flex items-center gap-1.5 px-3 py-2 border-b border-white/10 bg-white/[0.03];
+  }
+  .pc-term-dot {
+    @apply h-2.5 w-2.5 rounded-full;
+  }
+
+  /* --- Prose (detail-page body) ----------------------------------------- */
+  .prose-pc {
+    @apply max-w-none leading-relaxed text-ink-700 dark:text-ink-200;
+  }
+  .prose-pc h2 { @apply text-xl font-semibold mt-10 mb-3 pb-2 border-b border-ink-200/70 dark:border-ink-800/70 text-ink-900 dark:text-ink-50 scroll-mt-24; }
+  .prose-pc h3 { @apply text-lg font-semibold mt-7 mb-2 text-ink-900 dark:text-ink-50; }
+  .prose-pc h4 { @apply text-base font-semibold mt-6 mb-2 text-ink-800 dark:text-ink-100; }
   .prose-pc p  { @apply my-3; }
-  .prose-pc ul { @apply list-disc pl-6 my-3 space-y-1; }
-  .prose-pc ol { @apply list-decimal pl-6 my-3 space-y-1; }
-  .prose-pc a  { @apply text-accent-500 hover:text-accent-400 underline underline-offset-2; }
-  .prose-pc blockquote { @apply border-l-4 border-accent-500/50 pl-4 italic my-4 text-ink-600 dark:text-ink-300; }
+  .prose-pc ul { @apply list-disc pl-6 my-3 space-y-1.5; }
+  .prose-pc ol { @apply list-decimal pl-6 my-3 space-y-1.5; }
+  .prose-pc li { @apply marker:text-accent-500; }
+  .prose-pc a  { @apply text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2 decoration-accent-500/40 hover:decoration-accent-500; }
+  .prose-pc strong { @apply text-ink-900 dark:text-ink-50 font-semibold; }
+  .prose-pc blockquote { @apply border-l-[3px] border-accent-500/60 pl-4 my-4 text-ink-600 dark:text-ink-300; }
   .prose-pc table { @apply w-full border-collapse my-4 text-sm; }
-  .prose-pc th, .prose-pc td { @apply border border-ink-200/70 dark:border-ink-800/70 px-3 py-2 text-left; }
-  .prose-pc th { @apply bg-ink-50/70 dark:bg-ink-900/70 font-semibold; }
+  .prose-pc th, .prose-pc td { @apply border border-ink-200/70 dark:border-ink-800/70 px-3 py-2 text-left align-top; }
+  .prose-pc th { @apply bg-ink-50/80 dark:bg-ink-900/70 font-semibold text-ink-800 dark:text-ink-100; }
   .prose-pc :not(pre) > code {
-    @apply rounded bg-ink-100/80 dark:bg-ink-800/80 px-1.5 py-0.5 text-[0.9em] text-ink-800 dark:text-ink-100;
+    @apply rounded bg-ink-100/90 dark:bg-ink-800/80 px-1.5 py-0.5 text-[0.85em] text-accent-700 dark:text-accent-300;
   }
   .prose-pc pre {
-    @apply rounded-lg p-4 overflow-x-auto text-sm my-4 border border-ink-800/70;
+    @apply rounded-xl p-4 overflow-x-auto text-sm my-4 border border-ink-800/70;
   }
   .prose-pc hr { @apply my-8 border-ink-200/70 dark:border-ink-800/70; }
+
+  /* --- Scroll reveal (only when JS is on, so no-JS shows everything) ----- */
+  html.js .reveal {
+    opacity: 0;
+    transform: translateY(14px);
+    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  html.js .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
 }
 
-/* shiki theme override: keep code blocks on a solid dark surface
-   so syntax-highlighted content stays maximally readable regardless of
-   the translucent surface behind it. */
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+@layer utilities {
+  /* Blinking terminal caret — the brand signature glyph */
+  .caret {
+    @apply inline-block w-[0.52em] h-[1.05em] translate-y-[0.12em] rounded-[1px] bg-accent-500 animate-caret-blink;
+  }
+  .text-balance { text-wrap: balance; }
+  .text-pretty { text-wrap: pretty; }
+}
+
+/* Skip-to-content link (a11y) — visible only on focus */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 100;
+  transition: top 0.2s ease;
+}
+.skip-link:focus {
+  top: 0.75rem;
+}
+
+/* Respect reduced-motion: kill all transitions/animations/reveal offsets */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* shiki: keep code blocks on a solid dark surface regardless of the
+   translucent surface behind them, for maximum syntax-highlight contrast. */
 html:not(.dark) .astro-code {
   @apply !bg-ink-900 text-ink-100;
 }

@@ -1,6 +1,7 @@
 ---
 title: claude-code-announcements
-summary: Claude Code의 `companyAnnouncements`(매 세션 시작 시 Claude가 보는 워크플로우 cheatsheet)를 자동 구성하는 스킬. ECC·OMCC·Superpowers·Minimal 프리셋 + 사용자 설치 슬래시 커맨드 auto-detect.
+summary: "설치해 둔 슬래시 명령어를 매번 까먹는 문제를 해결 — Claude가 세션을 시작할 때마다 자동으로 보는 작은 명령어 안내문을 설정 파일에 넣어, 적절한 명령어를 알아서 제안하게 만든다."
+summary_en: "Stop forgetting the slash commands you installed — drops a short command cheat sheet into Claude Code's settings so it sees your shortcuts at every session start and suggests the right one."
 tags: [skill, claude-code, workflow, settings, company-announcements, cskwork]
 source: https://github.com/cskwork/claude-code-announcements
 author: cskwork
@@ -12,7 +13,9 @@ install: "cp -r ~/Downloads/Code/claude-code-announcements ~/.claude/skills/comp
 
 ## 문제
 
-Superpowers, Everything Claude Code, Oh My Claude Code, 또는 직접 만든 커맨드 40+ 개를 깔아놓고 매번 3개만 쓴다. 나머지 명령어가 있다는 것조차 잊어버린다.
+Superpowers, Everything Claude Code, Oh My Claude Code, 또는 직접 만든 슬래시 명령어 40여 개를 깔아놓고 매번 3개만 쓴다. 나머지 명령어가 있다는 것조차 잊어버린다.
+
+*EN: You install 40+ slash commands but only ever remember three.*
 
 ## 해결책
 

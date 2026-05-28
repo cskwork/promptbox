@@ -1,6 +1,7 @@
 ---
 title: CLAUDE.md — Ten Commandments
-summary: Claude Code가 자동으로 읽는 시스템 프롬프트. 코딩 에이전트를 위한 10가지 계명 + 응답·문서화 스타일 + 레포 규칙.
+summary: "AI 코딩 도우미(Claude Code)가 매번 따르는 작업 규칙을 적어두는 파일. 한 번 저장하면 새 대화마다 코딩 원칙을 다시 설명할 필요가 없다."
+summary_en: "A rules file Claude Code loads automatically, so your coding assistant follows the same principles every session."
 tags: [config, claude-code, system-prompt, agent-rules]
 source: https://github.com/cskwork/coding-agent-rules
 author: cskwork

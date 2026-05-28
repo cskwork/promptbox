@@ -1,6 +1,7 @@
 ---
 title: stitch-landing
-summary: 프로젝트 README와 스크린샷을 입력으로 받아 GitHub Pages에 랜딩 페이지를 자동 배포하는 스킬. Stitch MCP로 디자인하고 Tailwind CDN으로 출력.
+summary: "내 프로젝트의 README와 스크린샷만 있으면, AI가 디자인한 소개용 웹페이지를 만들어 GitHub의 무료 호스팅(GitHub Pages)에 바로 올려 줍니다."
+summary_en: "Turns your project's README and screenshots into an AI-designed landing page, then publishes it on GitHub Pages at no cost."
 tags: [skill, github-pages, landing, stitch, mcp, tailwind]
 source: https://github.com/cskwork/stitch-landing-skill
 author: cskwork
@@ -12,7 +13,9 @@ install: "git clone https://github.com/cskwork/stitch-landing-skill ~/.claude/sk
 
 ## 핵심 아이디어
 
-`README.md` + `docs/*.svg|png` 정도가 있는 레포에 한 세션 안에서 배포된 랜딩 페이지를 붙인다. 디자인 패스는 **Stitch MCP**(`mcp__stitch__*`)가 생성하고, 출력은 단일 `docs/index.html`(~25-30KB, Tailwind CDN).
+`README.md`와 스크린샷(`docs/*.svg|png`)만 있는 레포에서, 한 번의 작업으로 인터넷에 공개된 소개 페이지까지 만들어 준다. 디자인은 구글의 AI UI 도구 **Stitch**가 그려 주고(`mcp__stitch__*`), 결과물은 파일 하나(`docs/index.html`, ~25-30KB, Tailwind CDN)로 나온다.
+
+*EN: From just a README and screenshots, it ships a public landing page in one pass — Stitch (Google's AI UI tool) does the design.*
 
 레퍼런스 결과물: <https://cskwork.github.io/oh-my-symphony/>
 

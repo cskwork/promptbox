@@ -1,6 +1,7 @@
 ---
 title: web-design-guidelines
-summary: Vercel의 Web Interface Guidelines를 매 review마다 WebFetch로 fresh하게 가져와, 지정된 파일을 그 규칙에 비춰 검사하고 `file:line` 형식으로 위반 사항을 리포트하는 스킬.
+summary: "내 웹사이트 코드를 Vercel의 웹 디자인 기준(접근성·UX 모범 사례)에 비춰 검사하고, 고쳐야 할 곳을 파일·줄 번호로 짚어 주는 스킬. 검사할 때마다 최신 규칙을 자동으로 받아 와 따로 업데이트할 필요가 없다."
+summary_en: "Audits UI code against Vercel's design and accessibility guidelines; reports each issue by file and line."
 tags: [skill, vercel, audit, accessibility, ux, web-interface-guidelines]
 source: https://github.com/vercel-labs/agent-skills/tree/main/skills/web-design-guidelines
 author: vercel-labs (vercel)
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/vercel-labs/agent-skills --skill web
 
 ## 한 줄
 
-review 시점에 항상 `https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md`를 WebFetch로 가져와서 — 룰이 burned-in되지 않으니 update 따로 안 해도 됨.
+검사할 때마다 `https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md`에서 규칙을 새로 받아 온다 — 규칙이 스킬 안에 박혀 있지 않으니 따로 업데이트할 필요가 없다.
+
+*EN: Rules are fetched fresh on every run, not baked in, so they never go out of date.*
 
 ## 언제 쓰는가
 

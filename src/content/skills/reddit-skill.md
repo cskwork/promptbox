@@ -1,6 +1,7 @@
 ---
 title: reddit-poster (cskwork/reddit-skill)
-summary: Reddit에 사람처럼 글 쓰는 Claude 스킬. CLI `reddit-post`가 본체(MCP는 옵션). 4단계 — flair·top5 조회 → 휴먼 톤 draft → dry-run → 사용자 명시 승인 후 post. flair_id 정확 해석, shadow-remove(inbox 확인), megathread redirect, 카르마/스팸 필터까지 다 다룬다.
+summary: 광고처럼 안 보이는 Reddit 글을 사람 말투로 대신 써 주고, 올리기 직전에 미리보기와 내 승인을 꼭 거치게 하는 Claude 스킬. 글머리 태그(flair) 자동 매칭, 스팸·카르마 필터에 막히는 상황까지 알아서 안내한다.
+summary_en: Generates Reddit-native posts, resolves flair automatically, and gates every live submit behind your explicit approval.
 tags: [skill, claude-code, reddit, mcp, cli, posting, flair, automation]
 source: https://github.com/cskwork/reddit-skill
 author: cskwork
@@ -12,7 +13,8 @@ install: "git clone https://github.com/cskwork/reddit-skill && cd reddit-skill &
 
 ## 한 줄
 
-`reddit-post` CLI(기본) + 옵션 MCP server + `reddit-poster` SKILL. **널리 쓰이는 Reddit MCP들이 `flair_id`를 잘못 다루는 문제를 고친다** — 텍스트 flair를 받아 `subreddit.flair.link_templates`에서 id를 lookup해서 제대로 제출.
+`reddit-post` CLI(기본) + 옵션 MCP server + `reddit-poster` SKILL. **다른 Reddit 도구들이 글머리 태그(flair)를 잘못 붙여 글이 거부되는 문제를 고친다** — 태그 이름만 적어 주면 `subreddit.flair.link_templates`에서 진짜 id를 찾아 정확히 제출한다.
+*EN: fixes the broken flair handling in other Reddit tools — you name the tag, it resolves the real id.*
 
 ## 4단계 워크플로우 (생략 금지)
 
