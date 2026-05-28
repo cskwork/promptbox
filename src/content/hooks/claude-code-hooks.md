@@ -16,7 +16,7 @@ install: "git clone https://github.com/cskwork/claude-code-hooks ~/code/claude-c
 
 ## 한 줄
 
-Claude Code가 명령을 실행하기 직전·직후에 끼어들어 위험한 작업을 막거나 보완하는 개인용 훅(hook, 자동 실행 스크립트) 4종. 글로벌 `~/.claude/settings.json` 또는 프로젝트 `.claude/settings.json`에 등록해 켠다. hook 스펙: PreToolUse / PostToolUse, stdin JSON / stdout `hookSpecificOutput`, exit 2 = block.
+Claude Code가 명령을 실행하기 직전·직후에 끼어들어 위험한 작업을 막거나 보완하는 개인용 훅(hook, 자동 실행 스크립트) 4종. 글로벌 `~/.claude/settings.json` 또는 프로젝트 `.claude/settings.json`에 등록해 켠다. hook 스펙: PreToolUse / PostToolUse, stdin(표준 입력) JSON / stdout(표준 출력) `hookSpecificOutput`, exit 2 = block(차단).
 
 *EN: Four personal hooks that step in right before Claude Code runs a command, to block or augment risky actions.*
 
@@ -24,7 +24,7 @@ Claude Code가 명령을 실행하기 직전·직후에 끼어들어 위험한 �
 
 | Hook | Event | 트리거 | 목적 |
 |---|---|---|---|
-| `validate-mybatis-xml.sh` | PreToolUse(Bash) | `gradlew build/test/bootRun/assemble/check` | MyBatis 매퍼 XML well-formedness 사전 검증, 실패 시 명령 deny |
+| `validate-mybatis-xml.sh` | PreToolUse(Bash) | `gradlew build/test/bootRun/assemble/check` | MyBatis 매퍼 XML well-formedness(태그가 올바르게 닫혀 있는지 검사) 사전 검증, 실패 시 명령 deny(차단) |
 | `ssh-guard.sh` | PreToolUse(Bash) | 직접 `ssh`/`scp`/`sftp`/`sshpass`, wrapper의 `--shell`/`--allow-write` | 감사 가능한 wrapper 경로 강제 |
 | `web-search-year-inject.py` | PreToolUse(WebSearch) | 쿼리에 연도/시간 키워드 없을 때 | 끝에 현재 연도 자동 부착 → 최신 결과 우선 |
 | `graphify-hint.sh` | PreToolUse(Bash) | `grep`/`rg`/`find`/`fd`/`ack`/`ag` | `graphify-out/` · `.codegraph/` 있으면 raw search 전 힌트 |

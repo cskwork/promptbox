@@ -24,7 +24,7 @@ tools: [Codex CLI, Gemini CLI, OpenCode, Cursor, Windsurf]
 
 본문은 **완전히 동일**. 두 파일을 따로 두는 이유는:
 
-- `AGENTS.md`는 [emerging cross-tool spec](https://agents.md)
+- `AGENTS.md`는 [emerging cross-tool spec(여러 AI 도구가 공통으로 따르는 규격)](https://agents.md)
 - `CLAUDE.md`는 Claude Code가 자동 로드
 - 두 파일 모두 두면 어떤 CLI에서도 별도 분기 없이 동작
 

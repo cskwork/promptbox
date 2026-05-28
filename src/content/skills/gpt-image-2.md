@@ -19,13 +19,13 @@ install: "npx skills add https://github.com/agentspace-so/agent-skills --skill g
 
 ## 언제 쓰는가
 
-사용자가 명시적으로 "GPT Image 2 / image 2 / ChatGPT Images 2.0"이라고 지정했을 때만. 평범한 "이미지 만들어줘"에는 자동 발동 금지 — 다른 라우트(DALL·E, Midjourney, HTML mockup)로 silently fallback도 금지.
+사용자가 명시적으로 "GPT Image 2 / image 2 / ChatGPT Images 2.0"이라고 지정했을 때만. 평범한 "이미지 만들어줘"에는 자동 발동 금지 — 다른 라우트(DALL·E, Midjourney, HTML mockup(임시 화면 시안))로 silently fallback(말없이 다른 것으로 대체)도 금지.
 
 ## 함정
 
 - `codex-cli 0.111.0+`에서 `--enable image_generation` 플래그 **필수** (기본 off).
-- `--ephemeral`은 **쓰면 안 됨** — ephemeral 세션은 rollout이 안 남아서 base64 이미지 페이로드를 추출할 곳이 사라진다.
-- ChatGPT 구독에 image-generation 권한이 없으면 exit code 7 (skill이 capability를 부여하는 게 아니라 노출만).
+- `--ephemeral`은 **쓰면 안 됨** — ephemeral(일회성) 세션은 rollout(세션 실행 기록)이 안 남아서 base64(이미지를 텍스트로 인코딩한 형식) 이미지 페이로드를 추출할 곳이 사라진다.
+- ChatGPT 구독에 image-generation 권한이 없으면 exit code(종료 코드) 7 (skill이 capability(기능 권한)를 부여하는 게 아니라 노출만).
 
 ## 원문 SKILL.md
 

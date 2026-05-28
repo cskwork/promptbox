@@ -20,24 +20,24 @@ install: "git clone https://github.com/cskwork/myfocus-skill ~/myfocus-skill && 
 ## 무엇을 하는가
 
 1. 등록된 스캐너로 최근 N시간 세션 로그 수집 (Claude Code, Codex, Gemini 내장 · 추가 가능)
-2. cwd로 클러스터 → 토픽 추출
-3. 우선순위 휴리스틱 적용
-4. **TOP PRIORITY 하나** + 2–4개 deferred + context를 렌더
+2. cwd(현재 작업 디렉토리)로 클러스터(비슷한 것끼리 묶기) → 토픽 추출
+3. 우선순위 휴리스틱(경험적 규칙) 적용
+4. **TOP PRIORITY 하나** + 2–4개 deferred(미뤄둘 후보) + context를 렌더(화면에 그려냄)
 5. (`--save`) `~/.claude/myfocus/YYYY-MM-DD-HHMM.md`로 스냅샷
 
 ## 우선순위 신호
 
 | Signal | 위치 | Δ |
 |---|---|---|
-| 블로커 키워드 (`blocked`, `stuck`, `fails`, `error 5xx`) in 마지막 assistant turn | last excerpt | +3 |
+| 블로커(진행을 막는 장애물) 키워드 (`blocked`, `stuck`, `fails`, `error 5xx`) in 마지막 assistant turn | last excerpt(마지막 발췌) | +3 |
 | 시간 민감 (`today`, `tomorrow`, ISO date ≤3일, `deadline`, `ASAP`) | any excerpt | +3 |
 | 마지막 assistant가 TODO나 미해결 질문으로 끝남 | last excerpt | +2 |
 | 같은 토픽이 ≥3 세션에 등장 | 세션 수 | +2 |
-| 같은 토픽이 ≥2 에이전트에 걸침 | agent diversity | +1 |
+| 같은 토픽이 ≥2 에이전트에 걸침 | agent diversity(에이전트 다양성) | +1 |
 | "Done"/commit/PR-merge 신호 | last excerpt | −3 |
 | 세션 1개 + 총 길이 <500자 | session count | −1 |
 
-Tie-break: 가장 최근 `mtime` → 현재 스킬이 도는 에이전트.
+Tie-break(동점일 때 가르기): 가장 최근 `mtime`(파일 수정 시각) → 현재 스킬이 도는 에이전트.
 
 ## 사용
 

@@ -21,17 +21,17 @@ Claude Code 안에서 Codex에게 코드 검토(review)·코드 작성(impl)·�
 
 | Invocation | What | Example |
 |---|---|---|
-| `/codex-cli review` | diff를 Codex에 second-opinion review로 | `/codex-cli review --base main` |
-| `/codex-cli impl <prompt>` | Codex에 non-interactive 코딩 작업 위임 | `/codex-cli impl "add JWT refresh to api/auth.ts"` |
-| `/codex-cli image <prompt>` | Codex 내장 image gen — API key 불필요 | `/codex-cli image "isometric CPU diagram, neon"` |
+| `/codex-cli review` | diff를 Codex에 second-opinion review(다른 관점에서 한 번 더 검토)로 | `/codex-cli review --base main` |
+| `/codex-cli impl <prompt>` | Codex에 non-interactive(사람 입력 없이 한 번에 실행) 코딩 작업 위임 | `/codex-cli impl "add JWT refresh to api/auth.ts"` |
+| `/codex-cli image <prompt>` | Codex 내장 image gen(이미지 생성) — API key 불필요 | `/codex-cli image "isometric CPU diagram, neon"` |
 
 자연어로도 트리거 가능 — "ask codex to review my diff", "have codex generate an isometric CPU diagram" (스킬의 `when_to_use` 필드가 감지).
 
 ## 핵심 함정 (스킬이 알아서 처리)
 
-1. **이미지 생성의 디스커버리 문제** — 모델이 `OPENAI_API_KEY`나 `curl`/`python`을 언급한 prompt를 받으면 shell-out 경로로 빠지고 실패. 스킬은 "generate and save"라고만 시켜 내장 툴을 고르게 한다.
-2. **Windows sandbox copy bug** — codex-cli 0.128.0 Windows에서 이미지 생성은 성공하나 workspace 복사가 `CreateProcessAsUserW failed: 5`로 실패. 스킬이 `~/.codex/generated_images/<session>/ig_*.png`에서 직접 찾아 복사
-3. **Sandbox safety** — `-s danger-full-access` / `--dangerously-bypass-approvals-and-sandbox`는 명시 per-run approval 없이 절대 사용 X
+1. **이미지 생성의 디스커버리(어떤 도구를 쓸지 찾아내는) 문제** — 모델이 `OPENAI_API_KEY`나 `curl`/`python`을 언급한 prompt를 받으면 shell-out(셸 명령으로 외부 실행) 경로로 빠지고 실패. 스킬은 "generate and save"라고만 시켜 내장 툴을 고르게 한다.
+2. **Windows sandbox(격리 실행 환경) copy bug** — codex-cli 0.128.0 Windows에서 이미지 생성은 성공하나 workspace(작업 폴더) 복사가 `CreateProcessAsUserW failed: 5`로 실패. 스킬이 `~/.codex/generated_images/<session>/ig_*.png`에서 직접 찾아 복사
+3. **Sandbox safety** — `-s danger-full-access` / `--dangerously-bypass-approvals-and-sandbox`는 명시 per-run approval(실행할 때마다 받는 승인) 없이 절대 사용 X
 
 ## 설치
 

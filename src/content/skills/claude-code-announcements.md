@@ -19,7 +19,7 @@ Superpowers, Everything Claude Code, Oh My Claude Code, 또는 직접 만든 슬
 
 ## 해결책
 
-`~/.claude/settings.json`의 `companyAnnouncements` 필드에 워크플로우 cheatsheet를 박아두면 Claude가 매 세션 시작 시 본다 → Claude가 *알아서* 적절한 커맨드를 제안.
+`~/.claude/settings.json`의 `companyAnnouncements` 필드에 워크플로우 cheatsheet(요약 모음표)를 박아두면 Claude가 매 세션 시작 시 본다 → Claude가 *알아서* 적절한 커맨드를 제안.
 
 ```
 [Workflows] Dev: /orchestrate feature "desc" -> /e2e

@@ -20,7 +20,7 @@ AI 에이전트가 `ssh user@host "rm -rf ..."` 같은 위험한 명령을 직�
 ## 이것은 무엇이 *아닌가*
 
 - **샌드박스 아님.** 클라이언트에 root가 있는 악의적 행위자는 못 막는다.
-- **서버 사이드 하드닝 대체 아님.** 진짜 격리는 `ForceCommand` + `authorized_keys` + `rbash` + 전용 read-only SSH 유저.
+- **서버 사이드 하드닝(서버 보안 강화) 대체 아님.** 진짜 격리는 `ForceCommand` + `authorized_keys` + `rbash` + 전용 read-only(읽기 전용) SSH 유저.
 
 "AI 에이전트의 정직한 실수에 대한 가드레일" — 그것만으로도 가치 있다.
 
@@ -28,9 +28,9 @@ AI 에이전트가 `ssh user@host "rm -rf ..."` 같은 위험한 명령을 직�
 
 | Layer | 강제 주체 | 막는 것 |
 |---|---|---|
-| 1 PreToolUse 훅 | Claude Code 하네스 (에이전트 우회 불가) | 직접 `ssh`/`scp`/`sftp` 호출, bypass 플래그 |
-| 2 `permissions.deny` in `settings.json` | Claude Code 하네스 | bypass 플래그 (belt + suspenders) |
-| 3 `connect.sh` read-only 가드 | 헬퍼 스크립트 | `rm`/`sudo`/redirect/systemctl write/`curl -X POST`/패키지 설치/`-c` |
+| 1 PreToolUse 훅 | Claude Code 하네스 (에이전트 우회 불가) | 직접 `ssh`/`scp`/`sftp` 호출, bypass(우회) 플래그 |
+| 2 `permissions.deny` in `settings.json` | Claude Code 하네스 | bypass 플래그 (belt + suspenders, 이중 안전장치) |
+| 3 `connect.sh` read-only 가드 | 헬퍼 스크립트 | `rm`/`sudo`/redirect(출력 방향 전환)/systemctl write/`curl -X POST`/패키지 설치/`-c` |
 | 4 서버 사이드 (사용자가 제공) | `sshd_config`/`authorized_keys` | 그 외 모든 것 |
 
 ## 설치

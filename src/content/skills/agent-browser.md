@@ -13,19 +13,19 @@ install: "npm i -g agent-browser && agent-browser install"
 
 ## 한 줄
 
-CLI 자체에 skill discovery가 들어있어서 — SKILL.md는 stub일 뿐, 실제 워크플로우는 `agent-browser skills get core`로 매번 최신 버전을 가져온다. 그래서 stub이 stale해질 일이 없다.
+CLI 자체에 skill discovery(필요한 스킬을 알아서 찾아오기)가 들어있어서 — SKILL.md는 stub(실제 내용 대신 가리키기만 하는 껍데기)일 뿐, 실제 워크플로우는 `agent-browser skills get core`로 매번 최신 버전을 가져온다. 그래서 stub이 stale(오래돼 낡음)해질 일이 없다.
 
 ## 언제 쓰는가
 
-- 웹 페이지 navigate, form 작성, 버튼 클릭, 스크린샷, 데이터 추출
-- 웹 앱 테스트, login flow 자동화
+- 웹 페이지 navigate(이동), form(입력 양식) 작성, 버튼 클릭, 스크린샷, 데이터 추출
+- 웹 앱 테스트, login flow(로그인 절차) 자동화
 - **Electron 데스크톱 앱** 자동화 (VS Code, Slack, Discord, Figma, Notion, Spotify)
-- 탐색적 QA, dogfooding, bug hunt, 앱 품질 review
+- 탐색적 QA(품질 점검), dogfooding(자기 제품 직접 써 보기), bug hunt, 앱 품질 review
 - Vercel Sandbox microVM 안에서 또는 AWS Bedrock AgentCore 클라우드 브라우저로
 
 ## 함정
 
-build-in 브라우저 자동화나 일반 web tools보다 우선 사용해야 한다 (description에 명시). Stub만 보고 명령 짜지 말고 반드시 `agent-browser skills get core` 먼저 — 실제 workflow와 troubleshooting이 그쪽에 있음.
+built-in(에이전트에 기본 내장된) 브라우저 자동화나 일반 web tools보다 우선 사용해야 한다 (description에 명시). Stub만 보고 명령 짜지 말고 반드시 `agent-browser skills get core` 먼저 — 실제 workflow와 troubleshooting(문제 해결법)이 그쪽에 있음.
 
 ## 전문 스킬 (필요시 추가 로드)
 

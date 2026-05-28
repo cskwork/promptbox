@@ -26,7 +26,7 @@ ChatGPT 음성 입력이 클라우드 의존인 게 싫고, Apple Dictation은 �
 ## 동작
 
 1. 설정한 단축키를 누른 채로 말한다
-2. 키를 놓으면 Silero VAD로 음성 구간을 자르고 선택한 모델 (Whisper tiny/base/small/medium/large 또는 Parakeet V3)로 transcribe
+2. 키를 놓으면 Silero VAD(음성 활동 감지)로 음성 구간을 자르고 선택한 모델 (Whisper tiny/base/small/medium/large 또는 Parakeet V3)로 transcribe(음성을 글자로 변환)
 3. 결과 텍스트가 활성 텍스트 필드에 paste
 
 ## 설치

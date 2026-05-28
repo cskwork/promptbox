@@ -19,18 +19,18 @@ install: "git clone https://github.com/cskwork/reddit-skill && cd reddit-skill &
 ## 4단계 워크플로우 (생략 금지)
 
 1. **Discover** — `flairs <sub>` + `search "<topic>" --subreddit <name> --sort top --time-filter month --limit 5`로 그 sub의 실제 컨벤션 학습
-2. **Draft** — 소문자, 개인적 모먼트로 시작, marketing 형용사 금지, 한계 솔직히, 끝은 차분한 invitation. 사용자에게 보여주고 iterate
-3. **Dry-run** — `post ... --dry-run`. flair 해석·바이트 수 확인
-4. **Post** — **명시적 user approval** 후에만 라이브 submit (`AskUserQuestion`만으론 auto-mode classifier 통과 안 될 수 있음 → 평문 "approve" 필요)
+2. **Draft** — 소문자, 개인적 모먼트로 시작, marketing 형용사 금지, 한계 솔직히, 끝은 차분한 invitation(부담 없는 마무리 인사). 사용자에게 보여주고 iterate(보여주고 고치기를 반복)
+3. **Dry-run**(실제로 올리지 않고 미리 점검) — `post ... --dry-run`. flair 해석·바이트 수 확인
+4. **Post** — **명시적 user approval** 후에만 라이브 submit (`AskUserQuestion`만으론 auto-mode classifier(자동 판정기) 통과 안 될 수 있음 → 평문 "approve" 필요)
 
 ## 핵심 함정 (해결책 내장)
 
-- `POST_GUIDANCE_VALIDATION_FAILED` — **user-flair** (account-level) 필요. `flairs`에 안 나옴. 웹 UI에서 수동 설정
-- `Our filters have designated this as spam` — opaque. user-flair → 봇 disclosure → body 30% 단축 → 몇 시간 대기 순으로 trial
+- `POST_GUIDANCE_VALIDATION_FAILED` — **user-flair**(서브레딧 계정 수준 태그) 필요. `flairs`에 안 나옴. 웹 UI에서 수동 설정
+- `Our filters have designated this as spam` — opaque(왜 막혔는지 안 알려줌). user-flair → 봇 disclosure(봇이 썼다고 알리는 고지) → body 30% 단축 → 몇 시간 대기 순으로 trial(시도 순서)
 - `NO_SELFS` — link-only sub (r/programming류). retry 금지
-- **Shadow remove** — `reddit-post get`이 `score: 1` healthy 보여도 inbox에 automod 메시지 있음. **inbox가 source of truth**
-- **Karma minimum + megathread redirect** — mod-bot이 megathread URL 안내. 본문을 거기 top-level comment로
-- **Burst rate-limit** — 같은 계정 하루 3~4개 넘으면 stricter sub에서 silent filter. 며칠로 나눠 posting
+- **Shadow remove**(나만 보이고 남에겐 숨겨진 삭제) — `reddit-post get`이 `score: 1` healthy 보여도 inbox에 automod 메시지 있음. **inbox가 source of truth(가장 믿을 기준)**
+- **Karma minimum + megathread redirect** — mod-bot이 megathread(공식 모아보기 스레드) URL 안내. 본문을 거기 top-level comment(최상위 댓글)로
+- **Burst rate-limit**(짧은 시간 몰아 올릴 때 걸리는 횟수 제한) — 같은 계정 하루 3~4개 넘으면 stricter sub에서 silent filter(조용히 숨기는 필터). 며칠로 나눠 posting
 
 ## 설치 (CLI + Skill)
 
@@ -49,7 +49,7 @@ mkdir "$env:USERPROFILE\.claude\skills\reddit-poster"
 copy skills\reddit-poster\SKILL.md "$env:USERPROFILE\.claude\skills\reddit-poster\"
 ```
 
-자격증명 resolution: env vars → `.env` (cwd 위로 탐색) → `~/.claude.json` `mcpServers.reddit.env` fallback. 2FA 계정은 **app password** 발급.
+자격증명 resolution(탐색 우선순위): env vars → `.env` (cwd 위로 탐색) → `~/.claude.json` `mcpServers.reddit.env` fallback. 2FA 계정은 **app password** 발급.
 
 ## 옵션: MCP server로 쓰기
 

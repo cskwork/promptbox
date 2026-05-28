@@ -20,7 +20,7 @@ install: "brew install rtk"
 
 ## 언제 쓰는가
 
-- 큰 `git status`, `cargo test`, `docker logs`, `kubectl describe` 결과가 context window를 잡아먹을 때
+- 큰 `git status`, `cargo test`, `docker logs`, `kubectl describe` 결과가 context window(AI가 한 번에 기억하는 작업 공간)를 잡아먹을 때
 - Claude Code · Copilot · Cursor · Gemini CLI 13개 AI 코딩 툴 어디서나 동일하게
 - 토큰 절감 효과를 측정·시각화하고 싶을 때 (`rtk gain`, `rtk discover`)
 
@@ -52,7 +52,7 @@ rtk discover                   # 어떤 명령에 rtk가 도움되는지 분석
 
 ## 함정
 
-- Windows native는 limitation 있음 — 전체 기능은 WSL에서
+- Windows native는 limitation(기능 제한) 있음 — 전체 기능은 WSL에서
 - auto-rewrite hook은 셸 설정 변경하니 install 후 새 셸에서 검증
 - 압축 정책이 명령마다 다르므로 처음 쓸 때 `rtk gain`으로 실제 절감 확인 권장
 

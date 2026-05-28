@@ -21,21 +21,21 @@ install: "npx skills add https://github.com/mattpocock/skills --skill setup-matt
 
 | 섹션 | 결정 | 기본값 |
 |---|---|---|
-| A. 이슈 트래커 | GitHub / GitLab / local markdown(`.scratch/`) / Other(Jira·Linear 등 freeform) | git remote에서 추론 |
-| B. Triage 라벨 매핑 | `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix` 5개 canonical role의 실제 라벨 문자열 | 이름 그대로 |
-| C. 도메인 docs 레이아웃 | single-context (`CONTEXT.md` + `docs/adr/`) vs multi-context (`CONTEXT-MAP.md` + per-context) | 대부분 single |
+| A. 이슈 트래커 | GitHub / GitLab / local markdown(`.scratch/`) / Other(Jira·Linear 등 freeform(자유 서술형)) | git remote에서 추론 |
+| B. Triage 라벨 매핑 | `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix` 5개 canonical role(표준으로 정한 역할)의 실제 라벨 문자열 | 이름 그대로 |
+| C. 도메인 docs 레이아웃 | single-context(문맥 문서 하나)(`CONTEXT.md` + `docs/adr/`) vs multi-context(문맥 문서 여러 개)(`CONTEXT-MAP.md` + per-context) | 대부분 single |
 
 ## 산출물
 
 - `CLAUDE.md`(있으면) 또는 `AGENTS.md`의 `## Agent skills` 블록 — 세 결정의 one-line 요약 + `docs/agents/*.md` 포인터
-- `docs/agents/issue-tracker.md` — 트래커별 seed 템플릿 (github/gitlab/local)
+- `docs/agents/issue-tracker.md` — 트래커별 seed(시작점) 템플릿 (github/gitlab/local)
 - `docs/agents/triage-labels.md` — 라벨 매핑
-- `docs/agents/domain.md` — domain doc consumer rule
+- `docs/agents/domain.md` — domain doc consumer rule(도메인 문서를 어떻게 읽을지 정한 규칙)
 
 ## 함정
 
 - `CLAUDE.md`와 `AGENTS.md` **둘 다** 만들지 말 것 — 존재하는 쪽만 edit.
-- 기존 `## Agent skills` 블록이 있으면 **in-place update**, 중복 append 금지.
+- 기존 `## Agent skills` 블록이 있으면 **in-place update(그 자리에서 고쳐쓰기)**, 중복 append(파일 끝에 덧붙이기) 금지.
 - `disable-model-invocation: true` — 사용자가 명시적으로 부를 때만 실행.
 
 ## 원문 SKILL.md (전문)

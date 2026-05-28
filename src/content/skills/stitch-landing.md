@@ -28,22 +28,22 @@ install: "git clone https://github.com/cskwork/stitch-landing-skill ~/.claude/sk
 
 ## 8단계 플로우
 
-1. **레포 읽기** — README 포지셔닝, value props, 스크린샷, 라이선스 추출
+1. **레포 읽기** — README 포지셔닝, value props(핵심 가치 소개 문구), 스크린샷, 라이선스 추출
 2. **Stitch 디자인 패스** — `create_project` → `generate_screen_from_text` (DESKTOP, GEMINI_3_FLASH)
 3. **Stitch 결과물 다운로드/검사** — `htmlCode.downloadUrl`에서 HTML 가져와 디자인 토큰 추출
-4. **프로덕션 `docs/index.html` 작성** — Stitch tailwind config 토큰 복사, JetBrains Mono+Inter, 실제 스크린샷 임베드, README 카피 그대로 포팅
+4. **프로덕션 `docs/index.html` 작성** — Stitch tailwind config 토큰 복사, JetBrains Mono+Inter, 실제 스크린샷 임베드(직접 삽입), README 카피 그대로 포팅(원문 그대로 옮겨 심기)
 5. **Jekyll 비활성화** — `touch docs/.nojekyll`
 6. **GitHub Pages 활성화** — `gh api -X POST repos/<owner>/<repo>/pages -f 'source[branch]=main' -f 'source[path]=/docs'`
-7. **commit + push** (main 차단 시 PR 폴백)
+7. **commit + push** (main 차단 시 PR 폴백(막히면 PR로 우회))
 8. **라이브 검증** — `gh api .../pages/builds/latest`, `curl -sI <url>`
 
 ## 자주 하는 실수
 
-- **Stitch 첫 generation 타임아웃** → 재시도하지 말고 `list_screens` 폴링 (툴 docstring 명시)
-- **Base64 비대 HTML 그대로 출고** → Stitch HTML은 구조 참고용. 실제 스크린샷으로 교체
+- **Stitch 첫 generation(화면 생성) 타임아웃** → 재시도하지 말고 `list_screens` 폴링(주기적으로 상태 확인) (툴 docstring(함수 설명 주석) 명시)
+- **Base64(이미지를 텍스트로 변환한 형식) 비대 HTML 그대로 출고** → Stitch HTML은 구조 참고용. 실제 스크린샷으로 교체
 - **`.nojekyll` 누락** → `_` 시작 파일들이 조용히 드롭됨
 - **첫 Pages 빌드 30-60초** → 즉시 404 보고 패닉하지 말 것
-- **heredoc-in-`$()` 차단 환경** → `git commit -F file.txt` 사용
+- **heredoc(여러 줄 문자열 입력 방식)-in-`$()` 차단 환경** → `git commit -F file.txt` 사용
 
 ## 결과물
 

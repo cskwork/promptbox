@@ -26,7 +26,7 @@ install: "npx skills add https://github.com/vercel-labs/skills --skill find-skil
 1. **도메인·작업·일반성** 식별
 2. **리더보드 먼저 확인** — [skills.sh](https://skills.sh/) 설치 수 기준
 3. `npx skills find <query>` 실행 (구체적 키워드)
-4. **품질 검증**: install count 1K+ 선호, 100 미만은 조심. `vercel-labs`, `anthropics`, `microsoft` 등 공식 source 우선. <100 stars repo는 회의적으로
+4. **품질 검증**: install count(설치 횟수) 1K+ 선호, 100 미만은 조심. `vercel-labs`, `anthropics`, `microsoft` 등 공식 source(출처) 우선. <100 stars(GitHub 별점) repo는 회의적으로
 5. **옵션 제시**: 이름 + 동작 + install count + source + 설치 명령 + skills.sh 링크
 6. 동의하면 `npx skills add <owner/repo@skill> -g -y`로 설치
 

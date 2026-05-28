@@ -17,7 +17,7 @@ install: "npx skills add https://github.com/mattpocock/skills --skill tdd"
 *EN: Test what the code does, not how it does it.*
 내부 함수 이름만 바꿔도 테스트가 깨진다면, 그건 동작이 아니라 구현 방식을 테스트한 셈이다. 좋은 테스트는 명세처럼 읽힌다: *"valid cart로 checkout 가능"*.
 
-## Anti-pattern: Horizontal slicing
+## Anti-pattern: Horizontal slicing(가로로 쪼개기)
 
 ```
 WRONG (horizontal):

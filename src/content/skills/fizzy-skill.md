@@ -13,14 +13,14 @@ install: "git clone https://github.com/cskwork/fizzy-skill ~/.claude/skills/fizz
 
 ## 한 줄
 
-Fizzy는 마크다운 렌더러가 아니다 — HTML을 받지만 `<h*>`, `<strong>`, `<hr>`, `<a href>`, `<img>`, `<pre>`, `<table>` 다 strip한다. 이 스킬은 그 함정들을 결정 트리로 굳혀놨다.
+Fizzy는 마크다운 렌더러가 아니다 — HTML을 받지만 `<h*>`, `<strong>`, `<hr>`, `<a href>`, `<img>`, `<pre>`, `<table>` 다 strip(태그를 떼어버림)한다. 이 스킬은 그 함정들을 결정 트리로 굳혀놨다.
 
 *EN: Fizzy quietly strips most HTML tags, so this skill bakes the safe formatting tricks into a ready-made decision tree.*
 
 ## 다루는 것
 
-1. **Onboarding** — 설치, base URL, 인증(PAT 또는 매직링크), 기본 계정 설정
-2. **Daily ops** — 보드·카드·댓글 CRUD + 마크다운 함정 회피
+1. **Onboarding(초기 설정)** — 설치, base URL, 인증(PAT(개인 액세스 토큰) 또는 매직링크), 기본 계정 설정
+2. **Daily ops(일상 작업)** — 보드·카드·댓글 CRUD(생성·조회·수정·삭제) + 마크다운 함정 회피
 3. **Jira → Fizzy 마이그레이션** — Jira 이슈의 설명·첨부·14개 댓글을 카드(+서브카드)로 옮기되 포맷 유지
 
 ## Fizzy의 함정 (한 번에)
@@ -29,12 +29,12 @@ Fizzy는 마크다운 렌더러가 아니다 — HTML을 받지만 `<h*>`, `<str
 |---|---|---|
 | 마크다운 미렌더링 | `**bold**`가 별표 그대로 | HTML(hybrid) 사용 — `scripts/adf_to_fizzy.py` |
 | `--json` 위치 | subcommand 뒤에 두면 무시 | **앞에** 두기: `fizzy-cli --json comment list 36` |
-| `comment list` 페이지네이션 | ~3개만 반환, 나머지 보이지 않음 | 비어질 때까지 loop |
-| 단일 계정 자동 선택 안 됨 | `board list`가 cryptic 에러 | 계정 1개여도 `account set <SLUG>` 필수 |
+| `comment list` 페이지네이션 | ~3개만 반환, 나머지 보이지 않음 | 비어질 때까지 loop(반복) |
+| 단일 계정 자동 선택 안 됨 | `board list`가 cryptic(알아보기 힘든) 에러 | 계정 1개여도 `account set <SLUG>` 필수 |
 | 비-TTY 매직링크 | 매 호출마다 새 코드 발급, 받은 건 무효화 | `references/magic-link-curl-two-step.md` 워크어라운드 |
 | `<a href>` strip | URL이 사라짐 | `<p>label: URL</p>`로 보이게 |
 | `--image` | 카드당 메인 이미지 1개만, 본문 `<img>` strip | 한 장만 메인으로, 나머지는 텍스트 URL |
-| heredoc + backtick | shell substitution 발생 | Python `subprocess.run([...])`로 빌드 |
+| heredoc(여러 줄 입력 블록) + backtick | shell substitution(셸이 명령을 멋대로 실행) 발생 | Python `subprocess.run([...])`로 빌드 |
 
 ## 환경 변수
 
@@ -42,7 +42,7 @@ Fizzy는 마크다운 렌더러가 아니다 — HTML을 받지만 `<h*>`, `<str
 - `FIZZY_EMAIL`
 - `FIZZY_TOKEN` (PAT 권장) 또는 매직링크
 
-Jira 첨부: `ATLASSIAN_EMAIL` + `ATLASSIAN_PAT` + `ATLASSIAN_SITE` (acli OAuth는 `read:attachment-content:jira` 없음 → Basic auth로 직접).
+Jira 첨부: `ATLASSIAN_EMAIL` + `ATLASSIAN_PAT` + `ATLASSIAN_SITE` (acli OAuth는 `read:attachment-content:jira` 없음 → Basic auth(아이디·토큰을 직접 보내는 기본 인증)로 직접).
 
 ## 핵심 명령
 

@@ -20,20 +20,20 @@ PRD나 계획을 작은 작업 단위로 쪼개되, "DB만" 또는 "화면만" �
 ## 슬라이스 규칙
 
 - 각 슬라이스는 narrow하지만 **COMPLETE** path
-- 완료된 슬라이스는 단독으로 demoable
+- 완료된 슬라이스는 단독으로 demoable(혼자서도 시연 가능한)
 - 두꺼운 슬라이스 적게 < 얇은 슬라이스 많이
-- 가능하면 **AFK** (인간 개입 없이 implement+merge), HITL는 정말 필요할 때만
+- 가능하면 **AFK**(자리 비움, 사람 없이 자동 진행) (인간 개입 없이 implement+merge), HITL(사람이 개입하는 루프)는 정말 필요할 때만
 
 ## 사용자에게 quiz
 
 각 슬라이스를 numbered list로 — Title / Type(HITL·AFK) / Blocked by / User stories covered. 이후:
 
-- Granularity가 맞는가? (too coarse / too fine)
-- Dependency가 맞는가?
+- Granularity(쪼개는 정도)가 맞는가? (too coarse / too fine)
+- Dependency(의존 관계)가 맞는가?
 - merge / split할 슬라이스가 있나?
 - HITL/AFK 마킹이 맞나?
 
-사용자 승인 후 dependency 순서대로 publish (blocker 먼저) — "Blocked by"에 진짜 이슈 ID 넣기 위해.
+사용자 승인 후 dependency 순서대로 publish (blocker(먼저 끝나야 하는 선행 이슈) 먼저) — "Blocked by"에 진짜 이슈 ID 넣기 위해.
 
 ## 이슈 본문 템플릿
 

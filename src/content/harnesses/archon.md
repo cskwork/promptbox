@@ -15,7 +15,7 @@ install: "git clone https://github.com/coleam00/Archon && cd Archon && bun insta
 
 ## 한 줄
 
-AI가 작업할 때마다 계획·테스트·PR을 제멋대로 다르게 만드는 문제를, 순서를 적어둔 파일(YAML) 하나로 고정해 매번 똑같이 실행되게 만든다 — Dockerfile이 인프라를, GitHub Actions가 CI/CD를 고정해 준 것처럼.
+AI가 작업할 때마다 계획·테스트·PR을 제멋대로 다르게 만드는 문제를, 순서를 적어둔 YAML(설정을 적는 텍스트 파일 형식) 파일 하나로 고정해 매번 똑같이 실행되게 만든다 — Dockerfile이 인프라를, GitHub Actions가 CI/CD(코드 통합·배포 자동화)를 고정해 준 것처럼.
 
 *EN: Locks the AI's plan/test/PR steps into one file so they run the same way every time — like Dockerfile did for infra and GitHub Actions for CI/CD.*
 

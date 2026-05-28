@@ -18,8 +18,8 @@ install: "npx skills add https://github.com/mattpocock/skills --skill to-prd"
 
 ## 프로세스
 
-1. Repo explore (이미 했으면 skip). 도메인 glossary 어휘 사용, ADR 존중.
-2. Build/modify할 major module sketch — deep module 추출 기회를 적극적으로 찾기. 사용자에게 module 매핑이 기대와 맞는지, 어느 module에 테스트 쓸지 확인.
+1. Repo explore (이미 했으면 skip). 도메인 glossary(용어 사전) 어휘 사용, ADR(아키텍처 결정 기록) 존중.
+2. Build/modify할 major module(기능 단위) sketch — deep module(단순한 인터페이스 뒤에 기능을 깊게 감춘 단위) 추출 기회를 적극적으로 찾기. 사용자에게 module 매핑이 기대와 맞는지, 어느 module에 테스트 쓸지 확인.
 3. PRD를 템플릿대로 작성 → 트래커에 publish, `ready-for-agent` 라벨 적용.
 
 ## PRD 템플릿

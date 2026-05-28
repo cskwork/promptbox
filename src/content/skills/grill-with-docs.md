@@ -19,22 +19,22 @@ grill-me에 "용어 관리"를 더한 버전 — 인터뷰 중 내가 쓴 단어
 
 ## 언제 쓰는가
 
-- 새 기능을 implementation 전에 도메인 언어와 정렬
-- 모호한/overloaded 용어 sharpen ("account"는 Customer인가 User인가?)
-- 사용자가 말한 동작과 코드 동작의 contradiction 발견
+- 새 기능을 implementation(구현) 전에 도메인 언어와 정렬
+- 모호한/overloaded(한 단어에 뜻이 여럿 겹친) 용어 sharpen(뜻을 더 날카롭게) ("account"는 Customer인가 User인가?)
+- 사용자가 말한 동작과 코드 동작의 contradiction(모순) 발견
 
 ## 파일 구조 가정
 
 - 단일 컨텍스트: 루트의 `CONTEXT.md` + `docs/adr/`
 - 멀티 컨텍스트: 루트의 `CONTEXT-MAP.md`가 각 컨텍스트의 `CONTEXT.md` 위치를 가리킴
 
-파일은 lazy 생성 — 첫 용어가 resolve될 때 `CONTEXT.md`를 만든다.
+파일은 lazy(필요할 때만 미루어) 생성 — 첫 용어가 resolve(뜻이 확정)될 때 `CONTEXT.md`를 만든다.
 
 ## 함정
 
-- `CONTEXT.md`에 구현 디테일을 넣지 말 것. spec도, scratch pad도 아니다. **glossary일 뿐.**
-- ADR은 **3가지 조건이 모두** 충족될 때만: hard to reverse + surprising without context + 진짜 trade-off. 하나라도 빠지면 skip.
-- 용어 업데이트는 batch하지 말고 그때그때 — 발견 즉시 캡처.
+- `CONTEXT.md`에 구현 디테일을 넣지 말 것. spec(명세)도, scratch pad(낙서장)도 아니다. **glossary(용어집)일 뿐.**
+- ADR(아키텍처 결정 기록)은 **3가지 조건이 모두** 충족될 때만: hard to reverse(되돌리기 어려운) + surprising without context(맥락 없이는 의외인) + 진짜 trade-off(장단점 맞교환). 하나라도 빠지면 skip(건너뜀).
+- 용어 업데이트는 batch(모아서 한꺼번에)하지 말고 그때그때 — 발견 즉시 캡처.
 
 ## 원문 SKILL.md (전문)
 

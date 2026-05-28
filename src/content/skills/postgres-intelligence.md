@@ -20,13 +20,13 @@ install: "git clone https://github.com/cskwork/postgres-intelligence && cd postg
 ## 무엇을 하는가
 
 - `.env`에서 `DB1_...DB10_...` 다중 PostgreSQL 연결 로드
-- 비밀번호/full DSN 노출 없이 connectivity 테스트
+- 비밀번호/full DSN(DB 접속 문자열 전체) 노출 없이 connectivity(연결 가능 여부) 테스트
 - `information_schema` + `pg_catalog`에서 스키마 메타데이터 추출
 - 기본 read-only SQL — `SELECT`, `WITH`, `SHOW`, `EXPLAIN`
-- write / DDL는 명시적 `--allow-write` / `--allow-ddl` (+ user approval)
-- 멀티 statement / `UPDATE`·`DELETE` without `WHERE` 차단
-- LLM 친화적 structured JSON 출력
-- `EXPLAIN`, 인덱스(B-tree/GIN/BRIN), JSONB, maintenance 가이던스
+- write / DDL(테이블 구조 변경 명령)는 명시적 `--allow-write` / `--allow-ddl` (+ user approval(사용자 승인))
+- 멀티 statement(여러 SQL 문장) / `UPDATE`·`DELETE` without `WHERE` 차단
+- LLM 친화적 structured(구조화된) JSON 출력
+- `EXPLAIN`, 인덱스(B-tree/GIN/BRIN), JSONB, maintenance(유지보수) 가이던스
 
 ## 설치
 
@@ -59,7 +59,7 @@ python scripts/query_executor.py --allow-ddl "CREATE INDEX CONCURRENTLY ix ON t 
 3. SQL 생성 전 `schema_metadata.json` 로드/리프레시
 4. 스키마 컨텍스트 부족하면 `information_schema` / `pg_catalog` 먼저
 5. `SELECT *` 대신 명시 컬럼, 탐색용 read에는 `LIMIT`
-6. 에러 시 `sqlstate` + suggestion으로 refine. **최대 3회**
+6. 에러 시 `sqlstate`(오류 상태 코드) + suggestion으로 refine(정제). **최대 3회**
 7. 실행 SQL / 핵심 row / row count / 추론 보고. 자격증명은 보고하지 않음
 
 ## SKILL.md 본문 (그대로 복사)
