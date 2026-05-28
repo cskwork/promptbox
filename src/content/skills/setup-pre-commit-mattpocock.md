@@ -22,17 +22,17 @@ install: "Claude Code 세션에서 `/setup-pre-commit` 또는 SKILL.md를 ~/.cla
 |---|---|
 | `husky` | git hook 디렉터리 자동 관리, `.husky/pre-commit` 실행 |
 | `lint-staged` | 스테이징된 파일에만 명령 실행 (전체 격납 방지) |
-| `prettier` | 스테이징 파일 자동 포맷 (`--ignore-unknown`로 못 읽는 파일은 skip) |
+| `prettier` | 스테이징 파일 자동 포맷 (`--ignore-unknown`로 못 읽는 파일은 skip(건너뜀)) |
 | `.husky/pre-commit` | `lint-staged → typecheck → test` 순서로 실행 |
 | `.lintstagedrc` | `"*": "prettier --ignore-unknown --write"` |
-| `.prettierrc` | 부재 시 mattpocock 기본값 (tab 2, 80폭, double-quote, semi, ES5 trailing comma) |
+| `.prettierrc` | 부재 시 mattpocock 기본값 (tab 2, 80폭, double-quote, semi, ES5 trailing comma(줄 끝 쉼표)) |
 
 ## 단계 (요약)
 
 1. **패키지 매니저 감지** — `package-lock.json` / `pnpm-lock.yaml` / `yarn.lock` / `bun.lockb` 중 존재하는 것
-2. **devDeps 설치** — `husky lint-staged prettier`
+2. **devDeps(개발 의존성) 설치** — `husky lint-staged prettier`
 3. **Husky init** — `npx husky init` (자동으로 `.husky/` 생성 + `prepare: "husky"` 추가)
-4. **`.husky/pre-commit` 작성** — 셔뱅 불필요(Husky v9+)
+4. **`.husky/pre-commit` 작성** — 셔뱅(스크립트 첫 줄에 `#!`로 인터프리터를 지정하는 줄) 불필요(Husky v9+)
    ```sh
    npx lint-staged
    npm run typecheck

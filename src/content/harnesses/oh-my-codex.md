@@ -21,14 +21,14 @@ Codex가 실제 코드를 짜는 엔진이고, OMX는 그 위에 정해진 작�
 
 ## 표준 워크플로우 (외워두기)
 
-1. **`$deep-interview "..."`** — 요구·boundary가 모호할 때. 질문으로 다듬기
-2. **`$ralplan "..."`** — 명확해진 scope를 architecture + implementation plan으로
-3. **`$ultragoal "..."`** — 승인된 plan을 sequential Codex goal + `.omx/ultragoal` ledger checkpoint로 durable화
+1. **`$deep-interview "..."`** — 요구·boundary(경계)가 모호할 때. 질문으로 다듬기
+2. **`$ralplan "..."`** — 명확해진 scope(범위)를 architecture(설계 구조) + implementation plan(구현 계획)으로
+3. **`$ultragoal "..."`** — 승인된 plan을 sequential(순차적) Codex goal + `.omx/ultragoal` ledger(작업 기록 장부) checkpoint(중간 저장점)로 durable(사라지지 않게)화
 
 옵션:
-- **`$prometheus-strict`** — high-risk plan stricter interview/critique/synthesis
-- **`$team "..."`** — Ultragoal 스토리 안에서 coordinated parallel execution이 필요할 때만
-- **`$ralph "..."`** — durable multi-goal 대신 single-owner 완료 루프
+- **`$prometheus-strict`** — high-risk(위험도 높은) plan stricter interview/critique(비평)/synthesis(종합)
+- **`$team "..."`** — Ultragoal 스토리 안에서 coordinated parallel execution(여러 작업을 조율해 동시 실행)이 필요할 때만
+- **`$ralph "..."`** — durable multi-goal(여러 목표) 대신 single-owner(한 주체가 끝까지 맡는) 완료 루프
 
 ## 설치 (recommended default — macOS / Linux + Codex CLI)
 

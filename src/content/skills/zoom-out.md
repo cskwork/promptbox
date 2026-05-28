@@ -20,13 +20,13 @@ install: "npx skills add https://github.com/mattpocock/skills --skill zoom-out"
 ## 언제 쓰는가
 
 - 낯선 영역에서 코드를 읽기 시작했지만 어디부터 봐야 할지 막막할 때
-- bigger picture에 어떻게 맞물리는지 모를 때
+- bigger picture(큰 그림)에 어떻게 맞물리는지 모를 때
 - 직속 호출자만 아니라 전체 호출 그래프 윤곽이 필요할 때
 
 ## 함정
 
 - `disable-model-invocation: true` — 사용자가 명시적으로 호출. 자동 트리거되지 않음.
-- map은 **도메인 glossary 어휘**로 — "FooBarHandler"가 아니라 "Order intake module".
+- map(지도)은 **도메인 glossary(용어집) 어휘**로 — "FooBarHandler"가 아니라 "Order intake module".
 
 ## 원문 SKILL.md (전문)
 

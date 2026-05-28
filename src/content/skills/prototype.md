@@ -20,19 +20,19 @@ install: "npx skills add https://github.com/mattpocock/skills --skill prototype"
 
 | 질문 | 산출물 |
 |---|---|
-| "이 logic / state model이 맞나?" | tiny interactive terminal app — paper로 추론 어려운 case를 state machine에 밀어넣음 |
-| "이건 어떻게 생겨야 하나?" | 한 라우트 + URL search param + floating bottom bar로 토글되는 radically different UI variation들 |
+| "이 logic / state model(상태 모델)이 맞나?" | tiny interactive terminal app(작게 직접 조작해 보는 터미널 앱) — paper(머릿속·종이)로 추론 어려운 case를 state machine(상태 기계)에 밀어넣음 |
+| "이건 어떻게 생겨야 하나?" | 한 라우트 + URL search param(주소 끝 검색 인자) + floating bottom bar(화면 아래 떠 있는 막대)로 토글되는 radically different UI variation(완전히 다른 화면 안)들 |
 
-질문이 모호하고 사용자가 reachable 안 하면 surrounding code로 결정 (backend module → logic, page/component → UI). 가정은 prototype 상단에 명시.
+질문이 모호하고 사용자가 reachable(연락 닿는) 안 하면 surrounding code(주변 코드)로 결정 (backend module → logic, page/component → UI). 가정은 prototype 상단에 명시.
 
 ## 두 갈래 공통 규칙
 
-1. **Day 1부터 throwaway, 그렇게 표시** — 사용될 곳 옆에 두되 이름으로 prototype임이 보이게.
-2. **명령 하나로 실행** — 프로젝트의 기존 task runner 사용.
-3. **기본 persistence 없음** — 메모리에만. DB가 질문의 일부면 "PROTOTYPE — wipe me" scratch DB.
-4. **Polish skip** — 테스트도, error handling도, 추상화도 없음. 빨리 배우고 삭제.
-5. **State surface** — 매 action 후(logic) 또는 매 variant switch 후(UI) 관련 state를 print/render.
-6. **끝나면 삭제 or 흡수** — 답을 얻었으면 commit message / ADR / issue / NOTES.md에 *질문과 답*을 기록 후 prototype은 제거.
+1. **Day 1부터 throwaway(처음부터 버릴 것), 그렇게 표시** — 사용될 곳 옆에 두되 이름으로 prototype임이 보이게.
+2. **명령 하나로 실행** — 프로젝트의 기존 task runner(작업 실행 도구) 사용.
+3. **기본 persistence(데이터 저장) 없음** — 메모리에만. DB가 질문의 일부면 "PROTOTYPE — wipe me" scratch DB(언제든 지워도 되는 임시 DB).
+4. **Polish skip(다듬기 생략)** — 테스트도, error handling(오류 처리)도, 추상화도 없음. 빨리 배우고 삭제.
+5. **State surface(상태 드러내기)** — 매 action 후(logic) 또는 매 variant switch(시안 전환) 후(UI) 관련 state를 print/render.
+6. **끝나면 삭제 or 흡수** — 답을 얻었으면 commit message / ADR(설계 결정 기록) / issue / NOTES.md에 *질문과 답*을 기록 후 prototype은 제거.
 
 ## 원문 SKILL.md (전문)
 

@@ -19,9 +19,9 @@ install: "npx skills add https://github.com/anthropics/skills --skill skill-crea
 
 ## 핵심 원칙
 
-- **Progressive disclosure 3단계**: metadata (~100 words 항상 in context) → SKILL.md body (<500 lines, trigger 시 로드) → bundled resources (필요 시)
-- description은 **pushy**하게 — Claude는 스킬을 "undertrigger"하는 경향이 있어서, 트리거 phrase를 명시적으로 나열해야 한다
-- 의도가 객관적으로 검증 가능한 작업 (file transform, code gen, fixed workflow)만 test case 만들고, 주관적 (글쓰기, 디자인)은 정성 평가로
+- **Progressive disclosure(필요한 만큼만 단계적으로 펼쳐 보여주기) 3단계**: metadata(요약 정보) (~100 words 항상 in context(맥락에 올라가 있음)) → SKILL.md body (<500 lines, trigger 시 로드) → bundled resources(함께 딸려오는 보조 파일) (필요 시)
+- description은 **pushy(적극적으로 밀어붙이듯)**하게 — Claude는 스킬을 "undertrigger(켜져야 할 상황에서도 잘 안 켜짐)"하는 경향이 있어서, 트리거 phrase(문구)를 명시적으로 나열해야 한다
+- 의도가 객관적으로 검증 가능한 작업 (file transform(파일 변환), code gen(코드 생성), fixed workflow(정해진 절차))만 test case(테스트 사례) 만들고, 주관적 (글쓰기, 디자인)은 정성 평가로
 
 ## Anatomy
 
@@ -40,7 +40,7 @@ skill-name/
 
 1. 모든 test case에 대해 with-skill + baseline subagent **동시** spawn
 2. 결과 디렉토리: `<skill-name>-workspace/iteration-N/eval-<descriptive-name>/{with_skill,without_skill}/outputs/`
-3. 실행 중에 assertion 작성 (이름은 viewer에서 의미 명확하게)
+3. 실행 중에 assertion(검증 조건) 작성 (이름은 viewer에서 의미 명확하게)
 4. `grading.json` 필드명은 정확히 `text`, `passed`, `evidence` (viewer가 의존)
 5. `python -m scripts.aggregate_benchmark` → `benchmark.json` + `benchmark.md`
 6. `eval-viewer/generate_review.py`로 viewer 띄우기 (cowork/headless면 `--static`)
@@ -48,8 +48,8 @@ skill-name/
 ## 함정
 
 - `/skill-test` 같은 다른 테스트 스킬 쓰지 말 것 — 이 워크플로우 안에서 한 번에 끝낸다
-- 새 iteration이면 eval_metadata.json을 **새로 만들기** — 이전 iteration에서 carry over 안 됨
-- 변하지 않는 assertion (non-discriminating)이나 high-variance eval은 분석 단계에서 따로 표시
+- 새 iteration(반복 개선 회차)이면 eval_metadata.json을 **새로 만들기** — 이전 iteration에서 carry over 안 됨
+- 변하지 않는 assertion (non-discriminating(with-skill/baseline 결과를 구분 못 하는))이나 high-variance eval은 분석 단계에서 따로 표시
 
 ## 원문 SKILL.md (frontmatter + 개요)
 

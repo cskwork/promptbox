@@ -24,7 +24,7 @@ AI가 실행하려는 명령을 가로채 위험한 git 명령이면 막아 주�
 
 | 패턴 | 의미 |
 |---|---|
-| `git push` | 모든 push (force push 포함) |
+| `git push` | 모든 push (force push(강제로 원격 기록 덮어쓰기) 포함) |
 | `git reset --hard` | 작업 트리 강제 폐기 |
 | `git clean -f` / `git clean -fd` | 추적 안 된 파일 강제 삭제 |
 | `git branch -D` | 머지 안 된 브랜치 강제 삭제 |

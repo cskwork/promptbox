@@ -26,15 +26,15 @@ install: "git clone https://github.com/aspectrr/fluid.sh && cd fluid.sh/fluid-cl
                   config.yaml allowlist       /usr/local/bin/fluid-readonly-shell
 ```
 
-- **2중 검증:** fluid CLI (로컬 allowlist) + fluid-readonly-shell (서버 blocklist)
+- **2중 검증:** fluid CLI (로컬 allowlist(허용 목록)) + fluid-readonly-shell (서버 blocklist(차단 목록))
 - 기본 허용: `ps`, `ls`, `cat`, `df`, `free` 등 68개 진단 명령어
 - 추가 허용: `config.yaml`의 `extra_allowed_commands`로 확장
 
 ## 함정
 
-- `go install`은 replace directive로 실패 → 반드시 소스 빌드
+- `go install`은 replace directive(모듈 대체 지시어)로 실패 → 반드시 소스 빌드
 - `/usr/local/bin/`에 빌드하면 permission denied → `$HOME/.local/bin/` 사용
-- `fluid mcp` 직접 실행은 stdio 대기로 hang처럼 보임 (정상)
+- `fluid mcp` 직접 실행은 stdio(표준 입출력) 대기로 hang(응답 없음 상태)처럼 보임 (정상)
 - `~/.mcp.json`에 등록 (✗ `~/.claude/.mcp.json`)
 
 ## 원문 SKILL.md

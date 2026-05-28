@@ -21,7 +21,7 @@ AI 에이전트가 질문할 때마다 코드 전체를 다시 읽느라 비용�
 ## 언제 쓰는가
 
 - Claude Code, Cursor, Codex, OpenCode, Hermes 에이전트가 큰 repo에서 아키텍처 질문에 답해야 할 때
-- 같은 질문에 반복적으로 tool call이 늘어나서 비용·시간이 부담될 때
+- 같은 질문에 반복적으로 tool call(에이전트가 도구를 호출하는 횟수)이 늘어나서 비용·시간이 부담될 때
 - 100% 로컬 — 외부 API로 코드가 안 새는 게 중요할 때
 
 ## 설치
@@ -50,9 +50,9 @@ codegraph context <task>             # 작업에 관련된 코드 context 가져
 
 ## 함정
 
-- index는 빌드 후 stale 가능 — 코드 크게 바뀌면 재인덱스 필요
-- framework auto-detect가 안 잡으면 routing 정보가 빠질 수 있음
-- 매우 큰 monorepo는 초기 index 시간 길어짐
+- index는 빌드 후 stale(캐시가 낡아 최신 코드와 어긋난 상태) 가능 — 코드 크게 바뀌면 재인덱스 필요
+- framework auto-detect가 안 잡으면 routing(경로·엔드포인트 연결 정보) 정보가 빠질 수 있음
+- 매우 큰 monorepo(여러 프로젝트를 하나의 저장소에 담은 구조)는 초기 index 시간 길어짐
 
 ## 핵심 효과 (저자 측정)
 

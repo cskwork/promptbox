@@ -13,13 +13,13 @@ install: "npx skills add uditgoenka/autoresearch (Claude Code) — 다른 하네
 
 ## 한 줄
 
-"GOAL을 정하면 에이전트가 LOOP를 돌리고, 자고 일어나면 결과가 쌓여있다." Karpathy autoresearch(630줄 Python으로 하룻밤 100개 ML 실험)의 원칙 — 단일 metric · 제한된 scope · 빠른 검증 · 자동 rollback · git as memory — 을 임의 도메인으로 확장한 13-커맨드 코딩 에이전트 플러그인.
+"GOAL을 정하면 에이전트가 LOOP를 돌리고, 자고 일어나면 결과가 쌓여있다." Karpathy autoresearch(630줄 Python으로 하룻밤 100개 ML 실험)의 원칙 — 단일 metric(측정 지표) · 제한된 scope(작업 범위) · 빠른 검증 · 자동 rollback(되돌리기) · git as memory(커밋 이력을 기억 저장소로) — 을 임의 도메인으로 확장한 13-커맨드 코딩 에이전트 플러그인.
 
 ## 언제 쓰는가
 
 - 측정 가능한 metric이 있고 점진적 개선이 의미 있는 작업 (성능 튜닝, 테스트 통과율, 토큰 절감, 보안 취약점 0)
 - 자율 야간/장시간 루프로 N회 반복하며 좋아지면 keep, 나빠지면 git revert
-- 단일 변경 → 즉시 검증 → 결과 로깅(TSV) 흐름이 적합한 도메인
+- 단일 변경 → 즉시 검증 → 결과 로깅(TSV, 탭으로 구분된 결과 표) 흐름이 적합한 도메인
 
 ## 핵심 루프
 
@@ -60,8 +60,8 @@ LOOP (N iterations or until done):
 
 과학적 방법으로 버그 헌팅. metric은 "누적 확정 발견 수" (higher_is_better).
 
-- **6 기법**: Binary search · Differential · Minimal reproduction · Trace · Pattern search · Working backwards
-- **각 iteration**: ① 미검증 vector 식별 → ② 하나의 falsifiable hypothesis 작성 ("I hypothesize {X} because {evidence}. Test by {Y}.") → ③ 기법 적용 → ④ confirmed / disproven / inconclusive 분류 → ⑤ file:line 증거 필수
+- **6 기법**: Binary search(이분 탐색으로 원인 범위를 반씩 좁히기) · Differential · Minimal reproduction · Trace · Pattern search · Working backwards
+- **각 iteration**: ① 미검증 vector 식별 → ② 하나의 falsifiable(반증 가능한) hypothesis 작성 ("I hypothesize {X} because {evidence}. Test by {Y}.") → ③ 기법 적용 → ④ confirmed / disproven / inconclusive 분류 → ⑤ file:line 증거 필수
 - **TSV 컬럼**: iteration · hypothesis · status · technique · evidence · file_line
 - **플래그**: `--fix` (확정 버그를 자동으로 `fix`로 체이닝), `--severity`, `--technique`
 
@@ -77,7 +77,7 @@ metric = 에러 카운트, direction = lower_is_better. 한 번에 한 에러씩
 
 ### `/autoresearch:security` — STRIDE + OWASP 적대적 감사 (기본 15회)
 
-red-team 페르소나(Security Adversary · Supply Chain · Insider Threat · Infra Attacker)를 로테이션하며 적대적으로 코드를 공격.
+red-team(공격자 관점에서 취약점을 찾는 역할) 페르소나(Security Adversary · Supply Chain · Insider Threat · Infra Attacker)를 로테이션하며 적대적으로 코드를 공격.
 
 - **Setup**: deps · `.env.example` · Dockerfile · API routes · auth/middleware · DB schema · CI configs 정찰 → 자산 식별 → trust boundary 매핑 → STRIDE 위협 모델 → attack surface map (`overview.md`, `threat-model.md`, `attack-surface-map.md` 생성)
 - **각 iteration**: 미테스트 OWASP/STRIDE 카테고리 우선 → 페르소나 채택 → file:line 증거가 있는 finding만 인정 (이론적 fluff 금지) → Critical/High/Medium/Low/Info + OWASP A01-A10 + STRIDE S/T/R/I/D/E 매핑

@@ -18,7 +18,7 @@ install: "cp -r ~/Downloads/Code/claude-code-workflow-cheatsheet ~/.claude/skill
 
 ## 언제 쓰는가
 
-- Superpowers · Everything Claude Code · Oh My Claude Code · Matt Pocock skills 같은 하니스를 깔았는데 명령어를 자꾸 잊는다
+- Superpowers · Everything Claude Code · Oh My Claude Code · Matt Pocock skills 같은 하니스(harness, Claude Code 위에 명령·스킬을 얹는 도구 모음)를 깔았는데 명령어를 자꾸 잊는다
 - 팀이 권장 워크플로우 체인(`/plan -> /tdd -> /code-review -> /verify`)을 공통으로 쓰게 하고 싶다
 - 신규 합류자에게 매번 "어떤 슬래시 쓰지?" 설명하는 게 지친다
 
@@ -26,8 +26,8 @@ install: "cp -r ~/Downloads/Code/claude-code-workflow-cheatsheet ~/.claude/skill
 
 1. `~/.claude/commands/`와 프로젝트 `.claude/commands/`를 스캔해 설치된 슬래시 커맨드 인벤토리
 2. 카테고리별 워크플로우 체인으로 분류 (Dev / Quality / Docs / Learn / Session / Meta …)
-3. `[Workflows]` / `[OMC]` / `[Superpowers]` / `[Matt]` 접두사로 라벨링된 한 줄짜리 cheatsheet 생성
-4. `~/.claude/settings.json`의 `companyAnnouncements`에 단일 string으로 박아넣음 (`\n`으로 라인 분리)
+3. `[Workflows]` / `[OMC]` / `[Superpowers]` / `[Matt]` 접두사로 라벨링된 한 줄짜리 cheatsheet(빠르게 훑어보는 요약표) 생성
+4. `~/.claude/settings.json`의 `companyAnnouncements`에 단일 string(하나의 문자열)으로 박아넣음 (`\n`으로 라인 분리)
 
 ## 함정
 

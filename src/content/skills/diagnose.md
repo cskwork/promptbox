@@ -13,24 +13,24 @@ install: "npx skills add https://github.com/mattpocock/skills --skill diagnose"
 
 ## 한 줄
 
-**이 스킬의 핵심은 Phase 1 — "버그를 자동으로 재현하는 테스트"를 먼저 만드는 것이다.** 빠르고 매번 똑같이 통과/실패를 보여주는(deterministic) 신호 하나만 만들면 나머지는 기계적으로 풀린다. 코드를 노려본다고 버그가 잡히지는 않는다.
+**이 스킬의 핵심은 Phase 1 — "버그를 자동으로 재현하는 테스트"를 먼저 만드는 것이다.** 빠르고 매번 똑같이 통과/실패를 보여주는 deterministic(매번 같은 결과) 신호 하나만 만들면 나머지는 기계적으로 풀린다. 코드를 노려본다고 버그가 잡히지는 않는다.
 
 *EN: The whole skill is Phase 1 — build a test that reproduces the bug on demand; once you have a fast, repeatable pass/fail signal, the rest is mechanical.*
 
 ## 6단계 흐름
 
-1. **Feedback loop 구축** — failing test, curl 스크립트, CLI diff, headless browser, capture replay, throwaway harness, fuzz, bisection, differential, HITL 스크립트 — 이 순서로 시도. 30초 flaky보다 2초 deterministic이 superpower.
-2. **재현** — 사용자가 말한 그 failure mode인지, 여러 번 reproducible한지, exact symptom을 캡처했는지 확인.
-3. **가설 3~5개 랭킹** — 단일 가설은 anchoring. 각 가설은 falsifiable해야 함 ("X가 원인이면, Y를 바꾸면 사라질 것"). 사용자에게 보여주고 도메인 지식으로 re-rank.
-4. **Instrument** — 가설별로 한 변수만 변경. debugger > targeted log > everything-log. 모든 debug log에 unique prefix(`[DEBUG-a4f2]`) — 끝에 grep 한 번으로 청소.
-5. **Fix + regression test** — correct seam이 있을 때만 regression test 먼저 작성. seam 부재 자체가 architecture finding이다.
-6. **Cleanup + post-mortem** — 원본 repro 사라졌는지, regression test 통과하는지, `[DEBUG-...]` 모두 제거, throwaway 삭제, 맞은 가설을 commit message에 기록. 그리고 "이걸 막을 architecture는?" 묻고 필요시 `/improve-codebase-architecture`로 핸드오프.
+1. **Feedback loop(피드백 루프, 고치고 바로 확인하는 순환) 구축** — failing test(실패하는 테스트), curl 스크립트, CLI diff, headless browser(화면 없이 도는 브라우저), capture replay(기록 후 재생), throwaway harness(버리는 테스트 골격), fuzz(무작위 입력 대량 투입), bisection(이분 탐색으로 원인 커밋 찾기), differential(두 버전 출력 비교), HITL(사람이 개입하는 루프) 스크립트 — 이 순서로 시도. 30초 flaky(됐다 안 됐다 하는)보다 2초 deterministic이 superpower.
+2. **재현** — 사용자가 말한 그 failure mode(실패 양상)인지, 여러 번 reproducible(재현 가능한)한지, exact symptom(정확한 증상)을 캡처했는지 확인.
+3. **가설 3~5개 랭킹** — 단일 가설은 anchoring(첫 가설에 갇히는 편향). 각 가설은 falsifiable(반증 가능한)해야 함 ("X가 원인이면, Y를 바꾸면 사라질 것"). 사용자에게 보여주고 도메인 지식으로 re-rank(다시 순위 매기기).
+4. **Instrument(계측, 측정 코드 심기)** — 가설별로 한 변수만 변경. debugger > targeted log(표적 로그) > everything-log(전부 찍기). 모든 debug log에 unique prefix(고유 접두어)(`[DEBUG-a4f2]`) — 끝에 grep 한 번으로 청소.
+5. **Fix + regression test(회귀 테스트)** — correct seam(테스트를 끼워 넣는 이음새)이 있을 때만 regression test 먼저 작성. seam 부재 자체가 architecture finding이다.
+6. **Cleanup + post-mortem(사후 분석)** — 원본 repro(재현) 사라졌는지, regression test 통과하는지, `[DEBUG-...]` 모두 제거, throwaway 삭제, 맞은 가설을 commit message에 기록. 그리고 "이걸 막을 architecture는?" 묻고 필요시 `/improve-codebase-architecture`로 핸드오프.
 
 ## 함정
 
-- Loop 없이 Phase 2로 진행하지 말 것. Loop 구축이 불가능하면 멈추고 명시적으로 말하라 — 환경 access, captured artifact, 또는 임시 production instrumentation 권한을 요청.
-- Non-deterministic 버그는 "깨끗한 repro"가 아니라 **재현율 상승**이 목표. 50% flake는 debugging 가능, 1%는 불가능.
-- 성능 회귀는 log가 잘못된 도구. 먼저 baseline measurement.
+- Loop 없이 Phase 2로 진행하지 말 것. Loop 구축이 불가능하면 멈추고 명시적으로 말하라 — 환경 access, captured artifact(캡처해둔 자료), 또는 임시 production instrumentation(운영 환경 계측) 권한을 요청.
+- Non-deterministic(매번 결과가 달라지는) 버그는 "깨끗한 repro"가 아니라 **재현율 상승**이 목표. 50% flake는 debugging 가능, 1%는 불가능.
+- 성능 회귀는 log가 잘못된 도구. 먼저 baseline measurement(기준 측정값).
 
 ## 원문 SKILL.md (전문)
 

@@ -19,8 +19,8 @@ Loki에 직접 붙는 대신 Grafana를 통해서 조회한다 — Grafana 계�
 ## 언제 쓰는가
 
 - Grafana 대시보드에 Loki가 등록돼 있고, CLI/스크립트에서 같은 데이터에 접근하고 싶을 때
-- 환경별(dev / stg / prod) endpoint와 인증을 프로필로 분리 관리하고 싶을 때
-- 로그 분석 결과를 클라이언트 사이드 필터링되는 self-contained HTML로 공유하고 싶을 때
+- 환경별(dev / stg / prod) endpoint(접속 주소)와 인증을 프로필로 분리 관리하고 싶을 때
+- 로그 분석 결과를 클라이언트 사이드 필터링되는 self-contained(외부 의존 없이 단독 실행되는) HTML로 공유하고 싶을 때
 
 ## Quick Start
 

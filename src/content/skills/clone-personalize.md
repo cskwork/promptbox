@@ -26,23 +26,23 @@ install: "git clone https://github.com/cskwork/clone-personalize ~/.claude/skill
 
 | Capability | 기본 CLI | 이유 |
 |---|---|---|
-| Chat / 추론 | `claude` (Claude Code) | 가장 강한 reasoning, 세션 호스트 |
-| Code 생성 | `codex` (Codex CLI) | 코드 특화, 별도 quota |
+| Chat / 추론 | `claude` (Claude Code) | 가장 강한 reasoning(추론), 세션 호스트 |
+| Code 생성 | `codex` (Codex CLI) | 코드 특화, 별도 quota(사용 한도) |
 | Image 생성 | `codex` (image mode) 또는 브라우저 브릿지 | |
 | Video 생성 | `gemini` (Gemini Omni) | 멀티모달 출력 |
 | Audio / TTS / STT | `gemini` 또는 브라우저 브릿지 | |
-| Web search / grounding | `gemini` (내장 grounding) | |
-| Embeddings | local model 또는 `gemini` | paid embedding API 회피 |
-| OAuth-gated SaaS (Drive, Notion, Slack) | `mcp__claude-in-chrome__*` | 로그인 브라우저 재사용 |
+| Web search / grounding | `gemini` (내장 grounding(검색 근거 연결)) | |
+| Embeddings(의미를 숫자 벡터로 변환) | local model 또는 `gemini` | paid embedding API 회피 |
+| OAuth(제3자 로그인 인증 방식)-gated SaaS (Drive, Notion, Slack) | `mcp__claude-in-chrome__*` | 로그인 브라우저 재사용 |
 
 ## 워크플로우 8단계 요약
 
 1. 설치된 CLI 검증 (`which claude codex gemini`)
 2. 소스 해결 (clone 또는 site 추출)
-3. AI 콜 사이트 인벤토리 (SDK import grep)
+3. AI 콜 사이트 인벤토리 (SDK import 부분을 grep(텍스트 검색)으로 찾기)
 4. 치환 계획을 `PERSONALIZATION.md`에 먼저 기록
-5. `lib/ai-cli/` 어댑터 레이어 구축 (`claude.ts`, `codex.ts`, `gemini.ts`)
-6. 콜 사이트 재배선 + `.env.example`에서 vendor 키 제거
+5. `lib/ai-cli/` 어댑터 레이어(CLI를 감싸는 변환 모듈) 구축 (`claude.ts`, `codex.ts`, `gemini.ts`)
+6. 콜 사이트 재배선 + `.env.example`에서 vendor(외부 AI 서비스 제공사) 키 제거
 7. (site 모드) UX 재구성
 8. 로컬에서 각 능력 1회씩 검증, 결과를 `PERSONALIZATION.md`에 기록
 

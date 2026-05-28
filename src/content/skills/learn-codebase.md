@@ -22,35 +22,35 @@ install: "git clone https://github.com/cskwork/learn-codebase ~/.claude/skills/l
 - AI가 PR을 쳤는데 뭘 한 건지 모르겠을 때
 - 40페이지 스펙 + 100개 파일 레포에 처음 들어갈 때
 - 주니어에게 *전체 제품*이 아니라 *한 기능*만 가르쳐야 할 때
-- 스펙과 구현이 어긋났는지(drift) 의심될 때
+- 스펙과 구현이 어긋났는지(drift, 문서와 코드가 시간이 지나며 벌어짐) 의심될 때
 - 동작 X를 바꿔야 하는데 영향 범위가 무서울 때
 
 ## 4단계 (필요한 깊이까지만 멈춰라)
 
 | Level | 예산 | 목표 | 산출물 |
 |---|---|---|---|
-| 1 Map | ≤5분 | 이게 뭐고 왜 있는가 | 3줄 요약 + entry function 1개 |
-| 2 Walk | ≤30분 | happy path가 어떻게 흐르는가 | side-by-side 추적 표 (5–10행) |
+| 1 Map | ≤5분 | 이게 뭐고 왜 있는가 | 3줄 요약 + entry function(코드가 시작되는 진입 함수) 1개 |
+| 2 Walk | ≤30분 | happy path(정상 흐름)가 어떻게 흐르는가 | side-by-side(나란히 비교) 추적 표 (5–10행) |
 | 3 Probe | ≤2h | 왜 이렇게 만들었는가 | 의사결정 매트릭스 + 기각된 대안 |
-| 4 Master | 깊게 | 무엇이 시스템을 지탱하는가 | 불변식·seam 맵 |
+| 4 Master | 깊게 | 무엇이 시스템을 지탱하는가 | 불변식·seam(테스트를 끼워 넣는 이음새) 맵 |
 
 ## Plain-Speech Rule (Feynman 모드)
 
 비전공자도 따라올 수 있어야 함. 모든 산출물은 다음 5가지를 지켜야 통과:
 
-1. **첫 줄에 일상 비유 또는 한 줄 plain summary**
+1. **첫 줄에 일상 비유 또는 한 줄 plain summary(쉬운 말 요약)**
 2. **모든 식별자(FR-001, twin_group 등)는 첫 등장에 괄호 안 풀어 쓰기**
 3. **무엇(what)보다 왜(why)를 먼저**
 4. **알몸 약어·코드 경로 금지**
-5. **마지막에 "If you only read one thing" — 3문장 zero-jargon 요약**
+5. **마지막에 "If you only read one thing" — 3문장 zero-jargon(전문 용어 없는) 요약**
 
 ## Bite-Size Delivery Rule
 
-한 응답 = 한 청크. 스크롤 한 번 이상이면 실패. TL;DR(3줄) → 메뉴 (A/B/C/D) → 사용자가 고른 것만 다음 응답.
+한 응답 = 한 청크(작게 나눈 한 덩어리). 스크롤 한 번 이상이면 실패. TL;DR(너무 길어 안 읽을까 봐 핵심만 3줄) → 메뉴 (A/B/C/D) → 사용자가 고른 것만 다음 응답.
 
 ## 핵심 동작
 
-읽는 코드 chunk마다 그것을 정당화하는 **intent**를 찾고, 양쪽을 한 행에 적는다. 빈 칸이 있으면 그건 **다음에 probe할 대상**이지, 문제가 아니다.
+읽는 코드 chunk마다 그것을 정당화하는 **intent(이렇게 짠 설계 의도)**를 찾고, 양쪽을 한 행에 적는다. 빈 칸이 있으면 그건 **다음에 probe(깊이 파고들어 확인)할 대상**이지, 문제가 아니다.
 
 ```
 | What this means (plain)         | Intent (cite)    | Code (file:line) | Test/Contract | Why-not (rejected) |

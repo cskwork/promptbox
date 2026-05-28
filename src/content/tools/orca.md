@@ -20,17 +20,17 @@ install: "https://onOrca.dev 에서 다운로드"
 
 ## 언제 쓰는가
 
-- 한 issue를 여러 변종으로 동시에 시도하고 싶을 때 (각 worker가 worktree)
+- 한 issue를 여러 변종으로 동시에 시도하고 싶을 때 — 각 worker(작업을 맡는 에이전트 한 개)가 독립 worktree(작업 폴더를 따로 떼어 둔 작업 공간)에서 실행됨
 - 모바일에서 desktop session에 접속해서 worker 상태를 보고 task를 던지고 싶을 때
-- vendor API 키 없이 **본인 구독**으로 에이전트들을 돌리고 싶을 때
+- vendor(공급사) API 키 없이 **본인 구독**으로 에이전트들을 돌리고 싶을 때
 
 ## 핵심 기능
 
 - **Worktree 기반 worker**: 각 에이전트가 독립 git worktree에서 작업, 충돌 없음
 - **다중 에이전트 호스팅**: Claude Code, Codex, Gemini, 그 외 코딩 에이전트
 - **본인 구독 사용**: ChatGPT/Claude/Gemini Pro 등 이미 결제한 채널 재활용
-- **데스크톱 + 모바일**: 같은 fleet에 양쪽에서 접근
-- **에이전트 간 통신 / 코디네이션** primitives 제공
+- **데스크톱 + 모바일**: 같은 fleet(돌리고 있는 에이전트 무리)에 양쪽에서 접근
+- **에이전트 간 통신 / 코디네이션** primitives(기본 동작을 묶은 부품) 제공
 
 ## 설치
 
@@ -38,6 +38,6 @@ install: "https://onOrca.dev 에서 다운로드"
 
 ## 함정
 
-- next-gen이라 stable agent fleet workflow는 아직 진화 중 — feature set 자주 바뀜
-- worktree fleet은 디스크 사용량이 커진다 (각 worker가 full checkout)
-- 본인 구독 사용 = 그 구독의 rate limit / quota가 그대로 전이됨
+- next-gen(차세대 초기 단계)이라 stable agent fleet workflow는 아직 진화 중 — feature set(기능 구성) 자주 바뀜
+- worktree fleet은 디스크 사용량이 커진다 (각 worker가 full checkout(저장소 전체를 통째로 복제))
+- 본인 구독 사용 = 그 구독의 rate limit(시간당 호출 한도) / quota(전체 사용량 한도)가 그대로 전이됨

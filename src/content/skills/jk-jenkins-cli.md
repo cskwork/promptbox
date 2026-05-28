@@ -18,9 +18,9 @@ Jenkins 웹 화면을 열지 않고 터미널에서: `jk run start <job> -p KEY=
 
 ## 언제 쓰는가
 
-- CI 잡을 셸에서 트리거하거나 결과를 스크립트로 받고 싶을 때
-- 여러 controller(prod/stg)를 context로 전환하며 쓸 때
-- 빌드 로그를 LLM context에 깔끔하게 가져오고 싶을 때
+- CI(자동 빌드·테스트 파이프라인) 잡을 셸에서 트리거하거나 결과를 스크립트로 받고 싶을 때
+- 여러 controller(Jenkins 본체 서버)(prod/stg)를 context(접속 환경 묶음)로 전환하며 쓸 때
+- 빌드 로그를 LLM(대규모 언어 모델) context에 깔끔하게 가져오고 싶을 때
 
 ## 의존성 확인
 
@@ -66,7 +66,7 @@ jk context use prod-jenkins
 jk context rm staging
 ```
 
-환경변수 `JK_CONTEXT`로 override.
+환경변수 `JK_CONTEXT`로 override(덮어쓰기).
 
 ## Quick Reference
 
@@ -189,8 +189,8 @@ jk run start team/app --quiet
 
 ## 함정
 
-- **중복 트리거 주의**: `jk run start`가 timeout으로 빠져도 Jenkins 서버에는 이미 트리거된 경우 많다. 재시도 전에 `jk run ls <JOB> --limit 3`으로 상태 먼저 확인 — RUNNING 빌드가 있으면 그게 트리거된 것. 중복 발생 시 `jk run cancel <JOB> <BUILD_NO>`로 이전 빌드 취소.
-- `--follow`/`--wait` 옵션은 일부 환경에서 hang 가능 — 대신 트리거 후 `jk run ls`로 폴링하는 패턴이 더 안정
+- **중복 트리거 주의**: `jk run start`가 timeout(응답 시간 초과)으로 빠져도 Jenkins 서버에는 이미 트리거된 경우 많다. 재시도 전에 `jk run ls <JOB> --limit 3`으로 상태 먼저 확인 — RUNNING 빌드가 있으면 그게 트리거된 것. 중복 발생 시 `jk run cancel <JOB> <BUILD_NO>`로 이전 빌드 취소.
+- `--follow`/`--wait` 옵션은 일부 환경에서 hang(응답 없이 멈춤) 가능 — 대신 트리거 후 `jk run ls`로 폴링(주기적으로 상태 확인)하는 패턴이 더 안정
 - `jk run start` 응답 자체가 20~30초 걸리는 게 정상 (Jenkins 큐 등록 시간 포함)
 - 파라미터 없이 트리거하면 400 Bad Request — 잡의 필수 파라미터를 `jk run params <job>`으로 먼저 확인
 

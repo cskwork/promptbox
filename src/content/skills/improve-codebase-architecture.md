@@ -13,23 +13,23 @@ install: "npx skills add https://github.com/mattpocock/skills --skill improve-co
 
 ## 핵심 어휘 (이 단어들을 그대로 써야 함)
 
-- **Module** — interface + implementation을 가진 모든 것
+- **Module** — interface(호출자에게 노출되는 사용 규약) + implementation(내부 구현)을 가진 모든 것
 - **Interface** — 호출자가 알아야 하는 모든 것 (타입, 불변식, 에러, 순서, config)
-- **Depth** — 작은 interface 뒤의 많은 동작. **Deep = high leverage**, **Shallow = interface가 implementation만큼 복잡**
-- **Seam** — interface가 사는 곳 (`boundary` 쓰지 말 것)
-- **Deletion test** — 모듈을 삭제했을 때 복잡도가 사라지면 pass-through, N개 호출자에 다시 나타나면 제 몫을 한 것
+- **Depth(모듈의 깊이)** — 작은 interface 뒤의 많은 동작. **Deep = high leverage(작은 interface로 큰 효용)**, **Shallow(얕음, interface가 implementation만큼 복잡)**
+- **Seam(테스트를 끼워 넣는 이음새)** — interface가 사는 곳 (`boundary` 쓰지 말 것)
+- **Deletion test(삭제해 보는 검증)** — 모듈을 삭제했을 때 복잡도가 사라지면 pass-through(그냥 거쳐 가기만 하던 모듈), N개 호출자에 다시 나타나면 제 몫을 한 것
 
 ## 워크플로우
 
-1. **Explore** — Explore agent로 코드베이스를 organic하게 탐색하면서 friction을 기록. shallow한 곳, 깊이 vs locality가 깨진 곳, untested 영역을 찾기.
-2. **HTML 리포트** — `$TMPDIR/architecture-review-<ts>.html`에 self-contained 리포트 작성. Tailwind CDN + Mermaid CDN. 각 후보마다 before/after 시각화 + `Strong`/`Worth exploring`/`Speculative` 배지.
-3. **Grilling loop** — 사용자가 후보를 고르면 design tree를 함께 걷는다. 결정이 crystallize되면 `CONTEXT.md` 인라인 업데이트, 후보가 reject되면 ADR 제안 (단, 미래 explorer가 같은 후보를 재제안하지 않기 위한 reason일 때만).
+1. **Explore** — Explore agent로 코드베이스를 organic하게(정해진 순서 없이 자연스럽게) 탐색하면서 friction(걸리적거리는 지점)을 기록. shallow한 곳, 깊이 vs locality(변경·버그·지식이 한곳에 모이는 정도)가 깨진 곳, untested(테스트가 없는) 영역을 찾기.
+2. **HTML 리포트** — `$TMPDIR/architecture-review-<ts>.html`에 self-contained(외부 의존 없이 한 파일로 완결된) 리포트 작성. Tailwind CDN + Mermaid CDN. 각 후보마다 before/after 시각화 + `Strong`/`Worth exploring`/`Speculative` 배지.
+3. **Grilling loop(파고드는 문답 반복)** — 사용자가 후보를 고르면 design tree(설계 선택지의 갈래)를 함께 걷는다. 결정이 crystallize되면(명확히 굳어지면) `CONTEXT.md` 인라인 업데이트, 후보가 reject되면(기각되면) ADR(아키텍처 결정 기록) 제안 (단, 미래 explorer가 같은 후보를 재제안하지 않기 위한 reason일 때만).
 
 ## 함정
 
 - "component / service / API / boundary" 단어 쓰지 말 것. 어휘 일관성 자체가 스킬의 포인트.
 - HTML 리포트는 **repo 밖**(temp dir)에 — repo 오염 방지.
-- 기존 ADR과 충돌하는 후보는 friction이 진짜로 클 때만 surface. 워닝 callout으로 표시.
+- 기존 ADR과 충돌하는 후보는 friction이 진짜로 클 때만 surface(겉으로 드러내 제안). 워닝 callout(강조 박스)으로 표시.
 
 ## 원문 SKILL.md (전문)
 

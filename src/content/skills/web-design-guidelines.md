@@ -19,15 +19,15 @@ install: "npx skills add https://github.com/vercel-labs/agent-skills --skill web
 
 ## 언제 쓰는가
 
-- "내 UI 검토해줘", "접근성 체크", "디자인 audit", "UX review"
-- "best practices에 맞는지 확인"
+- "내 UI 검토해줘", "접근성 체크", "디자인 audit(감사)", "UX(사용자 경험) review"
+- "best practices(모범 사례)에 맞는지 확인"
 
 ## 동작
 
-1. 위 URL에서 최신 가이드라인 fetch
-2. 사용자가 지정한 파일/패턴 read (없으면 물어봄)
+1. 위 URL에서 최신 가이드라인 fetch(받아 오기)
+2. 사용자가 지정한 파일/패턴 read(읽기) (없으면 물어봄)
 3. 모든 룰 적용
-4. 결과를 `file:line` 짧은 형식으로 출력 (수정 빠르게 할 수 있게)
+4. 결과를 `file:line`(파일:줄 번호) 짧은 형식으로 출력 (수정 빠르게 할 수 있게)
 
 ## 함정
 

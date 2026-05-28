@@ -17,7 +17,7 @@ transport: stdio
 
 - `mcp__stitch__create_project` — 프로젝트 생성
 - `mcp__stitch__generate_screen_from_text` — 텍스트 프롬프트 → HTML+CSS 화면
-- `mcp__stitch__list_screens` — 프로젝트 내 화면 목록 (생성 중 폴링용)
+- `mcp__stitch__list_screens` — 프로젝트 내 화면 목록 (생성 중 폴링(주기적으로 상태를 확인)용)
 
 `stitch-landing` 스킬이 이 MCP에 의존한다.
 

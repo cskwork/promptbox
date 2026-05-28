@@ -13,18 +13,18 @@ install: "/plugin install superpowers@claude-plugins-official  (Claude Code) —
 
 ## 한 줄
 
-"코딩 에이전트한테 *일하는 방법(방법론)*을 깔아주는 플러그인". 코드를 바로 쓰지 않고 brainstorm(아이디어 정리) → spec → plan → subagent로 TDD → review → finish 순서를 강제로 거치게 하는 작업 습관 모음. 8개 코딩 도구 지원.
+"코딩 에이전트한테 *일하는 방법(방법론)*을 깔아주는 플러그인". 코드를 바로 쓰지 않고 brainstorm(아이디어 정리) → spec(요구사항 명세) → plan → subagent(독립 작업을 맡는 보조 에이전트)로 TDD(테스트 먼저 쓰는 개발) → review → finish 순서를 강제로 거치게 하는 작업 습관 모음. 8개 코딩 도구 지원.
 
 *EN: A plugin that installs a working method into coding agents, forcing them through brainstorm, plan, test, and review before they touch code.*
 
 ## 기본 워크플로우
 
-1. **brainstorming** — 코드 쓰기 전. 요구를 질문으로 다듬고, 대안 탐색하고, 디자인을 섹션 단위로 validate하고 design 문서 저장.
-2. **using-git-worktrees** — design 승인 후. 새 브랜치 + isolated workspace 만들고 clean test baseline 검증.
-3. **writing-plans** — 작업을 2–5분짜리 bite-size 태스크로 분해. 각 태스크는 exact 파일 경로 + 완성된 코드 + 검증 단계 포함.
-4. **subagent-driven-development** / **executing-plans** — 태스크당 fresh subagent dispatch + 2단계 review (spec 준수 → 코드 품질), 또는 사람 체크포인트로 batch 실행.
+1. **brainstorming** — 코드 쓰기 전. 요구를 질문으로 다듬고, 대안 탐색하고, 디자인을 섹션 단위로 validate(타당성 검증)하고 design 문서 저장.
+2. **using-git-worktrees** — design 승인 후. 새 브랜치 + isolated workspace(격리된 작업 공간) 만들고 clean test baseline(테스트가 모두 통과하는 깨끗한 출발 상태) 검증.
+3. **writing-plans** — 작업을 2–5분짜리 bite-size(잘게 쪼갠) 태스크로 분해. 각 태스크는 exact 파일 경로 + 완성된 코드 + 검증 단계 포함.
+4. **subagent-driven-development** / **executing-plans** — 태스크당 fresh subagent dispatch(빈 맥락의 새 보조 에이전트 투입) + 2단계 review (spec 준수 → 코드 품질), 또는 사람 체크포인트로 batch(여러 개를 한 번에) 실행.
 5. **test-driven-development** — RED-GREEN-REFACTOR 강제. 실패하는 테스트 → 최소 구현 → pass → commit. **테스트보다 먼저 쓴 코드는 삭제**.
-6. **requesting-code-review** — 태스크 사이. plan 대비 review, severity별 보고. critical은 진행 차단.
+6. **requesting-code-review** — 태스크 사이. plan 대비 review, severity(심각도)별 보고. critical은 진행 차단.
 7. **finishing-a-development-branch** — 태스크 완료 시. 테스트 검증 → merge/PR/keep/discard 옵션 → worktree 정리.
 
 **에이전트가 모든 태스크 전에 관련 스킬을 자동으로 체크.** 제안 아니라 mandatory.
@@ -33,7 +33,7 @@ install: "/plugin install superpowers@claude-plugins-official  (Claude Code) —
 
 **Testing** — `test-driven-development`
 
-**Debugging** — `systematic-debugging` (4-phase root cause), `verification-before-completion`
+**Debugging** — `systematic-debugging` (4-phase root cause(근본 원인 추적)), `verification-before-completion`
 
 **Collaboration** — `brainstorming`, `writing-plans`, `executing-plans`, `dispatching-parallel-agents`, `requesting-code-review`, `receiving-code-review`, `using-git-worktrees`, `finishing-a-development-branch`, `subagent-driven-development`
 
@@ -42,9 +42,9 @@ install: "/plugin install superpowers@claude-plugins-official  (Claude Code) —
 ## 철학
 
 - **TDD** — 항상 테스트 먼저
-- **Systematic > ad-hoc** — guessing 대신 process
+- **Systematic > ad-hoc(그때그때 임시방편)** — guessing 대신 process
 - **Complexity reduction** — 단순함이 1순위
-- **Evidence over claims** — 성공 선언 전에 verify
+- **Evidence over claims** — 성공 선언 전에 verify(실제로 확인)
 
 [Original release post](https://blog.fsck.com/2025/10/09/superpowers/)
 

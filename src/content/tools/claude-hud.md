@@ -14,13 +14,13 @@ install: "/plugin marketplace add jarrodwatts/claude-hud && /plugin install clau
 
 ## 한 줄
 
-Claude Code 안에서 `/context` 따로 안 쳐도 context bar가 항상 보이고, 어떤 subagent가 어디까지 갔는지·어떤 파일이 읽히는지·todo가 몇 개 남았는지 즉시 보인다.
+Claude Code 안에서 `/context` 따로 안 쳐도 context bar(대화 사용량 막대)가 항상 보이고, 어떤 subagent(보조 에이전트)가 어디까지 갔는지·어떤 파일이 읽히는지·todo(할 일 목록)가 몇 개 남았는지 즉시 보인다.
 
 ## 언제 쓰는가
 
-- 긴 세션에서 context window가 얼마나 남았는지 계속 신경 쓰일 때
+- 긴 세션에서 context window(모델이 한 번에 기억하는 한도)가 얼마나 남았는지 계속 신경 쓰일 때
 - subagent를 자주 띄워서 어디가 돌고 있는지 추적이 필요할 때
-- Claude 구독 rate limit을 모니터링하고 싶을 때
+- Claude 구독 rate limit(사용량 제한)을 모니터링하고 싶을 때
 
 ## 설치
 

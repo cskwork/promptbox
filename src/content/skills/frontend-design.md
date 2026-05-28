@@ -13,18 +13,18 @@ install: "npx skills add https://github.com/anthropics/skills --skill frontend-d
 
 ## 한 줄
 
-코드 짜기 전에 **purpose · tone · constraints · differentiation**부터 결정. brutally minimal부터 maximalist chaos까지 극단을 고르고, 그 방향에 맞게 typography · color · motion · spatial · backgrounds 다섯 축을 의도적으로 구성.
+코드 짜기 전에 **purpose(목적) · tone(분위기) · constraints(제약) · differentiation(차별점)**부터 결정. brutally minimal(극단적 절제)부터 maximalist chaos(과잉의 혼돈)까지 극단을 고르고, 그 방향에 맞게 typography(글자체) · color(색) · motion(움직임) · spatial(공간 배치) · backgrounds(배경) 다섯 축을 의도적으로 구성.
 
 ## 절대 쓰지 말 것
 
 - 평범한 폰트 (Inter, Roboto, Arial, system fonts)
-- 흰 배경에 보라색 그라데이션 같은 cliché 색상
-- 예측가능한 레이아웃과 cookie-cutter 컴포넌트 패턴
+- 흰 배경에 보라색 그라데이션 같은 cliché(진부한) 색상
+- 예측가능한 레이아웃과 cookie-cutter(판박이) 컴포넌트 패턴
 - 생성마다 같은 선택으로 수렴 (예: Space Grotesk만 계속 쓰기)
 
 ## 함정
 
-미학과 코드 복잡도를 맞춰야 한다 — maximalist는 풍부한 애니메이션, minimalist는 절제된 spacing/typography. 의도가 명확하면 둘 다 작동한다.
+미학과 코드 복잡도를 맞춰야 한다 — maximalist는 풍부한 애니메이션, minimalist(요소를 덜어내는)는 절제된 spacing(여백 간격)/typography. 의도가 명확하면 둘 다 작동한다.
 
 ## 원문 SKILL.md
 
