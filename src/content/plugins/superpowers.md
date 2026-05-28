@@ -1,6 +1,7 @@
 ---
 title: Superpowers (obra/superpowers)
-summary: Jesse Vincent + Prime Radiant이 만든 다-하네스 코딩 에이전트 플러그인. brainstorming → writing-plans → subagent-driven-development → TDD → code-review → finish-branch까지 자동 트리거되는 SKILL 컬렉션. Claude Code · Codex CLI · Codex App · Factory Droid · Gemini CLI · OpenCode · Cursor · GitHub Copilot CLI 지원.
+summary: "AI 코딩 도구가 코드부터 쏟아내지 않고 기획→계획→테스트→리뷰 순서로 차근차근 일하게 만드는 작업 습관 모음. Claude Code 등 코딩 도구 8종에서 동작."
+summary_en: "Gives AI coding agents a structured workflow — brainstorm, plan, test, review — before writing code. Works across 8 agents."
 tags: [plugin, superpowers, tdd, subagent, brainstorming, multi-harness]
 source: https://github.com/obra/superpowers
 author: Jesse Vincent (obra) · Prime Radiant
@@ -12,7 +13,9 @@ install: "/plugin install superpowers@claude-plugins-official  (Claude Code) —
 
 ## 한 줄
 
-"코딩 에이전트한테 *방법론*을 깔아주는 플러그인". 코드를 바로 안 쓰고 brainstorm → spec → plan → subagent로 TDD → review → finish까지 강제 트리거하는 SKILL 집합. 8개 하네스 지원.
+"코딩 에이전트한테 *일하는 방법(방법론)*을 깔아주는 플러그인". 코드를 바로 쓰지 않고 brainstorm(아이디어 정리) → spec → plan → subagent로 TDD → review → finish 순서를 강제로 거치게 하는 작업 습관 모음. 8개 코딩 도구 지원.
+
+*EN: A plugin that installs a working method into coding agents, forcing them through brainstorm, plan, test, and review before they touch code.*
 
 ## 기본 워크플로우
 

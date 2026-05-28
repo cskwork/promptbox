@@ -1,6 +1,7 @@
 ---
 title: skill-creator
-summary: 스킬 자체를 만드는 메타 스킬 — intent 캡처 → draft → test prompts → parallel subagent eval (with-skill vs baseline) → grader/aggregator → viewer로 정량/정성 동시 평가 → iterate. description optimizer로 트리거 정확도까지 튜닝.
+summary: "새 스킬(AI 에이전트에게 추가하는 기능)을 만들고 다듬어 주는 도구 — 어떤 기능인지 정리하고 초안을 잡은 뒤, 적용 전후를 나란히 돌려 비교하고 고치는 과정을 끝까지 안내한다."
+summary_en: "Step-by-step workflow for creating a new Claude Code skill, testing it, and iterating until it works reliably."
 tags: [skill, meta, anthropic, eval, subagent, iteration, benchmark]
 source: https://github.com/anthropics/skills/tree/main/skills/skill-creator
 author: anthropics
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/anthropics/skills --skill skill-crea
 
 ## 한 줄
 
-스킬 작성은 6단계 — intent → draft → tests → eval(병렬 subagent) → iterate → description tuning. with-skill과 baseline을 **같은 턴**에 spawn해서 한꺼번에 끝내는 게 중요 (순차로 돌리면 시간만 날아간다).
+스킬 만들기는 6단계 — 무엇을 할 스킬인지 정리(intent) → 초안(draft) → 테스트 → 평가(eval, 병렬로 여러 에이전트 동시 실행) → 고치기 → 트리거 문구 다듬기. 스킬을 켠 쪽(with-skill)과 끈 쪽(baseline)을 **같은 턴**에 동시에 띄워(spawn) 한 번에 비교하는 게 핵심 (하나씩 돌리면 시간만 날아간다).
+
+*EN: Six steps — pin down what the skill does, draft it, test, evaluate, fix, and tune the trigger wording.*
 
 ## 핵심 원칙
 

@@ -1,6 +1,7 @@
 ---
 title: setup-matt-pocock-skills
-summary: 다른 mattpocock 엔지니어링 스킬들이 가정하는 per-repo 설정을 scaffold — 이슈 트래커(GitHub/GitLab/local markdown), triage 라벨 5개, 도메인 docs 레이아웃을 AGENTS.md/CLAUDE.md와 docs/agents/에 기록.
+summary: "Matt Pocock 스킬 모음을 쓰기 전 한 번만 실행 — 이슈 트래커, 라벨 이름, 문서 위치를 물어보고 CLAUDE.md에 기록해 다른 스킬이 매번 묻지 않게 한다."
+summary_en: "Run once before using Matt Pocock's other skills — records your issue tracker, label names, and doc layout in CLAUDE.md."
 tags: [skill, setup, issue-tracker, triage, scaffolding, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/setup-matt-pocock-skills
 author: mattpocock
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/mattpocock/skills --skill setup-matt
 
 ## 한 줄
 
-`to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture`, `zoom-out` 가 동작하려면 **이 스킬을 먼저 한 번 실행** — 이슈 트래커 위치, 5개 triage 라벨 매핑, 도메인 docs 레이아웃을 합의해서 `CLAUDE.md`(또는 `AGENTS.md`)와 `docs/agents/*.md`에 기록한다.
+`to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture`, `zoom-out` 같은 다른 스킬을 쓰기 전에 **이 스킬을 먼저 한 번 실행** — 이슈를 어디서 관리하는지, 분류 라벨 5개의 실제 이름, 프로젝트 문서 위치를 사용자와 합의한 뒤 `CLAUDE.md`(또는 `AGENTS.md`)와 `docs/agents/*.md`에 기록한다. 그래야 다른 스킬들이 매번 묻지 않고 이 프로젝트 규칙대로 동작한다.
+
+*EN: Run this once so the other engineering skills know where your issues, labels, and docs live.*
 
 ## 세 가지 결정 (한 번에 하나씩)
 

@@ -1,6 +1,7 @@
 ---
 title: find-skills
-summary: 사용자가 "how do I do X / find a skill for X / can you do X"라고 물을 때, skills.sh 리더보드와 `npx skills find`로 설치 가능한 스킬을 찾아 install count·source reputation·repo star로 검증한 뒤 추천·설치하는 스킬.
+summary: "\"이거 어떻게 해?\"라고 물으면, 직접 만드는 대신 이미 나와 있는 에이전트 추가 기능(스킬)이 있는지 먼저 찾아보고 설치 수·출처가 믿을 만한지 확인한 뒤 추천·설치해 준다."
+summary_en: "Before building from scratch, searches for an existing skill that already does the job, vets it by popularity and source, then offers to install it."
 tags: [skill, skills-cli, discovery, vercel-labs, npx-skills, package-manager]
 source: https://github.com/vercel-labs/skills/tree/main/skills/find-skills
 author: vercel-labs

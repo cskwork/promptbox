@@ -1,6 +1,7 @@
 ---
 title: zoom-out
-summary: 모르는 코드 영역에 들어갔을 때 agent에게 한 단계 위 추상화로 올라가서 관련 module과 caller의 map을 도메인 glossary 어휘로 그려달라고 요청하는 미니 스킬.
+summary: 낯선 코드에서 길을 잃었을 때, AI에게 한 발 물러나 관련된 코드 덩어리와 그 호출 관계를 프로젝트가 쓰는 쉬운 용어로 지도처럼 정리해 달라고 요청하는 한 문장짜리 도구.
+summary_en: Asks the AI to step back and sketch a map of the surrounding code in your project's own vocabulary.
 tags: [skill, exploration, mental-model, navigation, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/zoom-out
 author: mattpocock
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/mattpocock/skills --skill zoom-out"
 
 ## 한 줄
 
-스킬 본문이 단 두 문장 — 이 영역을 잘 모를 때, 한 단계 추상화 위로 올라가서 관련 module + caller의 map을 도메인 어휘로 그려달라.
+본문은 단 두 문장이다 — 이 영역을 잘 모르니, 한 단계 위로 물러나서 관련 코드 덩어리와 그것을 호출하는 곳들의 지도를 프로젝트의 쉬운 용어로 그려달라는 부탁.
+
+*EN: Ask the AI to zoom out one level and sketch a map of the surrounding code in the project's own words.*
 
 ## 언제 쓰는가
 

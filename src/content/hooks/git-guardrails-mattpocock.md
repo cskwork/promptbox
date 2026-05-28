@@ -1,6 +1,7 @@
 ---
 title: git-guardrails-claude-code (Matt Pocock)
-summary: Claude Code의 PreToolUse(Bash) hook 하나로 `git push`, `reset --hard`, `clean -fd`, `branch -D`, `checkout .`, `restore .` 같은 파괴적/되돌리기 어려운 git 명령을 실행 전에 차단. bash + jq + grep만 의존하므로 매 Bash 호출 오버헤드가 수 ms. npx 기반 `block-no-verify`처럼 매번 npm 캐시를 verify하지 않아 폭주 위험이 없다.
+summary: "AI 코딩 도구가 `git push`나 `reset --hard`처럼 되돌리기 어려운 git 명령을 실행하기 직전에 자동으로 막아 주는 작은 안전장치. 실수로 코드나 작업 내역이 날아가는 사고를 예방한다."
+summary_en: "A lightweight Claude Code hook that blocks risky git commands like git push or reset --hard before they wipe your work."
 tags: [hook, claude-code, pretooluse, git, guardrail, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/misc/git-guardrails-claude-code
 author: Matt Pocock
@@ -15,7 +16,9 @@ install: "curl -fsSL https://raw.githubusercontent.com/mattpocock/skills/main/sk
 
 ## 한 줄
 
-`tool_input.command`를 stdin JSON으로 받아 위험 패턴을 정규식으로 매칭, 매치 시 exit 2 + stderr 메시지로 Claude의 명령 실행을 거부시키는 8줄짜리 bash 스크립트.
+AI가 실행하려는 명령을 가로채 위험한 git 명령이면 막아 주는 8줄짜리 bash 스크립트. 내부적으로는 명령 텍스트(`tool_input.command`)를 받아 위험 패턴과 정규식으로 비교하고, 일치하면 종료 코드 2와 경고 메시지로 실행을 거부한다.
+
+*EN: An 8-line bash script that intercepts the command your AI is about to run and refuses it if it matches a dangerous git pattern.*
 
 ## 차단 패턴 (기본)
 

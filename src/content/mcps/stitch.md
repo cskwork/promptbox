@@ -1,6 +1,7 @@
 ---
 title: Stitch (Google) MCP
-summary: Google Stitch의 디자인 생성 기능을 Claude Code/Desktop/Codex에서 MCP 툴로 호출. stitch-landing 스킬이 의존하는 서버.
+summary: 만들고 싶은 화면을 말로 설명하면 Google Stitch가 웹/앱 화면 디자인(HTML)을 그려 준다. 코딩 에이전트 안에서 바로 호출하는 연결 설정(MCP).
+summary_en: Tell Google Stitch what screen you want and it generates the UI as HTML, available as a tool call from your coding agent.
 tags: [mcp, design, stitch, google, landing-page]
 source: https://stitch.withgoogle.com
 order: 10
@@ -10,7 +11,9 @@ transport: stdio
 
 ## 무엇을 하는가
 
-[Google Stitch](https://stitch.withgoogle.com)의 화면 디자인 생성을 MCP 툴로 노출한다. 주요 툴:
+텍스트로 설명한 화면을 [Google Stitch](https://stitch.withgoogle.com)가 디자인(HTML+CSS)으로 만들어 주고, 그 기능을 코딩 에이전트에서 바로 부를 수 있게 연결한다. 주요 툴:
+
+*EN: Turn a text description of a screen into a Stitch-designed HTML page, callable from your agent.*
 
 - `mcp__stitch__create_project` — 프로젝트 생성
 - `mcp__stitch__generate_screen_from_text` — 텍스트 프롬프트 → HTML+CSS 화면

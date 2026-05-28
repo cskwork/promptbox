@@ -1,6 +1,7 @@
 ---
 title: codegraph
-summary: 코드베이스의 심볼·관계를 사전에 인덱싱한 로컬 knowledge graph. 에이전트가 file scan을 반복하지 않고 아키텍처 질문에 빠르게 답하도록 — 토큰 35% 절감, tool call 71% 감소, 100% 로컬, 19+ 언어.
+summary: AI 코딩 도구가 매번 파일을 뒤지지 않도록 코드를 미리 지도처럼 정리해 두는 도구 — 구조 질문에 빨리 답하고 비용도 줄여줍니다. 코드는 내 컴퓨터 밖으로 안 나갑니다.
+summary_en: Pre-maps your codebase so AI coding tools answer "where does this live" fast, with fewer lookups and lower cost — and your code never leaves your machine.
 tags: [tool, indexer, knowledge-graph, claude-code, codex, cursor, opencode, local, mit]
 source: https://github.com/colbymchenry/codegraph
 author: colbymchenry
@@ -13,7 +14,9 @@ install: "curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/ma
 
 ## 한 줄
 
-에이전트가 매번 grep/read로 codebase를 헤집어 토큰을 태우는 대신, 미리 빌드된 semantic graph를 query — 19+ 언어 + framework-aware routing (Django, Flask, FastAPI, Express, Spring 등).
+AI 에이전트가 질문할 때마다 코드 전체를 다시 읽느라 비용을 태우는 대신, 미리 만들어 둔 코드 지도를 곧장 조회합니다 — 19개 이상 언어 지원에, Django·Flask·FastAPI·Express·Spring 같은 프레임워크 구조까지 알아서 인식.
+
+*EN: Instead of re-reading your whole codebase on every question, the agent queries a prebuilt map — 19+ languages, framework-aware for Django, Flask, FastAPI, Express, Spring, and more.*
 
 ## 언제 쓰는가
 

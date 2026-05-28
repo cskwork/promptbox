@@ -22,11 +22,28 @@ export default {
           900: '#0e111c',
           950: '#070912',
         },
+        // Signature brand color: emerald. Ties into the copy-success green —
+        // the whole site is about "copy → use", so the brand IS the success state.
         accent: {
-          400: '#7c9cff',
-          500: '#5a7dff',
-          600: '#3f5fe8',
+          300: '#6ee7b7',
+          400: '#34d399',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
         },
+      },
+      maxWidth: {
+        '8xl': '88rem',
+      },
+      keyframes: {
+        'caret-blink': {
+          '0%, 49%': { opacity: '1' },
+          '50%, 100%': { opacity: '0' },
+        },
+      },
+      animation: {
+        'caret-blink': 'caret-blink 1.1s steps(1) infinite',
       },
     },
   },

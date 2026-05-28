@@ -1,6 +1,7 @@
 ---
 title: setup-pre-commit (Matt Pocock)
-summary: 현재 레포에 Husky pre-commit hook + lint-staged(Prettier) + typecheck + test 세트를 설치하는 SKILL. `npm`/`pnpm`/`yarn`/`bun` 자동 감지, `.husky/pre-commit` · `.lintstagedrc` · `.prettierrc` 부재 시 생성, 마지막에 smoke commit으로 hook 동작까지 확인.
+summary: "git commit 전에 포맷팅·타입·테스트를 자동으로 실행해, 망가진 코드가 커밋되지 않게 막아주는 pre-commit 환경을 한 번에 설치."
+summary_en: "Installs a one-shot pre-commit setup that auto-formats your code and runs type and test checks before every git commit, so broken code never lands."
 tags: [skill, hook, pre-commit, husky, lint-staged, prettier, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/misc/setup-pre-commit
 author: Matt Pocock
@@ -12,7 +13,8 @@ install: "Claude Code 세션에서 `/setup-pre-commit` 또는 SKILL.md를 ~/.cla
 
 ## 한 줄
 
-Husky v9+ 기반 pre-commit hook을 단일 SKILL 호출로 설치. 패키지 매니저 감지부터 smoke test commit까지 7단계 체크리스트.
+커밋 전에 자동으로 돌아가는 검사 장치(Husky pre-commit hook)를 SKILL 호출 한 번으로 설치. 패키지 매니저 감지부터 시험 커밋까지 7단계 체크리스트로 끝낸다.
+*EN: Sets up the checks that run automatically before each commit, in a single call.*
 
 ## 무엇을 설치하나
 

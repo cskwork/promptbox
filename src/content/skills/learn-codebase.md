@@ -1,6 +1,7 @@
 ---
 title: learn-codebase
-summary: 다른 에이전트(사람·AI)가 만든 코드를 "의도(intent)" 칼럼과 "코드" 칼럼을 짝지어 읽게 하는 4단계(Map → Walk → Probe → Master) 학습 스킬.
+summary: "남이나 AI가 짠 낯선 코드를, 왜 이렇게 짰는지(설계 의도)와 실제 코드를 나란히 짚어 가며 길 잃지 않고 이해하도록 단계별로 안내하는 도구."
+summary_en: "Learn any codebase by pairing design intent with implementation, one depth level at a time — stop the moment you know enough to act."
 tags: [skill, claude-code, codex, code-review, onboarding, intent]
 source: https://github.com/cskwork/learn-codebase
 author: cskwork
@@ -12,7 +13,9 @@ install: "git clone https://github.com/cskwork/learn-codebase ~/.claude/skills/l
 
 ## 한 줄
 
-코드만 읽으면 **모방**, 스펙만 읽으면 **희망**, **짝지어 읽으면** 변경 가능한 양방향 추적이 된다.
+코드만 읽으면 **흉내**에 그치고, 설계 문서(스펙)만 읽으면 **추측**에 그친다. 둘을 **나란히** 짚으면 어디를 고쳐도 되는지 자신 있게 안다.
+
+*EN: Read code alone and you only mimic; read the spec alone and you only guess. Pair them and you know what is safe to change.*
 
 ## 언제 쓰는가
 

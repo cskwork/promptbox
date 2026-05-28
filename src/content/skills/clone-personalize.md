@@ -1,6 +1,7 @@
 ---
 title: clone-personalize
-summary: 임의의 AI 제품(GitHub 레포 또는 라이브 사이트)을 로컬로 복제하고, 모든 paid API 호출을 사용자의 설치된 CLI(Claude Code, Codex, Gemini)나 로그인된 브라우저 세션으로 교체하는 스킬.
+summary: 남이 만든 AI 앱(GitHub 주소나 웹사이트)을 내 컴퓨터로 가져와, 돈 내야 하는 AI 호출을 내가 이미 쓰는 도구(Claude Code, Codex, Gemini)로 바꿔서 API 키 없이 돌려준다.
+summary_en: Pull any AI app onto your machine and rewire its paid API calls to the CLI tools you already pay for, so it runs with no API keys.
 tags: [skill, claude-code, codex, gemini, oauth, personalize]
 source: https://github.com/cskwork/clone-personalize
 author: cskwork
@@ -12,7 +13,9 @@ install: "git clone https://github.com/cskwork/clone-personalize ~/.claude/skill
 
 ## 핵심 아이디어
 
-서드파티 AI 제품을 로컬에서 돌리되, 모든 paid API 호출(OpenAI, Anthropic, Google AI Studio, Replicate, ElevenLabs 등)을 사용자가 이미 로그인/구독 중인 CLI(`claude`, `codex`, `gemini`)로 교체한다. 결과물은 **API 키 없이** 돌아간다.
+남이 만든 AI 앱을 내 컴퓨터에서 돌리되, 돈을 내야 하는 AI 호출(OpenAI, Anthropic, Google AI Studio, Replicate, ElevenLabs 등)을 내가 이미 로그인/구독해 둔 명령줄 도구(`claude`, `codex`, `gemini`)로 바꿔 끼운다. 그래서 결과물은 **API 키 없이** 돌아간다.
+
+*EN: Run someone else's AI app on your own accounts — no per-call API bills.*
 
 두 가지 입력 모드:
 

@@ -1,6 +1,7 @@
 ---
 title: Autoresearch (uditgoenka/autoresearch)
-summary: Karpathy의 autoresearch를 일반화한 자율 개선 루프 플러그인. 12개 커맨드(iterate · plan · debug · fix · security · ship · scenario · predict · learn · reason · probe · evals)로 modify → verify → keep/discard 사이클을 코드/콘텐츠/마케팅 등 측정 가능한 모든 도메인에 적용. Claude Code · OpenCode · OpenAI Codex 지원.
+summary: "목표만 정해주면 AI가 한 번에 하나씩 고치고 직접 점검해서, 좋아지면 남기고 나빠지면 자동으로 되돌리는 작업을 알아서 반복합니다. 테스트 통과율 올리기, 속도 개선, 버그 잡기처럼 숫자로 잴 수 있는 일을 밤새 맡겨둘 수 있어요."
+summary_en: "Give the AI a measurable goal and it iterates on its own — one change, one check, keep what helps, revert what doesn't."
 tags: [plugin, autoresearch, autonomous-loop, iteration, multi-harness]
 source: https://github.com/uditgoenka/autoresearch
 author: Udit Goenka

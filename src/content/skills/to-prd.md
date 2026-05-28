@@ -1,6 +1,7 @@
 ---
 title: to-prd
-summary: 현재 대화 context와 코드베이스 이해를 PRD로 합성해서 이슈 트래커에 publish — 사용자 인터뷰 없이. Problem / Solution / User Stories(긴 numbered list) / Implementation Decisions / Testing Decisions / Out of Scope.
+summary: "지금까지 나눈 대화와 코드를 그대로 기획서(PRD, 무엇을 왜 만드는지 정리한 문서)로 바꿔서 팀 작업 목록(이슈 트래커)에 올려준다. 다시 질문하지 않고 이미 아는 내용으로 정리해 준다."
+summary_en: "Converts your current conversation and code into a PRD (product requirements doc) and posts it to the issue tracker — no extra questions asked."
 tags: [skill, prd, planning, requirements, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/to-prd
 author: mattpocock
@@ -12,7 +13,8 @@ install: "npx skills add https://github.com/mattpocock/skills --skill to-prd"
 
 ## 한 줄
 
-사용자를 **인터뷰하지 않는다** — 이미 알고 있는 것(대화 + 코드)을 PRD로 합성한다. `setup-matt-pocock-skills` 먼저, 트래커에 `ready-for-agent` 라벨로 publish.
+추가 질문을 **하지 않는다** — 이미 아는 것(대화 + 코드)만으로 기획서(PRD)를 만든다. `setup-matt-pocock-skills`를 먼저 실행하고, 작업 목록(트래커)에 `ready-for-agent` 라벨을 붙여 올린다.
+*EN: No interview — it drafts the PRD from what's already in the conversation and code, then files it on the tracker.*
 
 ## 프로세스
 

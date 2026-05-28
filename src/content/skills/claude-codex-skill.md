@@ -1,6 +1,7 @@
 ---
 title: codex-cli (claude-codex-skill)
-summary: Claude Code 안에서 OpenAI Codex CLI를 호출하는 스킬. `/codex-cli review|impl|image` 세 모드. **이미지는 ChatGPT 로그인만으로 생성 — `OPENAI_API_KEY` 없이도 작동** (Codex CLI 내장 `image_gen.imagegen` 툴 활용). Windows 0.128.0의 sandbox copy bug까지 우회.
+summary: "Claude Code 안에서 코드 검토·코드 작성·이미지 생성을 Codex에 바로 넘길 수 있는 스킬. 이미지 생성은 ChatGPT 로그인만 있으면 충분하고 별도 API 키가 필요 없습니다."
+summary_en: "Hand off code review, coding tasks, or image generation to OpenAI Codex without leaving Claude Code — and images work with just a ChatGPT login, no API key."
 tags: [skill, claude-code, codex, image-gen, code-review, sandbox, openai]
 source: https://github.com/cskwork/claude-codex-skill
 author: cskwork
@@ -12,7 +13,9 @@ install: "curl -fsSL https://raw.githubusercontent.com/cskwork/claude-codex-skil
 
 ## 한 줄
 
-Codex CLI에 숨겨진 ChatGPT-auth 이미지 생성을 발굴 + Codex의 본업(review / impl)을 Claude에 깔끔하게 위임하는 스킬. Codex `codex login`(ChatGPT) 하나면 끝, API key 별도 X.
+Claude Code 안에서 Codex에게 코드 검토(review)·코드 작성(impl)·이미지 생성(image)을 넘기는 스킬. 잘 알려지지 않은 사실 — 이미지 생성은 `codex login`(ChatGPT 로그인) 하나면 되고 별도 API key가 필요 없습니다.
+
+*EN: Delegate review, coding, and image generation to Codex from inside Claude Code — images need only a ChatGPT login, no API key.*
 
 ## 세 가지 모드
 

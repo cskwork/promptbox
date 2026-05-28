@@ -1,6 +1,7 @@
 ---
 title: grill-me
-summary: 계획·디자인을 implementation 전에 가차없이 인터뷰. 결정 트리의 각 branch를 한 번에 하나씩 따라가며, 의존성 있는 결정들을 차례로 해소하고 매 질문마다 권장 답을 함께 제시.
+summary: 코드를 짜기 전에 내 계획의 빈틈을 잡아주는 AI 면접관. 한 번에 한 질문씩, 매 질문마다 추천 답을 함께 던지며 놓친 결정들을 끝까지 캐묻는다.
+summary_en: An AI that stress-tests your plan before you write code — one probing question at a time, each with a suggested answer.
 tags: [skill, interview, planning, design-review, mattpocock, socratic]
 source: https://github.com/mattpocock/skills/tree/main/skills/productivity/grill-me
 author: mattpocock
@@ -13,6 +14,7 @@ install: "npx skills add https://github.com/mattpocock/skills --skill grill-me"
 ## 한 줄
 
 스킬 본문이 단 5문장 — *한 번에 한 질문씩, 매 질문에 권장 답까지, 코드로 답할 수 있는 질문이면 코드부터 본다*. 이 단순함이 본질.
+*EN: The whole skill is five sentences — one question at a time, a suggested answer each time, and check the code first when the code can answer it.*
 
 ## 언제 쓰는가
 

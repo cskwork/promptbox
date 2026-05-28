@@ -1,6 +1,7 @@
 ---
 title: oh-my-codex (OMX)
-summary: OpenAI Codex CLI 위에 얹는 workflow layer. `$deep-interview` → `$ralplan` → `$ultragoal` 표준 워크플로우 + 역할(role) 키워드 + 스킬 + `.omx/`에 plan/log/memory 저장. tmux로 detached HUD/runtime pane 관리, `$team`으로 병렬 실행. macOS · Linux primary, Windows는 secondary (WSL2 권장).
+summary: 터미널 AI 코딩 도구 Codex CLI에 정해진 작업 순서(질문으로 다듬기 → 계획 → 실행)와 더 강한 기본 설정을 입혀, 매번 똑같은 방식으로 일하고 작업 내용이 사라지지 않게 해 주는 도구.
+summary_en: Wraps Codex CLI with a fixed clarify-plan-execute routine, sane defaults, and session-persistent work logs.
 tags: [harness, codex, npm, workflow, tmux, ultragoal, deep-interview, ralplan]
 source: https://github.com/Yeachan-Heo/oh-my-codex
 author: Yeachan Heo (Yeachan-Heo)
@@ -14,7 +15,9 @@ install: "npm install -g oh-my-codex && omx setup && omx --madmax --high"
 
 ## 한 줄
 
-Codex가 실행 엔진. OMX가 **role routing + workflow + runtime**를 깐다. Codex를 매일 쓰는 사람이 "더 강한 default + 일관된 workflow + durable state"를 원할 때 쓰는 layer.
+Codex가 실제 코드를 짜는 엔진이고, OMX는 그 위에 정해진 작업 순서·역할·기록 보관을 얹는다. Codex를 매일 쓰는 사람이 "더 강한 기본값 + 일관된 작업 흐름 + 사라지지 않는 기록"을 원할 때 쓰는 도구다.
+
+*EN: Codex does the actual coding; OMX adds a consistent workflow, roles, and durable records on top.*
 
 ## 표준 워크플로우 (외워두기)
 

@@ -1,6 +1,7 @@
 ---
 title: jk (Jenkins CLI)
-summary: GitHub CLI 스타일의 Jenkins controller CLI. 잡 검색/조회, 빌드 트리거/취소/팔로우, 로그 스트리밍, artifact 다운로드, credential·node·queue·plugin 관리까지 — `jk auth login`으로 context 전환.
+summary: "Jenkins(자동 빌드·배포 서버)의 작업을 웹 화면 대신 터미널에서 실행·확인하는 도구 — 빌드를 돌리고, 로그를 따라가고, 결과 파일을 받아오고, AI 코딩 에이전트도 같은 명령을 쓸 수 있다."
+summary_en: "Run and watch your Jenkins build jobs from the terminal instead of the web UI — trigger builds, follow logs, pull artifacts, and let your coding agent do the same."
 tags: [skill, jenkins, cli, devops, ci, pipeline, build, jk]
 source: https://github.com/avivsinai/jenkins-cli
 author: avivsinai
@@ -12,7 +13,8 @@ install: "brew install avivsinai/tap/jk"
 
 ## 한 줄
 
-`jk run start <job> -p KEY=value`로 빌드 트리거, `jk run ls <job> --limit 3`로 상태 확인, `jk log <job> <build> --follow`로 콘솔 추적 — Jenkins UI를 안 거치고 같은 워크플로우.
+Jenkins 웹 화면을 열지 않고 터미널에서: `jk run start <job> -p KEY=value`로 빌드 실행, `jk run ls <job> --limit 3`로 진행 상태 확인, `jk log <job> <build> --follow`로 실행 로그를 실시간으로 따라간다.
+*EN: Drive your Jenkins build jobs straight from the shell — start a build, check its status, and tail its logs in real time.*
 
 ## 언제 쓰는가
 

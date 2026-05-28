@@ -1,6 +1,7 @@
 ---
 title: omp — oh-my-pi
-summary: "IDE 와이어가 박힌 coding agent. Pi(by @mariozechner) fork. 40+ provider · 32 built-in tool · 13 LSP op · 27 DAP op · ~27k LoC Rust core. read/search/bash/edit 같은 표준 tool에 LSP rename · DAP debugger · web_search · ACP(Zed) · time-traveling stream rules · hashline edits · subagent · Cursor/Cline/Codex/Copilot config 자동 인식까지 한 process 안에 묶음."
+summary: "코드 편집·검색·디버깅·웹 검색·브라우저 조작까지 AI 코딩 에이전트에 필요한 도구를 하나의 프로그램에 다 넣은 올인원 에이전트. 외부 도구를 따로 깔 필요 없이 macOS·Linux·Windows에서 같은 방식으로 돌고, 40개 넘는 AI 모델을 명령 하나로 바꿔 쓸 수 있다. Cursor·Codex 같은 다른 도구의 설정도 알아서 읽어 온다."
+summary_en: "One binary, every OS: a coding agent with editing, debugging, and web search built in, plus 40+ AI models switchable with one command."
 tags: [harness, omp, pi, coding-agent, lsp, dap, rust, multi-provider, acp, zed, terminal]
 source: https://github.com/can1357/oh-my-pi
 author: Can Bölük (can1357), based on Pi by Mario Zechner
@@ -14,7 +15,8 @@ install: "curl -fsSL https://omp.sh/install | sh   # 또는 bun install -g @oh-m
 
 ## 한 줄
 
-"out of the box로 complete, 끝까지 open." LSP/DAP/native Rust toolchain까지 process 내부에 박아서 fork-exec 없이 동작 — Windows 포함 모든 OS에서 같은 binary로.
+"꺼내자마자 완성돼 있고, 끝까지 열려 있다." 코드 분석·디버거·검색 같은 무거운 도구까지 전부 프로그램 안에 넣어 외부 실행 없이 동작 — Windows 포함 모든 OS에서 같은 실행 파일 하나로.
+*EN: Complete out of the box, open all the way down — one binary, every OS.*
 
 ## 설치
 

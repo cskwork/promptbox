@@ -1,0 +1,62 @@
+---
+import CategoryIcon from '~/components/CategoryIcon.astro';
+import { CATEGORY_META, type CategoryKey } from '~/content/config';
+
+interface Props {
+  href: string;
+  title: string;
+  summary: string;
+  summaryEn?: string;
+  tags?: string[];
+  source?: string;
+  category: CategoryKey;
+}
+const { href, title, summary, summaryEn, tags = [], source, category } = Astro.props;
+const meta = CATEGORY_META[category];
+
+let sourceLabel: string | null = null;
+if (source) {
+  try {
+    const u = new URL(source);
+    sourceLabel = u.hostname.replace(/^www\./, '') + u.pathname.replace(/\/$/, '');
+  } catch {
+    sourceLabel = source;
+  }
+}
+---
+<article class:list={['group glass-card flex flex-col rounded-xl overflow-hidden h-full', `cat-${category}`]}>
+  <a href={href} class="flex-1 flex flex-col p-4">
+    <div class="mb-2.5 flex items-center gap-2">
+      <span class="cat-tile h-7 w-7"><CategoryIcon icon={meta.icon} class="h-4 w-4" /></span>
+      <span class="font-mono text-[0.7rem] font-semibold uppercase tracking-[0.12em]" style="color:var(--cat-text)">{meta.label_en}</span>
+    </div>
+    <h3 class="mb-1 font-semibold leading-snug text-ink-900 transition-colors group-hover:text-accent-700 dark:text-ink-50 dark:group-hover:text-accent-400">{title}</h3>
+    <p class="line-clamp-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">{summary}</p>
+    {summaryEn && (
+      <p class="mt-1 line-clamp-2 text-[0.8rem] leading-snug text-ink-500 dark:text-ink-400">{summaryEn}</p>
+    )}
+    {tags.length > 0 && (
+      <div class="mt-auto flex flex-wrap gap-1 pt-3">
+        {tags.slice(0, 4).map((t) => (
+          <span class="glass-chip rounded-full px-2 py-0.5 font-mono text-[0.7rem]">#{t}</span>
+        ))}
+      </div>
+    )}
+  </a>
+  {source && (
+    <a
+      href={source}
+      target="_blank"
+      rel="noopener noreferrer"
+      class="flex items-center gap-1.5 border-t border-ink-100/80 bg-ink-50/40 px-4 py-2 text-xs text-ink-500 transition-colors hover:bg-ink-50/80 hover:text-accent-700 dark:border-white/5 dark:bg-ink-950/30 dark:hover:bg-ink-950/50 dark:hover:text-accent-400"
+      aria-label={`${title} — 원본 소스 (새 탭에서 열기)`}
+    >
+      <svg class="h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+        <polyline points="15 3 21 3 21 9" />
+        <line x1="10" y1="14" x2="21" y2="3" />
+      </svg>
+      <span class="truncate">{sourceLabel}</span>
+    </a>
+  )}
+</article>

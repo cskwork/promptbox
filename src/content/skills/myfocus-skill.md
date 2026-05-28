@@ -1,6 +1,7 @@
 ---
 title: myfocus
-summary: 여러 코딩 에이전트(Claude Code · Codex · Gemini) 세션 로그를 스캔해서 **다음 30분에 집중할 단 하나의 작업**을 골라주는 스킬. 작업을 *실행*하진 않고 가리키기만 함.
+summary: 여러 AI 코딩 도구(Claude Code · Codex · Gemini)를 오가며 일하다 "이제 뭘 하지" 싶을 때, 최근 대화 기록을 훑어 지금 가장 먼저 할 작업 하나를 짚어 준다. 직접 실행은 안 하고 알려만 줌.
+summary_en: Juggling Claude Code, Codex, and Gemini? It scans your recent sessions and names the one task to tackle next — it advises, it doesn't act.
 tags: [skill, claude-code, codex, gemini, focus, session-logs, prioritization]
 source: https://github.com/cskwork/myfocus-skill
 author: cskwork
@@ -12,7 +13,9 @@ install: "git clone https://github.com/cskwork/myfocus-skill ~/myfocus-skill && 
 
 ## 한 줄
 
-여러 에이전트 사이를 옮겨 다니다 보면 "다음에 뭐 하지" 결정 피로가 쌓인다. `/myfocus`는 세션 로그를 보고 **하나**를 골라준다.
+여러 AI 코딩 도구 사이를 옮겨 다니다 보면 "다음에 뭐 하지" 결정 피로가 쌓인다. `/myfocus`는 최근 대화 기록을 보고 지금 할 일 **하나**를 골라준다.
+
+*EN: Bounced between coding tools all day? `/myfocus` looks at your recent sessions and names the single next thing to do.*
 
 ## 무엇을 하는가
 

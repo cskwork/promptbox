@@ -1,6 +1,7 @@
 ---
 title: claude-code-workflow-cheatsheet
-summary: 설치된 슬래시 커맨드를 스캔해 `~/.claude/settings.json`의 `companyAnnouncements`에 워크플로우 cheatsheet를 박아넣어 매 세션 시작 시 Claude가 보게 한다. Superpowers / ECC / OMCC / Matt Pocock / Minimal 5개 프리셋.
+summary: "어떤 명령어를 언제 써야 할지 매번 까먹는 문제를 해결 — 자주 쓰는 작업 순서를 정리해 Claude가 모든 세션 시작 때 알려주게 한다. 인기 도구 모음 5종 기본 설정 제공."
+summary_en: "Stop forgetting which commands to run — pin a workflow cheat sheet so Claude reminds you at the start of every session. Includes 5 built-in presets."
 tags: [skill, claude-code, workflow, settings, company-announcements, cheatsheet, cskwork]
 source: https://github.com/cskwork/claude-code-workflow-cheatsheet
 author: cskwork
@@ -12,7 +13,8 @@ install: "cp -r ~/Downloads/Code/claude-code-workflow-cheatsheet ~/.claude/skill
 
 ## 한 줄
 
-40+개 슬래시 커맨드를 깔아놓고 3개만 쓰는 문제를 해결 — Claude Code의 `companyAnnouncements` 필드를 영구 메모리처럼 써서 매 세션 시작 시 워크플로우 체인을 Claude에게 주입한다.
+40개 넘는 슬래시 커맨드를 깔아놓고 정작 3개만 쓰는 문제를 해결 — Claude Code가 매번 띄워주는 공지 자리(`companyAnnouncements`)에 "이 작업엔 이 순서" 식의 워크플로우 안내를 넣어, 세션을 열 때마다 Claude가 그대로 보게 한다.
+*EN: Turn Claude's per-session announcement field into a permanent reminder of which commands to chain for each task.*
 
 ## 언제 쓰는가
 

@@ -1,6 +1,7 @@
 ---
 title: ssh-llm-connect
-summary: 코딩 에이전트(Claude Code 등)가 원격 서버에 SSH할 때 read-only 명령만 허용하고 위험한 명령(`rm`, `sudo`, `>`, `systemctl restart`, 패키지 설치)을 차단하는 헬퍼 + PreToolUse 훅 + 자격증명 파일 격리. 원본은 SKILL 포맷이 아니라 일반 레포이므로 여기서 SKILL 포맷으로 재구성.
+summary: "AI 에이전트가 원격 서버 로그·상태를 읽을 때 `rm`, `sudo`, 서비스 재시작 같은 위험 명령은 자동 차단하고, 접속 자격증명은 코드 밖에 보관한다."
+summary_en: "Lets your AI agent SSH in to read logs and status — destructive commands blocked, credentials kept out of the code."
 tags: [skill, ssh, security, claude-code, pre-tool-hook, read-only, guard]
 source: https://github.com/cskwork/ssh-llm-connect
 author: cskwork
@@ -12,7 +13,9 @@ install: "git clone https://github.com/cskwork/ssh-llm-connect && cd ssh-llm-con
 
 ## 한 줄
 
-LLM 에이전트가 평문 `ssh user@host "rm -rf ..."`를 칠 수 있는 환경에서, **에이전트가 우회할 수 없는** PreToolUse 훅 + 헬퍼의 read-only 가드 + 자격증명 격리로 *정직한 실수*를 막는다.
+AI 에이전트가 `ssh user@host "rm -rf ..."` 같은 위험한 명령을 직접 칠 수 있는 환경에서, **에이전트가 우회할 수 없는** 3중 차단(에이전트가 손댈 수 없는 사전 검사 + 읽기 전용 가드 + 비밀번호·키 분리 보관)으로 *정직한 실수*를 막는다.
+
+*EN: Guardrails against an AI agent's honest mistakes when it can run shell commands on a real server — not a sandbox.*
 
 ## 이것은 무엇이 *아닌가*
 

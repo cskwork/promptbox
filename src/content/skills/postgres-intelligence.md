@@ -1,6 +1,7 @@
 ---
 title: postgres-intelligence
-summary: 코딩 에이전트(Claude Code · Codex · Cursor · Windsurf)가 PostgreSQL을 *자격증명 노출 없이* 안전하게 다루도록 한다. read-first SQL (SELECT/WITH/SHOW/EXPLAIN), write/DDL는 명시 플래그, 다중 연결(`DB1_...DB10_...`), 스키마 메타데이터 추출, JSON 출력.
+summary: "AI 코딩 도구가 DB 비밀번호를 직접 보지 않고도 PostgreSQL을 안전하게 조회하게 해준다. 기본은 읽기만, 데이터 변경은 허용해야만 실행."
+summary_en: "AI tools query your PostgreSQL safely — credentials stay in the script, read-only by default, writes only when you allow."
 tags: [skill, postgres, sql, database, claude-code, codex, cursor, windsurf, explain]
 source: https://github.com/cskwork/postgres-intelligence
 author: cskwork
@@ -12,7 +13,9 @@ install: "git clone https://github.com/cskwork/postgres-intelligence && cd postg
 
 ## 한 줄
 
-"에이전트는 SQL을 *만들고*, 스크립트는 *자격증명을 로드한다*"로 contract를 가른다. 에이전트는 `.env`를 열거나 print하지 않는다 — 안전한 summaries / query result / metadata / error만 본다.
+역할을 둘로 나눈다 — AI는 SQL을 만들기만 하고, 비밀번호를 읽어 실제 접속하는 일은 스크립트가 맡는다. AI는 `.env`(접속 정보 파일)를 열거나 출력하지 않고, 안전하게 정리된 결과와 스키마 정보, 에러 메시지만 받아 본다.
+
+*EN: The AI only writes the SQL; the script loads the password and connects — so credentials never reach the AI.*
 
 ## 무엇을 하는가
 

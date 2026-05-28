@@ -1,6 +1,7 @@
 ---
 title: AGENTS.md — Cross-tool spec
-summary: Codex CLI · Gemini CLI · OpenCode · Cursor 등 AGENTS.md를 읽는 모든 도구를 위한 공용 시스템 프롬프트. CLAUDE.md와 본문은 동일.
+summary: "AI 코딩 도구에게 항상 지키게 할 작업 규칙을 한 파일에 적어두면, Codex CLI·Gemini CLI·OpenCode·Cursor가 모두 똑같이 따릅니다. 내용은 CLAUDE.md와 같습니다."
+summary_en: "Drop one file and every AI coding tool — Codex CLI, Gemini CLI, OpenCode, Cursor — follows the same rules as CLAUDE.md."
 tags: [config, codex, gemini, opencode, cursor, system-prompt, agent-rules]
 source: https://github.com/cskwork/coding-agent-rules
 author: cskwork

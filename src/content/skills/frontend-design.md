@@ -1,6 +1,7 @@
 ---
 title: frontend-design
-summary: 'AI slop 룩(Inter, 보라색 그라데이션, 예측가능한 레이아웃)을 거부하고, 컴포넌트·페이지·앱마다 BOLD한 미학 방향을 정해 production-grade 코드로 구현하라는 Anthropic 공식 frontend 디자인 스킬.'
+summary: 'AI가 만든 티 나는 밋밋한 화면 대신, 뚜렷한 디자인 방향을 먼저 정하고 실제 동작하는 세련된 웹 화면 코드로 만들어 주는 Anthropic 공식 디자인 스킬.'
+summary_en: 'Builds polished, production-ready web UIs with a distinct design direction — no generic AI look.'
 tags: [skill, frontend, design, anthropic, html, css, react, motion]
 source: https://github.com/anthropics/skills/tree/main/skills/frontend-design
 author: anthropics

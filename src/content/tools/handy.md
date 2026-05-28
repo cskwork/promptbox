@@ -1,6 +1,7 @@
 ---
 title: handy
-summary: 단축키 한 번 누르고 말하면, 어느 텍스트 필드에든 transcribe된 텍스트가 들어가는 오프라인 데스크톱 STT 앱. 음성을 클라우드로 보내지 않는다 — Whisper / Parakeet V3가 로컬에서 동작.
+summary: "단축키를 누른 채 말하면 그 자리 입력창에 받아쓴 글자가 그대로 들어가는 음성 입력 앱. 목소리는 인터넷으로 안 나가고 내 컴퓨터 안에서만 글로 바뀐다."
+summary_en: "Hold a hotkey, speak, and your words land as text in whatever field you're in — voice stays on your machine, never sent to the cloud."
 tags: [tool, speech-to-text, desktop, offline, privacy, whisper, parakeet, mit]
 source: https://github.com/cjpais/Handy
 author: cjpais
@@ -13,7 +14,8 @@ install: "brew install --cask handy   # macOS"
 
 ## 한 줄
 
-ChatGPT 음성 입력이 클라우드 의존인 게 싫고, Apple Dictation은 정확도가 낮을 때 — Handy는 **로컬 Whisper/Parakeet**로 어디든 붙여넣을 수 있는 STT.
+ChatGPT 음성 입력이 클라우드 의존인 게 싫고, Apple Dictation은 정확도가 낮을 때 — Handy는 음성을 내 컴퓨터 안에서만 글자로 바꿔(로컬 Whisper/Parakeet) 어느 입력창에든 넣어주는 음성 받아쓰기 도구.
+*EN: Local, private voice-to-text that types into any app — no cloud dependency.*
 
 ## 언제 쓰는가
 

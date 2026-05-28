@@ -1,6 +1,7 @@
 ---
 title: Transcription Cleanup
-summary: 음성 받아쓰기 텍스트를 깔끔하게 다듬는 프롬프트. 의미와 어순은 보존하고, 표기·구두점·필러만 정리.
+summary: 음성을 받아쓴 거친 텍스트를 사람이 읽기 좋게 다듬어 주는 프롬프트. 뜻과 말 순서는 그대로 두고 오타·구두점·"음, 어" 같은 군더더기만 정리합니다.
+summary_en: Cleans up rough speech-to-text transcripts by fixing typos, punctuation, and filler words — without changing the meaning or structure.
 tags: [transcription, cleanup, text-processing]
 author: cskwork
 order: 10

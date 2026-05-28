@@ -1,6 +1,7 @@
 ---
 title: fizzy
-summary: 자체호스팅 Fizzy 칸반(`tobiasbischoff/fizzy-cli`) 운영 + Jira 이슈를 Fizzy 카드(설명·첨부·14개 댓글 포함)로 마이그레이션하는 스킬. Fizzy의 함정(마크다운 미렌더링, 댓글 list 무음 페이지네이션, 단일 계정 자동선택 안 됨, 비-TTY 매직링크 깨짐)을 미리 처리.
+summary: 코딩 에이전트가 카드형 작업 보드 Fizzy를 직접 세팅하고, Jira 이슈를 글·첨부·댓글까지 그대로 옮겨 주는 스킬. Fizzy 특유의 글자 깨짐 함정도 알아서 피한다.
+summary_en: "Sets up Fizzy kanban boards and migrates Jira issues — with the HTML-stripping quirks already handled."
 tags: [skill, fizzy, kanban, jira, migration, claude-code, codex]
 source: https://github.com/cskwork/fizzy-skill
 author: cskwork
@@ -13,6 +14,8 @@ install: "git clone https://github.com/cskwork/fizzy-skill ~/.claude/skills/fizz
 ## 한 줄
 
 Fizzy는 마크다운 렌더러가 아니다 — HTML을 받지만 `<h*>`, `<strong>`, `<hr>`, `<a href>`, `<img>`, `<pre>`, `<table>` 다 strip한다. 이 스킬은 그 함정들을 결정 트리로 굳혀놨다.
+
+*EN: Fizzy quietly strips most HTML tags, so this skill bakes the safe formatting tricks into a ready-made decision tree.*
 
 ## 다루는 것
 

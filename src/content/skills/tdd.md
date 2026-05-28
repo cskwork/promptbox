@@ -1,6 +1,7 @@
 ---
 title: tdd
-summary: Red-green-refactor를 **vertical slice tracer bullet**로만 — 모든 테스트를 먼저 쓰고 모든 구현을 나중에 하는 horizontal slice는 crap tests를 만든다. 한 테스트 → 한 구현 → 다음 사이클이 정답.
+summary: "테스트를 한 번에 다 쓰지 말고, 테스트 하나 작성 → 통과시킬 코드 작성을 한 사이클씩 반복하게 해주는 테스트 우선 개발 가이드. 한꺼번에 쓴 테스트는 잘 깨지고 쓸모없어진다."
+summary_en: "One test at a time: write it, make it pass, repeat — so tests stay honest and behavior-focused."
 tags: [skill, tdd, red-green-refactor, integration-test, tracer-bullet, mattpocock]
 source: https://github.com/mattpocock/skills/tree/main/skills/engineering/tdd
 author: mattpocock
@@ -12,7 +13,9 @@ install: "npx skills add https://github.com/mattpocock/skills --skill tdd"
 
 ## 핵심 철학
 
-테스트는 **public interface로 behavior를 검증**한다 — implementation detail이 아니라. 내부 함수 rename에 테스트가 깨지면 그건 implementation을 테스트한 것이다. 좋은 테스트는 spec처럼 읽힌다: *"valid cart로 checkout 가능"*.
+테스트는 코드 **내부 구현이 아니라 겉으로 드러나는 동작(behavior)을 검증**해야 한다 — 즉 "무엇을 하는가"만 확인한다.
+*EN: Test what the code does, not how it does it.*
+내부 함수 이름만 바꿔도 테스트가 깨진다면, 그건 동작이 아니라 구현 방식을 테스트한 셈이다. 좋은 테스트는 명세처럼 읽힌다: *"valid cart로 checkout 가능"*.
 
 ## Anti-pattern: Horizontal slicing
 

@@ -1,6 +1,7 @@
 ---
 title: Archon
-summary: AI 코딩을 deterministic + repeatable하게 만드는 첫 open-source "harness builder". 개발 프로세스를 YAML workflow(`.archon/workflows/*.yaml`)로 인코딩 → CLI/Web/Slack/Telegram/GitHub 어디서나 같은 시퀀스로 실행. git worktree로 자동 격리, 병렬 5개 fix 동시 가능. Claude Code SDK · Codex SDK · Pi 어시스턴트 지원.
+summary: "AI에게 매번 다르게 시키지 말고, '계획→구현→테스트→리뷰→PR' 순서를 파일 하나로 정해두면 그대로 똑같이 실행해 주는 도구. 작업마다 따로 떼어 진행해서 여러 개를 한꺼번에 돌릴 수 있다."
+summary_en: "Pin your dev process (plan, build, test, review, PR) into one file so the AI runs the same steps every time, with each task isolated so several can run at once."
 tags: [harness, archon, workflow-engine, yaml, worktree, claude-code, codex, slack, github, telegram]
 source: https://github.com/coleam00/archon
 author: Cole Medin (coleam00)
@@ -14,7 +15,9 @@ install: "git clone https://github.com/coleam00/Archon && cd Archon && bun insta
 
 ## 한 줄
 
-Dockerfile이 인프라에, GitHub Actions가 CI/CD에 한 일을 **AI 코딩 워크플로우에 한다**. AI가 매번 다른 식으로 plan/test/PR 만드는 mood-dependent 문제를 — phase / validation gate / artifact가 결정적이고 사용자가 소유하는 YAML로 고정.
+AI가 작업할 때마다 계획·테스트·PR을 제멋대로 다르게 만드는 문제를, 순서를 적어둔 파일(YAML) 하나로 고정해 매번 똑같이 실행되게 만든다 — Dockerfile이 인프라를, GitHub Actions가 CI/CD를 고정해 준 것처럼.
+
+*EN: Locks the AI's plan/test/PR steps into one file so they run the same way every time — like Dockerfile did for infra and GitHub Actions for CI/CD.*
 
 ## 무엇이 가능한가
 
