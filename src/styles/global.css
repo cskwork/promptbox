@@ -105,7 +105,7 @@
   }
   .glass-card:hover {
     @apply -translate-y-0.5 bg-white/85 dark:bg-ink-900/65
-           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_16px_34px_-16px_rgba(16,185,129,0.38)];
+           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_18px_38px_-20px_rgba(16,40,34,0.28)];
     border-color: var(--cat-line, theme('colors.accent.500/0.6'));
   }
   .glass-chip {
@@ -135,7 +135,7 @@
   }
   .btn-primary {
     @apply bg-accent-500 text-ink-950 hover:bg-accent-400
-           shadow-[0_6px_16px_-8px_rgba(16,185,129,0.7)];
+           shadow-[0_10px_26px_-14px_rgba(16,185,129,0.5)];
   }
   .btn-ghost {
     @apply border border-ink-200/80 dark:border-white/15
@@ -214,6 +214,22 @@
     opacity: 1;
     transform: none;
   }
+  /* Staggered cascade: cards inside a revealed section waterfall in */
+  html.js .reveal .grid > * {
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  html.js .reveal.is-visible .grid > * {
+    opacity: 1;
+    transform: none;
+  }
+  html.js .reveal.is-visible .grid > *:nth-child(1) { transition-delay: 0.04s; }
+  html.js .reveal.is-visible .grid > *:nth-child(2) { transition-delay: 0.09s; }
+  html.js .reveal.is-visible .grid > *:nth-child(3) { transition-delay: 0.14s; }
+  html.js .reveal.is-visible .grid > *:nth-child(4) { transition-delay: 0.19s; }
+  html.js .reveal.is-visible .grid > *:nth-child(5) { transition-delay: 0.24s; }
+  html.js .reveal.is-visible .grid > *:nth-child(n+6) { transition-delay: 0.28s; }
 }
 
 /* ============================================================
@@ -250,7 +266,8 @@
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal {
+  .reveal,
+  .reveal .grid > * {
     opacity: 1 !important;
     transform: none !important;
   }
