@@ -29,7 +29,7 @@ const d = entry.data;
 
 // prev / next within the category (for footer navigation)
 const siblings = (await getCollection(category, (e: any) => !e.data.hidden)).sort(
-  (a: any, b: any) => (a.data.order ?? 100) - (b.data.order ?? 100),
+  (a: any, b: any) => a.data.title.localeCompare(b.data.title, 'ko'),
 );
 const idx = siblings.findIndex((e: any) => e.slug === entry.slug);
 const prev = idx > 0 ? siblings[idx - 1] : null;

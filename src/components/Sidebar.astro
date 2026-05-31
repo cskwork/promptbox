@@ -23,7 +23,7 @@ const grouped = CATEGORY_ORDER.map((key) => ({
   meta: CATEGORY_META[key],
   entries: items
     .filter((it) => it.category === key)
-    .sort((a, b) => a.order - b.order || a.title.localeCompare(b.title, 'ko')),
+    .sort((a, b) => a.title.localeCompare(b.title, 'ko')),
 }));
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
