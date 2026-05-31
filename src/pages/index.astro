@@ -13,7 +13,7 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const grouped = COLLECTIONS.map((key, idx) => ({
   key,
   meta: CATEGORY_META[key],
-  entries: lists[idx].sort((a: any, b: any) => (a.data.order ?? 100) - (b.data.order ?? 100)),
+  entries: lists[idx].sort((a: any, b: any) => a.data.title.localeCompare(b.data.title, 'ko')),
 }));
 
 const total = grouped.reduce((acc, g) => acc + g.entries.length, 0);
