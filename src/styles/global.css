@@ -22,18 +22,31 @@
   }
   body {
     @apply font-sans antialiased relative;
+    background-color: #f7f9f8;
+  }
+  html.dark body {
+    background-color: #070912;
+  }
+  /* Ambient corner glow + page wash as ONE fixed compositor layer.
+     Replaces background-attachment: fixed (which repaints the body bg on every
+     scroll frame, a known mobile jank source). Painting order: body bg-color ->
+     this negative-z layer -> content, so the visual is identical but composited. */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
     background:
       radial-gradient(900px 520px at 92% -10%, rgba(16, 185, 129, 0.14), transparent 60%),
       radial-gradient(820px 560px at -8% 108%, rgba(45, 212, 191, 0.10), transparent 55%),
       linear-gradient(180deg, #f7f9f8 0%, #eef2f1 100%);
-    background-attachment: fixed;
   }
-  html.dark body {
+  html.dark body::before {
     background:
       radial-gradient(950px 540px at 92% -10%, rgba(16, 185, 129, 0.18), transparent 60%),
       radial-gradient(880px 580px at -8% 108%, rgba(20, 184, 166, 0.12), transparent 55%),
       linear-gradient(180deg, #060a0c 0%, #080d12 100%);
-    background-attachment: fixed;
   }
   code,
   pre {
