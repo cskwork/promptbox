@@ -92,3 +92,33 @@ accent, glassmorphism, 카테고리 hue, 다크모드)는 유지하고 표적 �
 ### 검증 (2차)
 - `astro build` green(54 페이지). anti-slop 게이트: 3개 SHIP가 추가한 신규 위반 0(Sidebar 위반 0,
   global.css는 사전 존재 주석 em-dash·glass rgba만). 실질 슬롭 신호 전부 clean.
+
+---
+
+## 3차 — 웹 성능 (폰트 self-host)
+
+측정 결과 사이트는 이미 가볍다(CSS gz 7.7KB, JS 전부 인라인·외부 번들 0, index.html gz 39KB).
+유일한 실질 병목은 **렌더 블로킹 Google Fonts**: `<head>`의 `fonts.googleapis.com` 스타일시트가
+첫 페인트를 막고, 외부 origin 2곳(googleapis·gstatic)에 DNS/TLS 핸드셰이크를 강제.
+
+### 변경 (왜)
+- **폰트 self-host**: Geist·JetBrains Mono의 **라틴 normal variable woff2 2개만**(29KB + 40KB)
+  `public/fonts/`에 두고, `BaseLayout` head에 base-safe 인라인 `@font-face`(`font-display: swap`)
+  + 두 폰트 `preload`로 연결. Google Fonts `<link>` + preconnect 2개 제거.
+  - 효과: third-party 렌더 블로킹 요청 제거, 외부 핸드셰이크 0, FOUT 제거(폰트 same-origin),
+    above-the-fold 폰트 preload로 swap 구간 단축. 한글은 변동 없이 시스템 폰트 폴백.
+  - `@fontsource-variable/*`는 woff2 추출용으로만 잠시 설치 후 제거(런타임/빌드 의존성 없음).
+  - latin subset만 골라 cyrillic/greek 등 미사용 글리프 번들 회피(전 subset 대비 woff2 수 최소화).
+- `tailwind.config`: `fontFamily.sans/mono` 선두에 `Geist Variable`/`JetBrains Mono Variable` 추가
+  (기존 이름은 폴백으로 유지). italic은 기존과 동일하게 faux(원래 Google 로드도 normal weight만).
+
+### 검증 (3차)
+- `astro build` green(54 페이지). `grep googleapis/gstatic dist/` → 0건(외부 폰트 요청 완전 제거).
+- `dist/fonts/`에 woff2 2개 포함, `index.html`에 두 preload + 인라인 @font-face 확인.
+
+### 적용하지 않음 (선택지로 남김)
+- `body { background-attachment: fixed }`(앰비언트 글로우): 모바일 스크롤 repaint 비용이 있으나,
+  fixed 의사요소 레이어로 바꾸면 스태킹 컨텍스트 회귀 위험 + 브랜드 글로우 시각 검증을 브라우저
+  없이 못 해 보류. 원하면 적용 가능.
+- `public/og.png` 2400×1260·405KB: 스펙(1200×630)의 2배. 크롤러 전용이라 사용자 페이지 로드와는
+  무관하지만, 절반 리사이즈 시 소셜 카드 로드·저장소 용량 개선. 별건으로 처리 가능.

@@ -54,12 +54,14 @@ const items = lists.flatMap((entries, idx) => {
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    {/* Self-hosted variable fonts (latin subset): no third-party render-blocking
+        request, no external origin handshakes. Preload + swap so text paints fast. */}
+    <link rel="preload" href={`${base}/fonts/geist-variable-latin.woff2`} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={`${base}/fonts/jetbrains-mono-variable-latin.woff2`} as="font" type="font/woff2" crossorigin />
+    <style is:inline set:html={`
+      @font-face{font-family:'Geist Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${base}/fonts/geist-variable-latin.woff2) format('woff2-variations')}
+      @font-face{font-family:'JetBrains Mono Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${base}/fonts/jetbrains-mono-variable-latin.woff2) format('woff2-variations')}
+    `}></style>
     <script is:inline>
       // Mark JS available (gates scroll-reveal) + apply theme before paint (no flash)
       (function () {
