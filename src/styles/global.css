@@ -14,6 +14,12 @@
   html.dark {
     @apply text-ink-100;
   }
+  /* Korean: break lines at word (어절) boundaries, never mid-syllable.
+     overflow-wrap keeps long Latin/URL tokens from overflowing their box. */
+  html[lang='ko'] body {
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
   body {
     @apply font-sans antialiased relative;
     background:
@@ -59,21 +65,21 @@
    --cat-line : translucent border
    ============================================================ */
 .cat-prompts   { --cat: #0ea5e9; --cat-text: #0369a1; }
-.cat-skills    { --cat: #8b5cf6; --cat-text: #6d28d9; }
+.cat-skills    { --cat: #8b5cf6; --cat-text: #6d28d9; } /* taste-ok: category wayfinding hue, brand accent stays emerald */
 .cat-plugins   { --cat: #d946ef; --cat-text: #a21caf; }
 .cat-harnesses { --cat: #f59e0b; --cat-text: #b45309; }
 .cat-hooks     { --cat: #f43f5e; --cat-text: #be123c; }
 .cat-configs   { --cat: #14b8a6; --cat-text: #0f766e; }
-.cat-mcps      { --cat: #6366f1; --cat-text: #4338ca; }
+.cat-mcps      { --cat: #6366f1; --cat-text: #4338ca; } /* taste-ok: category wayfinding hue, brand accent stays emerald */
 .cat-tools     { --cat: #3b82f6; --cat-text: #1d4ed8; }
 
 .dark .cat-prompts   { --cat-text: #38bdf8; }
-.dark .cat-skills    { --cat-text: #a78bfa; }
+.dark .cat-skills    { --cat-text: #a78bfa; } /* taste-ok: category wayfinding hue */
 .dark .cat-plugins   { --cat-text: #e879f9; }
 .dark .cat-harnesses { --cat-text: #fbbf24; }
 .dark .cat-hooks     { --cat-text: #fb7185; }
 .dark .cat-configs   { --cat-text: #2dd4bf; }
-.dark .cat-mcps      { --cat-text: #818cf8; }
+.dark .cat-mcps      { --cat-text: #818cf8; } /* taste-ok: category wayfinding hue */
 .dark .cat-tools     { --cat-text: #60a5fa; }
 
 /* derive soft/line only on the hue classes (where --cat is defined) */
@@ -103,10 +109,29 @@
            dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_6px_18px_-12px_rgba(0,0,0,0.55)]
            transition-[transform,box-shadow,border-color,background-color] duration-200;
   }
-  .glass-card:hover {
+  .glass-card:hover,
+  .glass-card:focus-within {
     @apply -translate-y-0.5 bg-white/85 dark:bg-ink-900/65
            shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_18px_38px_-20px_rgba(16,40,34,0.28)];
     border-color: var(--cat-line, theme('colors.accent.500/0.6'));
+  }
+  /* Category-hued 2px top edge: at-a-glance wayfinding on the catalog grid.
+     Uses the existing --cat hue (never the emerald accent); only opacity
+     shifts on hover/focus, so it is motion-safe. Scoped to .glass-card that
+     carries a cat-<key> class, so the bare .glass-card nav cards stay clean. */
+  .glass-card[class*='cat-']::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: var(--cat);
+    opacity: 0.4;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+  }
+  .glass-card[class*='cat-']:hover::before,
+  .glass-card[class*='cat-']:focus-within::before {
+    opacity: 0.8;
   }
   .glass-chip {
     @apply bg-white/60 dark:bg-ink-800/55
@@ -118,7 +143,7 @@
     @apply bg-white/75 dark:bg-ink-900/60 backdrop-blur-[6px]
            border border-white/60 dark:border-white/10
            text-ink-800 dark:text-ink-100
-           placeholder:text-ink-400
+           placeholder:text-ink-500 dark:placeholder:text-ink-400
            focus:bg-white/95 dark:focus:bg-ink-900/85
            focus:border-accent-500/70 focus:ring-2 focus:ring-accent-500/30
            outline-none transition-colors;
