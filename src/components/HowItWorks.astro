@@ -29,14 +29,14 @@ const steps = [
     <div class="mb-6 flex flex-wrap items-end justify-between gap-2">
       <div>
         <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50">처음이세요?</h2>
-        <p class="mt-1 text-sm text-ink-500">New here? It takes three steps — browse, copy, paste.</p>
+        <p class="mt-1 text-sm text-ink-500">New here? It takes three steps: browse, copy, paste.</p>
       </div>
-      <span class="font-mono text-[0.72rem] uppercase tracking-wider text-ink-400">How it works</span>
+      <span class="font-mono text-[0.72rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">How it works</span>
     </div>
 
     <p class="mb-4 flex items-start gap-2 rounded-lg border border-accent-500/25 bg-accent-500/5 px-3 py-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
       <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-700 dark:text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      <span><strong class="font-semibold text-ink-800 dark:text-ink-100">준비물</strong> — Claude Code · Codex · Gemini CLI 같은 AI 코딩 에이전트가 먼저 설치돼 있어야 합니다. <span class="text-ink-500">You'll need an AI coding agent installed first.</span></span>
+      <span><strong class="font-semibold text-ink-800 dark:text-ink-100">준비물</strong>: Claude Code · Codex · Gemini CLI 같은 AI 코딩 에이전트가 먼저 설치돼 있어야 합니다. <span class="text-ink-500">You'll need an AI coding agent installed first.</span></span>
     </p>
 
     <ol class="grid gap-4 sm:grid-cols-3">
@@ -45,7 +45,7 @@ const steps = [
           <div class="mb-2 flex items-baseline gap-2">
             <span class="font-mono text-lg font-bold text-accent-700 dark:text-accent-400">{s.n}</span>
             <h3 class="font-semibold text-ink-900 dark:text-ink-50">{s.title}</h3>
-            <span class="font-mono text-[0.72rem] text-ink-400">{s.en}</span>
+            <span class="font-mono text-[0.72rem] text-ink-500 dark:text-ink-400">{s.en}</span>
           </div>
           <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">{s.desc}</p>
         </li>
@@ -55,7 +55,7 @@ const steps = [
     <div class="mt-8 border-t border-ink-100/80 pt-6 dark:border-white/10">
       <div class="mb-3 flex flex-wrap items-baseline gap-x-2">
         <h3 class="text-sm font-semibold text-ink-800 dark:text-ink-100">용어가 낯설다면</h3>
-        <span class="font-mono text-[0.72rem] text-ink-400">Jargon buster — what each category means</span>
+        <span class="font-mono text-[0.72rem] text-ink-500 dark:text-ink-400">Jargon buster · what each category means</span>
       </div>
       <div class="grid gap-x-6 gap-y-3 sm:grid-cols-2">
         {CATEGORY_ORDER.map((key) => {
@@ -66,7 +66,7 @@ const steps = [
               <div class="min-w-0">
                 <div class="flex items-baseline gap-1.5">
                   <span class="font-semibold text-ink-900 dark:text-ink-50">{m.label}</span>
-                  <span class="font-mono text-[0.7rem] text-ink-400">{m.label_en}</span>
+                  <span class="font-mono text-[0.7rem] text-ink-500 dark:text-ink-400">{m.label_en}</span>
                 </div>
                 <p class="text-[0.82rem] leading-snug text-ink-600 dark:text-ink-300">{m.blurb}</p>
                 <p class="text-[0.78rem] leading-snug text-ink-500 dark:text-ink-400">{m.blurb_en}</p>

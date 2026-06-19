@@ -102,12 +102,12 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
     <section class="mb-5 rounded-2xl border border-ink-100/90 bg-white/55 p-5 dark:border-white/10 dark:bg-ink-900/40">
       <div class="mb-3 flex items-baseline gap-2">
         <h2 class="text-sm font-semibold text-ink-800 dark:text-ink-100">사용법</h2>
-        <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">How to use</span>
+        <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">How to use</span>
       </div>
 
       {d.install && (
         <div class="mb-4">
-          <div class="mb-1.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">설치 · Install</div>
+          <div class="mb-1.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">설치 · Install</div>
           <div class="flex items-stretch gap-2">
             <code id="pc-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{d.install}</code>
             <CopyButton target="#pc-install" label="복사" size="sm" variant="ghost" class="shrink-0" />
@@ -119,7 +119,7 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
         <dl class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
           {rows.map((r) => (
             <div>
-              <dt class="mb-0.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">{r.label}</dt>
+              <dt class="mb-0.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">{r.label}</dt>
               {r.chips ? (
                 <dd class="flex flex-wrap gap-1">
                   {r.chips.map((c) => <span class="glass-chip rounded-full px-2 py-0.5 text-[0.7rem] font-medium">{c}</span>)}
@@ -140,6 +140,12 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
     </section>
   )}
 
+  <!-- Desktop sticky copy affordance: keeps the core "원문 복사" action in reach while
+       reading a long entry. top-20 clears the 56px sticky Header; z below the nav. -->
+  <div class="mb-3 hidden lg:sticky lg:top-20 lg:z-20 lg:flex lg:justify-end">
+    <CopyButton target="#pc-rawtext" label="원문 복사" size="sm" variant="ghost" />
+  </div>
+
   <article class="prose-pc rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
     <Content />
   </article>
@@ -148,13 +154,13 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
     <nav class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="같은 카테고리 이동">
       {prev ? (
         <a href={`${base}/${category}/${prev.slug}/`} class="glass-card flex flex-col rounded-xl p-4">
-          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">← 이전 · Prev</span>
+          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400"><span aria-hidden="true">←</span> 이전 · Prev</span>
           <span class="mt-1 font-medium text-ink-800 dark:text-ink-100">{prev.data.title}</span>
         </a>
       ) : <span></span>}
       {next && (
         <a href={`${base}/${category}/${next.slug}/`} class="glass-card flex flex-col rounded-xl p-4 text-right">
-          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">다음 · Next →</span>
+          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">다음 · Next <span aria-hidden="true">→</span></span>
           <span class="mt-1 font-medium text-ink-800 dark:text-ink-100">{next.data.title}</span>
         </a>
       )}
