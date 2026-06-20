@@ -14,14 +14,25 @@ export interface OnboardingPick {
 }
 
 export const ONBOARDING_PICKS: OnboardingPick[] = [
+  // orient + plan
   { category: 'skills', slug: 'claude-code-workflow-cheatsheet' },
   { category: 'skills', slug: 'zoom-out' },
   { category: 'skills', slug: 'grill-with-docs' },
   { category: 'skills', slug: 'improve-codebase-architecture' },
   { category: 'skills', slug: 'triage' },
+  // super* end-to-end suite
+  { category: 'skills', slug: 'supergoal' },
+  { category: 'skills', slug: 'superpm' },
+  { category: 'skills', slug: 'superdesign' },
+  { category: 'skills', slug: 'superoffice' },
+  { category: 'skills', slug: 'superhacker' },
+  // build your own + infra/CLIs
   { category: 'skills', slug: 'skill-creator' },
   { category: 'skills', slug: 'ssh-llm-connect' },
   { category: 'skills', slug: 'jk-jenkins-cli' },
+  { category: 'skills', slug: 'figma-cli' },
+  { category: 'tools', slug: 'supertonic-tts' },
+  // autonomous loop
   { category: 'plugins', slug: 'autoresearch' },
 ];
 
@@ -65,6 +76,16 @@ Rules:
      claude-code-workflow-cheatsheet github.com/cskwork/claude-code-workflow-cheatsheet
      jk (Jenkins CLI)               github.com/avivsinai/jenkins-cli          (install the jk binary per its README, then add a SKILL.md so agents can drive it)
      autoresearch                   github.com/uditgoenka/autoresearch        (install per its README; it is a plugin/skill)
+   These are whole-repo skills (SKILL.md plus agents/ reference/ templates/) -- copy the ENTIRE repo into ~/.agents/skills/<name>/, not just SKILL.md:
+     supergoal                      github.com/cskwork/supergoal-skill
+     superpm                        github.com/cskwork/superpm-skill
+     superdesign                    github.com/cskwork/superdesign-skill
+     superoffice                    github.com/cskwork/superoffice-skills
+     superhacker                    github.com/cskwork/superhacker-skill      (authorized security testing / CTF / learning only)
+
+   Command-line tools in the kit (install the binary; no skill folder needed):
+     supertonic-tts   npm i -g supertonic-tts    (local text-to-speech CLI)
+     figma-cli        npm i -g figma-ds-cli       (Figma design-system CLI; add a SKILL.md wrapper so agents can drive it -> skills/figma-cli)
 
 3. Symlink ~/.agents into every coding CLI I have
    Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
