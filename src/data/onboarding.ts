@@ -39,7 +39,9 @@ export const INSTALL_PROMPT = `You are setting up my global AI coding-agent envi
 Rules:
 - Be idempotent. If something already exists, UPDATE it to the latest version instead of duplicating.
 - Never delete my data. Back up any real file you replace to <file>.bak-<timestamp> before symlinking over it.
-- Detect my OS and use the matching commands (ln -s on macOS/Linux; New-Item -ItemType SymbolicLink in PowerShell, which needs Developer Mode or an admin terminal on Windows).
+- Resolve ~ to my home directory on the current OS, and use the matching link command:
+    macOS/Linux: ln -s
+    Windows (PowerShell): New-Item -ItemType SymbolicLink -- needs Developer Mode or an admin terminal. If neither is available, fall back by target type: a directory -> New-Item -ItemType Junction (no elevation needed); a file -> New-Item -ItemType HardLink (same drive, no elevation); copy only as a last resort and tell me it will not auto-update.
 - Do not commit or push anything. Print a summary of created / updated / skipped / backed-up at the end.
 
 1. Create the unified directory
@@ -65,7 +67,8 @@ Rules:
      autoresearch                   github.com/uditgoenka/autoresearch        (install per its README; it is a plugin/skill)
 
 3. Symlink ~/.agents into every coding CLI I have
-   Detect which are installed (config dir present or binary on PATH). For each present tool,
+   Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
+   config path). For each present tool,
    replace its global rules file with a symlink to ~/.agents/AGENTS.md and, where the tool
    supports a global skills dir, replace it with a symlink to ~/.agents/skills. Back up first.
      Claude Code     ~/.claude/CLAUDE.md            and  ~/.claude/skills
