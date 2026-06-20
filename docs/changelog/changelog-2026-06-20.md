@@ -174,3 +174,39 @@ accent, glassmorphism, 카테고리 hue, 다크모드)는 유지하고 표적 �
   책임 있게 기술(공격 역량 과장 금지).
 - 검증: `npm run build` green(61 페이지, +6). 신규 상세 6쪽 생성, 홈 "What's in the kit · 16 items",
   신규 픽 7종 카드 렌더, 설치 프롬프트에 supergoal-skill 소스 임베드 확인.
+
+---
+
+## 5차 — 랜딩 성능 최적화 (off-screen 카드 렌더 스킵)
+
+측정 우선: `index.html` 324KB raw / **51KB gz**(3차 39KB → picks 16종 + 신규 카탈로그로 증가),
+홈에 카드 article **75개** + 인라인 SVG **196개**, CSS 7.8KB gz. 전송량은 양호 —
+실질 병목은 **긴 단일 스크롤에서 화면 밖 ~60개 카드의 레이아웃/페인트**.
+
+### 변경 (왜)
+- `global.css` `.glass-card`에 `content-visibility: auto` + `contain-intrinsic-size: auto 200px`.
+  브라우저가 뷰포트 근처가 아닌 카드의 레이아웃/페인트를 미룸. intrinsic-size로 스크롤바·앵커
+  안정, `auto`가 첫 페인트 후 실측 크기 캐시. 미지원 브라우저는 no-op(graceful). reveal
+  IntersectionObserver는 섹션만 관찰하므로 카드 cascade 애니메이션과 무충돌.
+- 적용 안 함(ROI 낮음): CSS 인라인화(7.8KB gz 차단은 미미), SVG 스프라이트 dedup(gzip이 이미
+  반복 마크업 압축; DOM 노드 감소 효과는 content-visibility가 더 직접적으로 해결), og.png(크롤러 전용).
+
+## 6차 — 전역 설정 경로 교정 (설치 프롬프트 매핑)
+
+사용자 지적(Gemini 기본 파일·Antigravity 차이·Kilo 누락)을 현재(2026) 문서로 검증 후 수정:
+- **Gemini CLI**: `~/.gemini/AGENTS.md` → `~/.gemini/GEMINI.md`(기본). AGENTS.md 이름은
+  `~/.gemini/settings.json`의 `context.fileName`에 추가해야 인식. 전역 skills 폴더 없음.
+- **Antigravity**: `~/.antigravity/AGENTS.md`(틀림) → `~/.gemini/GEMINI.md` 공유(알려진 충돌),
+  워크스페이스 규칙은 `.agents/rules/` + AGENTS.md(v1.20.3+).
+- **Codex skills**: "(if supported)" 제거 — `~/.codex/skills/` 정식 지원 확인.
+- **Cursor**: 전역 파일 없음, 레포 루트 `AGENTS.md` 네이티브 지원(+`.cursor/rules/` 스코프).
+- **Windsurf**: 전역 `~/.windsurf/rules/` 또는 레포 `AGENTS.md`(루트 always-on).
+- **Kilo Code**: 신규 추가 — AGENTS.md 우선 로드 후 `.kilocode/rules/`, 전역은 글로벌 config 폴더 AGENTS.md.
+- 심링크는 링크 이름만 도구별로 다르고(CLAUDE.md/AGENTS.md/GEMINI.md) 타깃은 단일 `~/.agents/AGENTS.md` —
+  이 점을 프롬프트에 명시. `.ts`/`.md` 동기 + KO 함정 절에 Gemini/Antigravity/Cursor/Windsurf/Kilo 경로 주석.
+
+### 검증
+- `npm run build` green(61 페이지). `dist/_astro/*.css`에 `content-visibility:auto` 확인.
+  `index.html` + 상세 페이지에 교정된 매핑("Gemini's DEFAULT file is GEMINI.md", "Kilo Code") 임베드 확인.
+- 출처: Gemini CLI docs(GEMINI.md hierarchy, context.fileName), Antigravity rules/issue #16058,
+  Codex developers.openai.com(skills, AGENTS.md), OpenCode docs, Cursor docs, Windsurf/Devin docs, Kilo docs.

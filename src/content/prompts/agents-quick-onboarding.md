@@ -32,7 +32,13 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
   연결(둘 다 권한 불필요). macOS·Linux는 `ln -s` 한 줄로 끝나 별도 권한이 필요 없다.
 - **기존 파일 보존**: 프롬프트가 덮어쓰기 전에 `<파일>.bak-<시각>`으로 백업하도록 지시한다 —
   그래도 중요한 `CLAUDE.md`가 있다면 먼저 따로 챙겨 두자.
-- **도구별 스킬 지원 차이**: 전역 `skills/` 폴더를 읽지 않는 CLI는 규칙 파일만 연결된다.
+- **도구별 스킬 지원 차이**: 전역 `skills/` 폴더를 읽는 건 Claude Code(`~/.claude/skills`)·Codex(`~/.codex/skills`)
+  등 일부뿐. 나머지는 규칙 파일만 연결된다.
+- **Gemini CLI·Antigravity는 파일명이 다르다**: 둘 다 기본 파일이 `AGENTS.md`가 아니라 `~/.gemini/GEMINI.md`
+  (Antigravity가 Gemini 전역 파일을 공유한다). Gemini에서 `AGENTS.md` 이름을 쓰려면 `~/.gemini/settings.json`에
+  `"context": { "fileName": ["AGENTS.md", "GEMINI.md"] }`를 먼저 넣어야 한다. Cursor는 전역 파일이 없고
+  레포 루트의 `AGENTS.md`를, Windsurf는 `~/.windsurf/rules/`(전역) 또는 레포 `AGENTS.md`를, Kilo Code는
+  전역 설정 폴더의 `AGENTS.md`를 읽는다 — 프롬프트가 도구별로 올바른 경로에 연결한다.
 
 아래 프롬프트를 에이전트 채팅창에 그대로 붙여넣으세요.
 
@@ -81,15 +87,22 @@ Rules:
 
 3. Symlink ~/.agents into every coding CLI I have
    Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
-   config path). For each present tool,
-   replace its global rules file with a symlink to ~/.agents/AGENTS.md and, where the tool
-   supports a global skills dir, replace it with a symlink to ~/.agents/skills. Back up first.
-     Claude Code     ~/.claude/CLAUDE.md            and  ~/.claude/skills
-     Codex CLI       ~/.codex/AGENTS.md             and  ~/.codex/skills (if supported)
-     Gemini CLI      ~/.gemini/AGENTS.md
-     OpenCode        ~/.config/opencode/AGENTS.md
-     Antigravity     ~/.antigravity/AGENTS.md       (else drop AGENTS.md per repo)
-     Cursor/Windsurf <repo>/AGENTS.md               (per project)
+   config path). For each present tool, replace its global rules file with a symlink to
+   ~/.agents/AGENTS.md -- the link NAME differs per tool (CLAUDE.md / AGENTS.md / GEMINI.md) but
+   all point at the one file -- and where the tool has a global skills dir, symlink it to
+   ~/.agents/skills. Back up any real file first. Current (2026) per-tool paths:
+     Claude Code   rules ~/.claude/CLAUDE.md             skills ~/.claude/skills
+     Codex CLI     rules ~/.codex/AGENTS.md              skills ~/.codex/skills
+     OpenCode      rules ~/.config/opencode/AGENTS.md    (AGENTS.md overrides CLAUDE.md here)
+     Gemini CLI    rules ~/.gemini/GEMINI.md             Gemini's DEFAULT file is GEMINI.md, NOT AGENTS.md.
+                     To use the AGENTS.md name instead, first add
+                     "context": { "fileName": ["AGENTS.md", "GEMINI.md"] } to ~/.gemini/settings.json.
+                     No global skills dir.
+     Antigravity   rules ~/.gemini/GEMINI.md             Shares Gemini's global file (known conflict). Its
+                     per-project rules live in .agents/rules/ + AGENTS.md, so also symlink AGENTS.md per repo.
+     Windsurf      global rules dir ~/.windsurf/rules/   (or a per-repo AGENTS.md, always-on at the repo root)
+     Cursor        per-repo AGENTS.md at the repo root   (no global rules file; .cursor/rules/ for scoped extras)
+     Kilo Code     AGENTS.md in its global config dir    (loads AGENTS.md first, then .kilocode/rules/)
      any other agents.md-compatible CLI -> its global config dir + skills dir
    Skip tools that are not installed and list which you skipped.
 
