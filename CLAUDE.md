@@ -135,8 +135,9 @@ mkdir -p ~/.claude && ln -sf ~/promptbox/CLAUDE.md ~/.claude/CLAUDE.md
 # OpenAI Codex CLI
 mkdir -p ~/.codex && ln -sf ~/promptbox/AGENTS.md ~/.codex/AGENTS.md
 
-# Google Gemini CLI
-mkdir -p ~/.gemini && ln -sf ~/promptbox/AGENTS.md ~/.gemini/AGENTS.md
+# Google Gemini CLI — Gemini's default context file is GEMINI.md, not AGENTS.md
+# (to use the AGENTS.md name instead, add "context":{"fileName":["AGENTS.md","GEMINI.md"]} to ~/.gemini/settings.json)
+mkdir -p ~/.gemini && ln -sf ~/promptbox/AGENTS.md ~/.gemini/GEMINI.md
 
 # OpenCode
 mkdir -p ~/.config/opencode && ln -sf ~/promptbox/AGENTS.md ~/.config/opencode/AGENTS.md
