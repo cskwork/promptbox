@@ -35,7 +35,7 @@ git clone https://github.com/cskwork/coding-agent-rules.git ~/coding-agent-rules
 
 ln -sf ~/coding-agent-rules/CLAUDE.md ~/.claude/CLAUDE.md
 ln -sf ~/coding-agent-rules/AGENTS.md ~/.codex/AGENTS.md
-ln -sf ~/coding-agent-rules/AGENTS.md ~/.gemini/AGENTS.md
+ln -sf ~/coding-agent-rules/AGENTS.md ~/.gemini/GEMINI.md   # Gemini reads GEMINI.md by default, not AGENTS.md
 ln -sf ~/coding-agent-rules/AGENTS.md ~/.config/opencode/AGENTS.md
 ```
 

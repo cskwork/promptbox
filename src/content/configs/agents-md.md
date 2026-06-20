@@ -7,7 +7,7 @@ source: https://github.com/cskwork/coding-agent-rules
 author: cskwork
 license: MIT
 order: 20
-target_file: "~/.codex/AGENTS.md · ~/.gemini/AGENTS.md · ~/.config/opencode/AGENTS.md · <repo>/AGENTS.md"
+target_file: "~/.codex/AGENTS.md · ~/.gemini/GEMINI.md · ~/.config/opencode/AGENTS.md · <repo>/AGENTS.md"
 tools: [Codex CLI, Gemini CLI, OpenCode, Cursor, Windsurf]
 ---
 
@@ -16,9 +16,13 @@ tools: [Codex CLI, Gemini CLI, OpenCode, Cursor, Windsurf]
 | 도구 | 파일 경로 |
 |---|---|
 | OpenAI Codex CLI | `~/.codex/AGENTS.md` |
-| Google Gemini CLI | `~/.gemini/AGENTS.md` |
+| Google Gemini CLI | `~/.gemini/GEMINI.md` ※ |
 | OpenCode | `~/.config/opencode/AGENTS.md` |
-| Cursor / Windsurf / 기타 | `<repo>/AGENTS.md` |
+| Cursor / Windsurf(현 Devin Desktop) / 기타 | `<repo>/AGENTS.md` |
+
+※ Gemini CLI의 **기본 컨텍스트 파일명은 `GEMINI.md`** (AGENTS.md 아님, 2026-06 기준). `AGENTS.md` 이름을
+그대로 쓰려면 `~/.gemini/settings.json`에 `"context": { "fileName": ["AGENTS.md", "GEMINI.md"] }`를 추가한다.
+Google Antigravity는 이 `~/.gemini/GEMINI.md`를 전역 규칙 파일로 공유한다.
 
 ## CLAUDE.md와의 관계
 

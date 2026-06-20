@@ -224,3 +224,13 @@ accent, glassmorphism, 카테고리 hue, 다크모드)는 유지하고 표적 �
   `.agents/agents.md + .agents/skills/` 임베드 확인.
 - 1차 출처: google-gemini.github.io gemini-md, github #16058, codelabs.developers.google.com
   antigravity 파이프라인, docs.devin.ai cascade/agents-md, kilo.ai custom-instructions.
+
+### 6차-c — 같은 Gemini 경로 오류를 나머지 파일까지 정정
+설치 프롬프트 외에 동일한 `~/.gemini/AGENTS.md`(Gemini가 기본으로 안 읽음) 오류가 있던 4곳을
+`~/.gemini/GEMINI.md`로 통일(설정 없이 바로 동작):
+- 레포 계약 파일 `CLAUDE.md`·`AGENTS.md`의 "Global install" 심링크 라인 + settings.json 대안 주석.
+- `configs/claude-md.md`의 단일 출처 심링크 블록.
+- `configs/agents-md.md`의 `target_file`·"어디에 둘 것인가" 표 + GEMINI.md/settings.json/Antigravity 공유 각주,
+  Windsurf→Devin Desktop 병기.
+- 검증: build green(61). `grep`로 소스 내 `~/.gemini/AGENTS.md` 잔존 0(changelog 기록 제외) 확인,
+  `dist/configs/agents-md/`에 `~/.gemini/GEMINI.md` 반영 확인.
