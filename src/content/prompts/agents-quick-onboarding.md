@@ -94,6 +94,7 @@ Rules:
      claude-code-workflow-cheatsheet github.com/cskwork/claude-code-workflow-cheatsheet
      jk (Jenkins CLI)               github.com/avivsinai/jenkins-cli          (install the jk binary per its README, then add a SKILL.md so agents can drive it)
      autoresearch                   github.com/uditgoenka/autoresearch        (install per its README; it is a plugin/skill)
+     call-agent                     github.com/cskwork/call-agent             (delegation skill -> routes to codex/agy/kiro/claude/notebooklm; copy its skills/call-agent folder, NOT its install.sh -- the symlink step below links it)
    These are whole-repo skills (SKILL.md plus agents/ reference/ templates/) -- copy the ENTIRE repo into ~/.agents/skills/<name>/, not just SKILL.md:
      supergoal                      github.com/cskwork/supergoal-skill
      superpm                        github.com/cskwork/superpm-skill
