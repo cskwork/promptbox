@@ -2,6 +2,7 @@
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import Hero from '~/components/Hero.astro';
 import HowItWorks from '~/components/HowItWorks.astro';
+import DeveloperPicks from '~/components/DeveloperPicks.astro';
 import Card from '~/components/Card.astro';
 import CategoryIcon from '~/components/CategoryIcon.astro';
 import { getCollection } from 'astro:content';
@@ -24,6 +25,7 @@ const currentHref = base + '/';
 <BaseLayout title="promptbox — AI 코딩 에이전트 도구 모음" currentHref={currentHref}>
   <Hero total={total} categoryCount={categoryCount} />
   <HowItWorks />
+  <DeveloperPicks />
 
   <section id="catalog" class="scroll-mt-20 pt-4">
     <div class="mb-6 flex items-end justify-between border-b border-ink-200/70 pb-3 dark:border-ink-800/70">

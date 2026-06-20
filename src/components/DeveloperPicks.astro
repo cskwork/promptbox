@@ -1,0 +1,89 @@
+---
+import Card from '~/components/Card.astro';
+import CopyButton from '~/components/CopyButton.astro';
+import { getCollection } from 'astro:content';
+import { ONBOARDING_PICKS, INSTALL_PROMPT } from '~/data/onboarding';
+import type { CategoryKey } from '~/content/config';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+
+// Resolve each pick to its content entry. Cache one getCollection() call per category,
+// skip any pick that goes missing/hidden so the section degrades instead of erroring.
+const cols = new Map<CategoryKey, any[]>();
+async function entriesFor(cat: CategoryKey) {
+  if (!cols.has(cat)) cols.set(cat, await getCollection(cat, (e: any) => !e.data.hidden));
+  return cols.get(cat)!;
+}
+const picks = (
+  await Promise.all(
+    ONBOARDING_PICKS.map(async ({ category, slug }) => {
+      const entry = (await entriesFor(category)).find((e: any) => e.slug === slug);
+      return entry ? { entry, category } : null;
+    }),
+  )
+).filter(Boolean) as { entry: any; category: CategoryKey }[];
+
+const promptHref = `${base}/prompts/agents-quick-onboarding/`;
+
+const does = [
+  { ko: '추천 스킬을 ~/.agents/skills/ 에 설치 (있으면 최신화)', en: 'Installs each skill, updates if present' },
+  { ko: '공통 시스템 프롬프트 AGENTS.md 를 한곳에', en: 'One shared system prompt for every tool' },
+  { ko: '설치된 모든 CLI에 자동 심링크', en: 'Auto-symlinks into every CLI you have' },
+];
+---
+<section id="start-here" class="reveal scroll-mt-20 py-10">
+  <div class="glass-panel rounded-2xl p-6 lg:p-8">
+    <div class="mb-5 flex flex-wrap items-end justify-between gap-2">
+      <div>
+        <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50">개발자 추천 — 여기서 시작</h2>
+        <p class="mt-1 text-sm text-ink-500">Start here · a hand-picked starter kit, installed with one prompt.</p>
+      </div>
+      <span class="font-mono text-[0.72rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">Developer picks</span>
+    </div>
+
+    <p class="mb-5 max-w-3xl text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
+      아래 프롬프트를 쓰는 코딩 에이전트(Claude Code · Codex · Gemini CLI …) 채팅창에 <strong class="font-semibold text-ink-800 dark:text-ink-100">그대로 붙여넣으면</strong>,
+      추천 스킬 한 묶음과 공통 규칙을 <code class="rounded bg-ink-100/80 px-1 py-0.5 font-mono text-[0.85em] dark:bg-ink-800/80">~/.agents/</code> 한곳에 설치하고
+      설치된 모든 CLI에 자동으로 연결합니다. 이미 있으면 최신으로 업데이트합니다.
+      <span class="text-ink-500">Paste it into your agent — it installs the kit and wires it into every CLI you have.</span>
+    </p>
+
+    <!-- One-shot install prompt: the <pre> is the copy target (button grabs its innerText). -->
+    <div class="mb-5 overflow-hidden rounded-xl border border-ink-800/70 bg-ink-950 shadow-sm">
+      <div class="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-2">
+        <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-400">한 방 설치 프롬프트 · paste into your agent</span>
+        <CopyButton target="#onboard-prompt" label="프롬프트 복사" size="sm" />
+      </div>
+      <pre id="onboard-prompt" class="max-h-80 overflow-auto px-4 py-3 font-mono text-[0.78rem] leading-relaxed text-ink-100">{INSTALL_PROMPT}</pre>
+    </div>
+
+    <div class="mb-6 grid gap-2 sm:grid-cols-3">
+      {does.map((d) => (
+        <div class="flex items-start gap-2 rounded-lg border border-ink-100/80 bg-white/50 px-3 py-2 dark:border-white/10 dark:bg-ink-900/40">
+          <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-700 dark:text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          <span class="text-sm leading-snug text-ink-700 dark:text-ink-200">{d.ko}<span class="block text-[0.78rem] text-ink-500 dark:text-ink-400">{d.en}</span></span>
+        </div>
+      ))}
+    </div>
+
+    <div class="mb-3 flex flex-wrap items-baseline gap-x-2">
+      <h3 class="text-sm font-semibold text-ink-800 dark:text-ink-100">한 묶음에 담긴 것</h3>
+      <span class="font-mono text-[0.72rem] text-ink-500 dark:text-ink-400">What's in the kit · {picks.length} items</span>
+      <a href={promptHref} class="ml-auto font-mono text-[0.72rem] text-accent-700 hover:underline dark:text-accent-400">설치 프롬프트 자세히 →</a>
+    </div>
+
+    <div class="grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
+      {picks.map(({ entry, category }) => (
+        <Card
+          href={`${base}/${category}/${entry.slug}/`}
+          title={entry.data.title}
+          summary={entry.data.summary}
+          summaryEn={entry.data.summary_en}
+          tags={entry.data.tags}
+          source={entry.data.source}
+          category={category}
+        />
+      ))}
+    </div>
+  </div>
+</section>

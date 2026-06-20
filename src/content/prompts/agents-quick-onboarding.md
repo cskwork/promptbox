@@ -1,0 +1,83 @@
+---
+title: 코딩 에이전트 온보딩 한 방 설치
+summary: "추천 스킬 한 묶음과 공통 시스템 프롬프트를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(.claude·.codex·.gemini·opencode 등)에 자동으로 심링크 연결하는 복사-붙여넣기 프롬프트. 이미 있으면 최신으로 업데이트한다."
+summary_en: "One paste-and-go prompt that installs a curated skill set plus a shared system prompt into a single ~/.agents/ dir, then symlinks it into every coding CLI you have — updating anything already there."
+tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles]
+author: cskwork
+order: 5
+use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 한곳에서 관리하고 싶을 때. 에이전트 채팅창에 그대로 붙여넣으면 끝."
+---
+
+## 한 줄
+
+추천 스킬 묶음과 공통 시스템 프롬프트를 `~/.agents/` **한 폴더**에 모으고, 설치된 모든 코딩 CLI에
+심링크(symlink, 한 파일을 여러 위치에서 가리키게 하는 바로가기)로 연결하는 단일 설치 프롬프트.
+
+## 언제 쓰는가
+
+- 새 노트북·서버를 세팅하면서 자주 쓰는 스킬을 한 번에 깔고 싶을 때
+- Claude Code·Codex·Gemini CLI·OpenCode를 섞어 쓰는데, 규칙(시스템 프롬프트)과 스킬을
+  도구마다 따로 복사하기 싫을 때 — `~/.agents/` 하나만 고치면 전부 따라온다
+
+## 무엇을 하는가
+
+1. `~/.agents/`를 단일 출처로 만든다 — `AGENTS.md`(공통 규칙) + `skills/`(스킬 모음).
+2. 추천 스킬을 각 소스에서 받아 `~/.agents/skills/<이름>/`에 설치한다. **이미 있으면 최신으로 업데이트.**
+3. 설치된 CLI를 감지해 각 도구의 규칙 파일·스킬 폴더를 `~/.agents/`로 심링크한다.
+
+## 함정
+
+- **심링크 권한**: Windows는 개발자 모드(Developer Mode) 또는 관리자 터미널이 있어야 심링크를 만든다.
+- **기존 파일 보존**: 프롬프트가 덮어쓰기 전에 `<파일>.bak-<시각>`으로 백업하도록 지시한다 —
+  그래도 중요한 `CLAUDE.md`가 있다면 먼저 따로 챙겨 두자.
+- **도구별 스킬 지원 차이**: 전역 `skills/` 폴더를 읽지 않는 CLI는 규칙 파일만 연결된다.
+
+아래 프롬프트를 에이전트 채팅창에 그대로 붙여넣으세요.
+
+```text
+You are setting up my global AI coding-agent environment. Build ONE shared source of truth at ~/.agents/ and symlink it into every coding CLI I already have installed.
+
+Rules:
+- Be idempotent. If something already exists, UPDATE it to the latest version instead of duplicating.
+- Never delete my data. Back up any real file you replace to <file>.bak-<timestamp> before symlinking over it.
+- Detect my OS and use the matching commands (ln -s on macOS/Linux; New-Item -ItemType SymbolicLink in PowerShell, which needs Developer Mode or an admin terminal on Windows).
+- Do not commit or push anything. Print a summary of created / updated / skipped / backed-up at the end.
+
+1. Create the unified directory
+   - ~/.agents/AGENTS.md      my global system prompt (coding rules), shared by every tool
+   - ~/.agents/skills/        every skill lives here, one folder per skill containing a SKILL.md
+   - ~/.agents/.cache/        clones of the source repos, used for updates
+   If ~/.agents/AGENTS.md is missing, fetch the latest from
+   https://raw.githubusercontent.com/cskwork/coding-agent-rules/main/AGENTS.md
+   If it already exists, keep my edits and just tell me it can be refreshed from that URL.
+
+2. Install or update these skills into ~/.agents/skills/<name>/
+   For each: clone into ~/.agents/.cache/ (or git pull if already there), then copy the
+   folder that holds SKILL.md to ~/.agents/skills/<name>/ (overwrite to update).
+   mattpocock/skills holds four of them — clone it once and copy all four.
+     grill-with-docs                github.com/mattpocock/skills  -> skills/engineering/grill-with-docs
+     improve-codebase-architecture  github.com/mattpocock/skills  -> skills/engineering/improve-codebase-architecture
+     triage                         github.com/mattpocock/skills  -> skills/engineering/triage
+     zoom-out                       github.com/mattpocock/skills  -> skills/engineering/zoom-out
+     skill-creator                  github.com/anthropics/skills  -> skills/skill-creator
+     ssh-llm-connect                github.com/cskwork/ssh-llm-connect        (copy its SKILL.md; run install.sh per project when you need the SSH guard)
+     claude-code-workflow-cheatsheet github.com/cskwork/claude-code-workflow-cheatsheet
+     jk (Jenkins CLI)               github.com/avivsinai/jenkins-cli          (install the jk binary per its README, then add a SKILL.md so agents can drive it)
+     autoresearch                   github.com/uditgoenka/autoresearch        (install per its README; it is a plugin/skill)
+
+3. Symlink ~/.agents into every coding CLI I have
+   Detect which are installed (config dir present or binary on PATH). For each present tool,
+   replace its global rules file with a symlink to ~/.agents/AGENTS.md and, where the tool
+   supports a global skills dir, replace it with a symlink to ~/.agents/skills. Back up first.
+     Claude Code     ~/.claude/CLAUDE.md            and  ~/.claude/skills
+     Codex CLI       ~/.codex/AGENTS.md             and  ~/.codex/skills (if supported)
+     Gemini CLI      ~/.gemini/AGENTS.md
+     OpenCode        ~/.config/opencode/AGENTS.md
+     Antigravity     ~/.antigravity/AGENTS.md       (else drop AGENTS.md per repo)
+     Cursor/Windsurf <repo>/AGENTS.md               (per project)
+     any other agents.md-compatible CLI -> its global config dir + skills dir
+   Skip tools that are not installed and list which you skipped.
+
+4. Verify
+   List ~/.agents/skills/, confirm every symlink resolves to ~/.agents, and print the summary.
+```
