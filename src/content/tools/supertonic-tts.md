@@ -9,7 +9,7 @@ license: MIT
 languages: [JavaScript]
 platforms: [macOS, Linux, Windows]
 order: 30
-install: "npm install -g supertonic-tts"
+install: "npm install -g github:cskwork/supertonic-tts"
 ---
 
 ## 한 줄
@@ -37,7 +37,8 @@ CLI(`supertts` / `supertonic-tts`)와 Vite 기반 웹 앱이 같은 패키지에
 
 ````bash
 # 전역 설치 (Windows / macOS / Linux, Node >= 18.3 필요)
-npm install -g supertonic-tts
+# npm 레지스트리 게시 전이라 GitHub 저장소에서 직접 설치합니다
+npm install -g github:cskwork/supertonic-tts
 
 # 기본 사용 — 언어 자동 감지 (ko / ja / en)
 supertts "Hello from Supertonic!"
