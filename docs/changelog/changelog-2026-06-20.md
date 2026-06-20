@@ -155,3 +155,22 @@ accent, glassmorphism, 카테고리 hue, 다크모드)는 유지하고 표적 �
 ### 검증
 - `npm run build` green(55 페이지, +1). `dist/prompts/agents-quick-onboarding/` 생성 확인,
   `dist/index.html`에 섹션 제목 + 설치 프롬프트 본문 임베드 확인(복사 버튼 동작 대상).
+
+### 후속 — 크로스플랫폼 보강
+- 설치 프롬프트의 OS 분기 강화: `~`를 현재 OS 홈으로 해석, Windows에서 심링크 권한이 없으면
+  폴더→정션(junction)·파일→하드링크(hardlink)로 자동 폴백(둘 다 권한 불필요), 최후엔 복사 +
+  "자동 업데이트 안 됨" 고지. macOS/Linux는 `ln -s`. `.ts`/`.md` 동기 수정.
+
+### 후속 2 — 추천 항목 7종 추가 (picks 9 → 16)
+- 신규 카탈로그 엔트리 6건(병렬 executor 서브에이전트가 각 소스 클론·작성, gold 템플릿=supergoal.md):
+  `skills/superdesign` · `skills/superoffice` · `skills/superhacker` · `skills/superpm`(모두 cskwork
+  super* 멀티파일 스킬, 전체 repo clone+symlink 필요), `skills/figma-cli`(silships/figma-cli —
+  SKILL.md 없어 직접 작성; bin 별칭 `figma-cli`·서브커맨드 전부 REFERENCE.md와 대조 검증),
+  `tools/supertonic-tts`(사용자 지정 "just cli" → tools 카테고리, npm 전역 설치).
+- 기존 `skills/supergoal`은 소스 일치 확인 후 picks에만 추가(중복 생성 안 함).
+- `onboarding.ts`: ONBOARDING_PICKS 16종으로 확장(테마별 정렬) + INSTALL_PROMPT에 super* 멀티파일
+  스킬 블록·CLI 도구 블록(supertonic-tts·figma-ds-cli) 추가. 동일 페이로드를 `.md`에 동기.
+- superhacker는 보안 스킬이라 "서면 승인 게이트·최소 영향·CTF/학습/승인된 테스트 한정"으로
+  책임 있게 기술(공격 역량 과장 금지).
+- 검증: `npm run build` green(61 페이지, +6). 신규 상세 6쪽 생성, 홈 "What's in the kit · 16 items",
+  신규 픽 7종 카드 렌더, 설치 프롬프트에 supergoal-skill 소스 임베드 확인.
