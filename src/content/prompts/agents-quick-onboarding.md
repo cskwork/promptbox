@@ -34,11 +34,13 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
   그래도 중요한 `CLAUDE.md`가 있다면 먼저 따로 챙겨 두자.
 - **도구별 스킬 지원 차이**: 전역 `skills/` 폴더를 읽는 건 Claude Code(`~/.claude/skills`)·Codex(`~/.codex/skills`)
   등 일부뿐. 나머지는 규칙 파일만 연결된다.
-- **Gemini CLI·Antigravity는 파일명이 다르다**: 둘 다 기본 파일이 `AGENTS.md`가 아니라 `~/.gemini/GEMINI.md`
-  (Antigravity가 Gemini 전역 파일을 공유한다). Gemini에서 `AGENTS.md` 이름을 쓰려면 `~/.gemini/settings.json`에
-  `"context": { "fileName": ["AGENTS.md", "GEMINI.md"] }`를 먼저 넣어야 한다. Cursor는 전역 파일이 없고
-  레포 루트의 `AGENTS.md`를, Windsurf는 `~/.windsurf/rules/`(전역) 또는 레포 `AGENTS.md`를, Kilo Code는
-  전역 설정 폴더의 `AGENTS.md`를 읽는다 — 프롬프트가 도구별로 올바른 경로에 연결한다.
+- **Gemini CLI·Antigravity는 파일명이 다르다** (2026-06 기준): 둘 다 기본 파일이 `AGENTS.md`가 아니라
+  `~/.gemini/GEMINI.md` (Antigravity가 Gemini 전역 파일을 공유 — 알려진 충돌). Gemini에서 `AGENTS.md`
+  이름을 쓰려면 `~/.gemini/settings.json`에 `"context": { "fileName": ["AGENTS.md", "GEMINI.md"] }`를
+  먼저 넣어야 한다. Antigravity는 워크스페이스에서 `.agents/` 디렉터리(`.agents/agents.md`·`.agents/skills/`)를
+  네이티브로 인식한다. Cursor는 전역 파일 없이 레포 루트 `AGENTS.md`, Windsurf(현 **Devin Desktop**)는 레포
+  루트 `AGENTS.md`(always-on), Kilo Code는 `~/.config/kilo/AGENTS.md`를 읽는다 — 프롬프트가 도구별로
+  올바른 경로에 연결한다.
 
 아래 프롬프트를 에이전트 채팅창에 그대로 붙여넣으세요.
 
@@ -98,11 +100,13 @@ Rules:
                      To use the AGENTS.md name instead, first add
                      "context": { "fileName": ["AGENTS.md", "GEMINI.md"] } to ~/.gemini/settings.json.
                      No global skills dir.
-     Antigravity   rules ~/.gemini/GEMINI.md             Shares Gemini's global file (known conflict). Its
-                     per-project rules live in .agents/rules/ + AGENTS.md, so also symlink AGENTS.md per repo.
-     Windsurf      global rules dir ~/.windsurf/rules/   (or a per-repo AGENTS.md, always-on at the repo root)
+     Antigravity   rules ~/.gemini/GEMINI.md             Shares Gemini's global file (known conflict, issue #16058).
+                     Per-workspace it NATIVELY reads a .agents/ dir (.agents/agents.md + .agents/skills/), so point
+                     that skills dir at ~/.agents/skills too.
+     Windsurf      per-repo AGENTS.md at the repo root   Renamed "Devin Desktop". AGENTS.md is always-on at the root;
+                     project rules engine is .devin/rules/ (legacy .windsurf/rules/). No confirmed home-dir global file.
      Cursor        per-repo AGENTS.md at the repo root   (no global rules file; .cursor/rules/ for scoped extras)
-     Kilo Code     AGENTS.md in its global config dir    (loads AGENTS.md first, then .kilocode/rules/)
+     Kilo Code     rules ~/.config/kilo/AGENTS.md        (a project AGENTS.md overrides it; in-project AGENTS.md loads, then .kilocode/rules/)
      any other agents.md-compatible CLI -> its global config dir + skills dir
    Skip tools that are not installed and list which you skipped.
 

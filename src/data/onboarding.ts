@@ -100,11 +100,13 @@ Rules:
                      To use the AGENTS.md name instead, first add
                      "context": { "fileName": ["AGENTS.md", "GEMINI.md"] } to ~/.gemini/settings.json.
                      No global skills dir.
-     Antigravity   rules ~/.gemini/GEMINI.md             Shares Gemini's global file (known conflict). Its
-                     per-project rules live in .agents/rules/ + AGENTS.md, so also symlink AGENTS.md per repo.
-     Windsurf      global rules dir ~/.windsurf/rules/   (or a per-repo AGENTS.md, always-on at the repo root)
+     Antigravity   rules ~/.gemini/GEMINI.md             Shares Gemini's global file (known conflict, issue #16058).
+                     Per-workspace it NATIVELY reads a .agents/ dir (.agents/agents.md + .agents/skills/), so point
+                     that skills dir at ~/.agents/skills too.
+     Windsurf      per-repo AGENTS.md at the repo root   Renamed "Devin Desktop". AGENTS.md is always-on at the root;
+                     project rules engine is .devin/rules/ (legacy .windsurf/rules/). No confirmed home-dir global file.
      Cursor        per-repo AGENTS.md at the repo root   (no global rules file; .cursor/rules/ for scoped extras)
-     Kilo Code     AGENTS.md in its global config dir    (loads AGENTS.md first, then .kilocode/rules/)
+     Kilo Code     rules ~/.config/kilo/AGENTS.md        (a project AGENTS.md overrides it; in-project AGENTS.md loads, then .kilocode/rules/)
      any other agents.md-compatible CLI -> its global config dir + skills dir
    Skip tools that are not installed and list which you skipped.
 
