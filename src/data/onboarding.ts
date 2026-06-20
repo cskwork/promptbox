@@ -89,15 +89,22 @@ Rules:
 
 3. Symlink ~/.agents into every coding CLI I have
    Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
-   config path). For each present tool,
-   replace its global rules file with a symlink to ~/.agents/AGENTS.md and, where the tool
-   supports a global skills dir, replace it with a symlink to ~/.agents/skills. Back up first.
-     Claude Code     ~/.claude/CLAUDE.md            and  ~/.claude/skills
-     Codex CLI       ~/.codex/AGENTS.md             and  ~/.codex/skills (if supported)
-     Gemini CLI      ~/.gemini/AGENTS.md
-     OpenCode        ~/.config/opencode/AGENTS.md
-     Antigravity     ~/.antigravity/AGENTS.md       (else drop AGENTS.md per repo)
-     Cursor/Windsurf <repo>/AGENTS.md               (per project)
+   config path). For each present tool, replace its global rules file with a symlink to
+   ~/.agents/AGENTS.md -- the link NAME differs per tool (CLAUDE.md / AGENTS.md / GEMINI.md) but
+   all point at the one file -- and where the tool has a global skills dir, symlink it to
+   ~/.agents/skills. Back up any real file first. Current (2026) per-tool paths:
+     Claude Code   rules ~/.claude/CLAUDE.md             skills ~/.claude/skills
+     Codex CLI     rules ~/.codex/AGENTS.md              skills ~/.codex/skills
+     OpenCode      rules ~/.config/opencode/AGENTS.md    (AGENTS.md overrides CLAUDE.md here)
+     Gemini CLI    rules ~/.gemini/GEMINI.md             Gemini's DEFAULT file is GEMINI.md, NOT AGENTS.md.
+                     To use the AGENTS.md name instead, first add
+                     "context": { "fileName": ["AGENTS.md", "GEMINI.md"] } to ~/.gemini/settings.json.
+                     No global skills dir.
+     Antigravity   rules ~/.gemini/GEMINI.md             Shares Gemini's global file (known conflict). Its
+                     per-project rules live in .agents/rules/ + AGENTS.md, so also symlink AGENTS.md per repo.
+     Windsurf      global rules dir ~/.windsurf/rules/   (or a per-repo AGENTS.md, always-on at the repo root)
+     Cursor        per-repo AGENTS.md at the repo root   (no global rules file; .cursor/rules/ for scoped extras)
+     Kilo Code     AGENTS.md in its global config dir    (loads AGENTS.md first, then .kilocode/rules/)
      any other agents.md-compatible CLI -> its global config dir + skills dir
    Skip tools that are not installed and list which you skipped.
 
