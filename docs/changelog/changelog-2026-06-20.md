@@ -122,3 +122,36 @@ accent, glassmorphism, 카테고리 hue, 다크모드)는 유지하고 표적 �
   없이 못 해 보류. 원하면 적용 가능.
 - `public/og.png` 2400×1260·405KB: 스펙(1200×630)의 2배. 크롤러 전용이라 사용자 페이지 로드와는
   무관하지만, 절반 리사이즈 시 소셜 카드 로드·저장소 용량 개선. 별건으로 처리 가능.
+
+---
+
+## 4차 — 개발자 추천 온보딩 섹션 + 한 방 설치 프롬프트
+
+요청: 랜딩에 "개발자 추천" 온보딩 섹션 추가 + 추천 항목 한 묶음을 **단일 복사-붙여넣기 프롬프트**로
+한 번에 설치(있으면 최신화)하게 함. 추천 항목 9종은 모두 이미 카탈로그에 존재 → 신규 작성은
+설치 프롬프트(시스템 프롬프트 통합 `.agents/` 개념) 1건뿐.
+
+### 변경 (왜)
+- `src/data/onboarding.ts` (신규): 큐레이션 목록(`ONBOARDING_PICKS`) + 설치 프롬프트
+  (`INSTALL_PROMPT`)의 **단일 출처**. 컴포넌트가 이 모듈만 읽어 카드 그리드와 복사 블록을 그림.
+  픽이 누락되면 빌드를 깨지 않고 그리드가 줄어들게(`find` → skip) 설계.
+- `src/components/DeveloperPicks.astro` (신규): glass-panel 섹션. 상단에 다크 코드블록으로 설치
+  프롬프트(복사 대상 `<pre id="onboard-prompt">`, 기존 `.pc-copy` 메커니즘 재사용) + "하는 일" 3칸
+  + 기존 `Card`로 큐레이션 9종 렌더. `HowItWorks`와 `catalog` 사이에 배치.
+- `src/content/prompts/agents-quick-onboarding.md` (신규): 설치 프롬프트의 카탈로그 엔트리(상세
+  페이지·원문 복사). 본문은 KO 설명 4절 + 검증용 ```text 페이로드. 페이로드는 `INSTALL_PROMPT`와
+  동일(원소스 라운드트립 컨벤션). `source` 미기재(원본 없음, 날조 금지 규칙).
+- `src/pages/index.astro`: `<DeveloperPicks />` 1줄 삽입 + import.
+
+### 결정/대안
+- 신규 카테고리 추가 아님(기존 `prompts` 컬렉션에 엔트리 1건) → config.ts·COLLECTIONS 3파일
+  동기화 불필요(불필요한 광범위 변경 회피).
+- 설치 프롬프트 텍스트가 `.ts`와 `.md` 두 곳에 중복: 콘텐츠 마크다운은 TS를 import할 수 없어
+  불가피. 안정 텍스트라 비용 한정, 양쪽에 동기화 주석.
+- 프롬프트는 백틱 없는 평문으로 작성(템플릿 리터럴 이스케이프 지옥 회피, 에이전트 paste용으로 충분).
+- `~/.agents/` 단일 출처 → 설치된 CLI에 심링크 방식은 사용자가 명시한 설계. 기존 repo CLAUDE.md의
+  "Global install" 패턴을 스킬+시스템프롬프트 통합으로 일반화.
+
+### 검증
+- `npm run build` green(55 페이지, +1). `dist/prompts/agents-quick-onboarding/` 생성 확인,
+  `dist/index.html`에 섹션 제목 + 설치 프롬프트 본문 임베드 확인(복사 버튼 동작 대상).
