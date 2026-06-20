@@ -210,3 +210,17 @@ accent, glassmorphism, 카테고리 hue, 다크모드)는 유지하고 표적 �
   `index.html` + 상세 페이지에 교정된 매핑("Gemini's DEFAULT file is GEMINI.md", "Kilo Code") 임베드 확인.
 - 출처: Gemini CLI docs(GEMINI.md hierarchy, context.fileName), Antigravity rules/issue #16058,
   Codex developers.openai.com(skills, AGENTS.md), OpenCode docs, Cursor docs, Windsurf/Devin docs, Kilo docs.
+
+### 6차-b — 1차 소스 재검증(WebFetch) 후 보정
+검색 스니펫(2차)을 공식 문서로 재확인. 3건 정정:
+- **Gemini** ✓ 확정: settings 키는 nested `context.fileName`(배열), 기본 `~/.gemini/GEMINI.md`.
+- **Antigravity**: 워크스페이스가 `.agents/rules/ + AGENTS.md`(2차 오정보) → 실제로는 `.agents/` 디렉터리를
+  네이티브 인식(`.agents/agents.md` + `.agents/skills/`, Google codelab). 전역 `~/.gemini/GEMINI.md`는
+  이슈 #16058로 재확인. (사용자의 `~/.agents/` 발상과 정확히 일치하는 네이티브 컨벤션)
+- **Windsurf**: **Devin Desktop으로 개명** 확인. 홈 전역 `~/.windsurf/rules/`는 1차 미확인이라 단정 제거 →
+  레포 루트 `AGENTS.md`(always-on) + `.devin/rules/`(legacy `.windsurf/rules/`).
+- **Kilo**: 전역 경로를 정확히 `~/.config/kilo/AGENTS.md`로 명시.
+- 검증: build green(61). `index.html`에 "Devin Desktop", `~/.config/kilo/AGENTS.md`,
+  `.agents/agents.md + .agents/skills/` 임베드 확인.
+- 1차 출처: google-gemini.github.io gemini-md, github #16058, codelabs.developers.google.com
+  antigravity 파이프라인, docs.devin.ai cascade/agents-md, kilo.ai custom-instructions.
