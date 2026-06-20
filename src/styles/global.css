@@ -146,6 +146,17 @@
   .glass-card[class*='cat-']:focus-within::before {
     opacity: 0.8;
   }
+  /* The home page ships the whole catalog (~75 cards) in one long scroll. Let the
+     browser skip layout/paint for cards that are off-screen until they near the
+     viewport — the dominant cost on this page, not transfer size. intrinsic-size
+     reserves ~card height so the scrollbar/anchors stay stable; `auto` caches each
+     card's real size after first paint. No-op where content-visibility is
+     unsupported (graceful). The reveal IntersectionObserver watches the section,
+     not the card, so the cascade animation is unaffected. */
+  .glass-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 200px;
+  }
   .glass-chip {
     @apply bg-white/60 dark:bg-ink-800/55
            backdrop-blur-[6px]
