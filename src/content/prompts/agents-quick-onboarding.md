@@ -27,9 +27,13 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 
 ## 함정
 
-- **심링크 권한**: Windows는 개발자 모드(Developer Mode) 또는 관리자 터미널이 있어야 심링크를 만든다.
-  둘 다 없으면 프롬프트가 자동으로 폴백한다 — 폴더는 정션(junction), 파일은 하드링크(hardlink)로
-  연결(둘 다 권한 불필요). macOS·Linux는 `ln -s` 한 줄로 끝나 별도 권한이 필요 없다.
+- **심링크 권한 + 파일/폴더 구분 (Windows 핵심 함정)**: 심볼릭 링크는 개발자 모드(Developer Mode)나
+  관리자 권한이 필요하다. 없으면 자동 폴백하는데 — **파일은 하드링크(hardlink)**, **폴더(skills)는
+  정션(junction)** 으로 갈라야 한다. `mklink /H`(하드링크)는 **폴더에 안 통한다** — skills 링크가
+  실패하는 흔한 원인. macOS·Linux는 `ln -s` 하나로 파일·폴더 모두 처리된다.
+- **링크 실패 시 원본이 비지 않게**: 프롬프트는 *링크를 먼저 만들고 성공한 뒤에만* 원본을 `.bak`으로
+  옮긴다. 혹시 이전 버전으로 이미 원본이 `<파일>.bak-<시각>`에 들어가고 위치가 비었다면, 그 `.bak`을
+  원래 이름으로 되돌리면 복구된다 (예: `mv ~/.codex/AGENTS.md.bak-* ~/.codex/AGENTS.md`).
 - **기존 파일 보존**: 프롬프트가 덮어쓰기 전에 `<파일>.bak-<시각>`으로 백업하도록 지시한다 —
   그래도 중요한 `CLAUDE.md`가 있다면 먼저 따로 챙겨 두자.
 - **도구별 스킬 지원 차이**: 전역 `skills/` 폴더를 읽는 건 Claude Code(`~/.claude/skills`)·Codex(`~/.codex/skills`)
@@ -48,12 +52,26 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 You are setting up my global AI coding-agent environment. Build ONE shared source of truth at ~/.agents/ and symlink it into every coding CLI I already have installed.
 
 Rules:
-- Be idempotent. If something already exists, UPDATE it to the latest version instead of duplicating.
-- Never delete my data. Back up any real file you replace to <file>.bak-<timestamp> before symlinking over it.
-- Resolve ~ to my home directory on the current OS, and use the matching link command:
-    macOS/Linux: ln -s
-    Windows (PowerShell): New-Item -ItemType SymbolicLink -- needs Developer Mode or an admin terminal. If neither is available, fall back by target type: a directory -> New-Item -ItemType Junction (no elevation needed); a file -> New-Item -ItemType HardLink (same drive, no elevation); copy only as a last resort and tell me it will not auto-update.
-- Do not commit or push anything. Print a summary of created / updated / skipped / backed-up at the end.
+- Be idempotent. If something already exists, UPDATE it to the latest instead of duplicating. If a path is
+  already a link into ~/.agents, leave it.
+- NEVER leave a config path empty. Put the new link in place BEFORE removing the original, and only ever back
+  up a REAL file/dir, never a link. Safe order PER target:
+    1. Confirm the ~/.agents source (file or dir) exists. If not, skip this target and say so -- do NOT touch the original.
+    2. Create the link at a temp name beside the target (e.g. <path>.newlink).
+    3. If link creation FAILED: delete the temp, leave the original untouched, report the exact error, move on.
+       (Never reach step 4 on failure -- this is what caused empty config paths before.)
+    4. Only now: if the original is a real file/dir, move it to <path>.bak-<timestamp>; then rename <path>.newlink to <path>.
+  If any path ever ends up empty, restore it from its <path>.bak-* immediately.
+- Resolve ~ to my home dir on the current OS, and pick the link type by TARGET TYPE (file vs directory):
+    macOS/Linux: ln -s            (works for both files and directories, no elevation)
+    Windows, a FILE:      New-Item -ItemType SymbolicLink (needs Developer Mode or admin). If denied,
+                          fall back to New-Item -ItemType HardLink (same drive only, no elevation).
+    Windows, a DIRECTORY: New-Item -ItemType SymbolicLink (needs Developer Mode or admin). If denied,
+                          fall back to New-Item -ItemType Junction (no elevation). NEVER hardlink a directory --
+                          mklink /H / hardlinks do not work on folders (this is why the skills links failed).
+    If a fallback cannot apply (e.g. ~/.agents is on a different drive, so a junction/hardlink cannot span
+    volumes), COPY instead and tell me it will not auto-update.
+- Do not commit or push anything. Print a summary of created / updated / skipped / backed-up / restored at the end.
 
 1. Create the unified directory
    - ~/.agents/AGENTS.md      my global system prompt (coding rules), shared by every tool
@@ -91,8 +109,9 @@ Rules:
    Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
    config path). For each present tool, replace its global rules file with a symlink to
    ~/.agents/AGENTS.md -- the link NAME differs per tool (CLAUDE.md / AGENTS.md / GEMINI.md) but
-   all point at the one file -- and where the tool has a global skills dir, symlink it to
-   ~/.agents/skills. Back up any real file first. Current (2026) per-tool paths:
+   all point at the one file -- and where the tool has a global skills dir, link it to
+   ~/.agents/skills (a DIRECTORY: on Windows that means a junction, never a hardlink). Use the safe
+   link-before-backup order from the Rules above. Current (2026) per-tool paths:
      Claude Code   rules ~/.claude/CLAUDE.md             skills ~/.claude/skills
      Codex CLI     rules ~/.codex/AGENTS.md              skills ~/.codex/skills
      OpenCode      rules ~/.config/opencode/AGENTS.md    (AGENTS.md overrides CLAUDE.md here)

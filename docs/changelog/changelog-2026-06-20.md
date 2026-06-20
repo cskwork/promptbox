@@ -234,3 +234,18 @@ accent, glassmorphism, 카테고리 hue, 다크모드)는 유지하고 표적 �
   Windsurf→Devin Desktop 병기.
 - 검증: build green(61). `grep`로 소스 내 `~/.gemini/AGENTS.md` 잔존 0(changelog 기록 제외) 확인,
   `dist/configs/agents-md/`에 `~/.gemini/GEMINI.md` 반영 확인.
+
+### 6차-d — 설치 프롬프트 안전성 버그 수정 (Windows 실제 실행 보고 반영)
+Windows 실행 중 데이터 변위 사고 발생: 링크 성공 **전에** 원본을 `.bak`으로 옮겨, 링크가 전부
+실패하자 `~/.claude/CLAUDE.md`·`~/.codex/AGENTS.md` 등 6개 설정 위치가 비었다(데이터는 `.bak` 안전).
+근본 원인 2가지를 프롬프트에서 수정:
+- **링크-우선, 백업-후속**: 이전 Rules가 "심링크 전에 백업"이라 실패 시 빈 경로가 남았음 →
+  per-target 순서 재정의: (1) ~/.agents 소스 존재 확인 (2) 임시명 `<path>.newlink`로 링크 생성
+  (3) 실패하면 임시 삭제·원본 그대로·보고·다음으로 (4) 성공해야만 원본 `.bak` 후 임시→정위치 rename.
+  빈 경로가 생기면 즉시 `.bak`에서 복구하도록 명시.
+- **파일 vs 폴더 링크 타입 분리**: Windows에서 `mklink /H`(하드링크)는 폴더에 동작하지 않음 → skills
+  링크 실패의 직접 원인. 규칙을 타깃 타입별로: 파일=심볼릭(권한)→실패 시 하드링크, 폴더=심볼릭(권한)→
+  실패 시 정션(junction). 폴더는 절대 하드링크 금지. 크로스 볼륨이면 복사로 폴백.
+- KO 함정 절에 권한·파일/폴더 구분·`.bak` 복구법 추가.
+- 검증: build green(61). `index.html`에 "this is what caused empty config paths before",
+  "NEVER hardlink a directory" 임베드 확인. 사용자 머신 파일은 만지지 않음(복구는 명령만 제공).

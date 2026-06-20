@@ -48,12 +48,26 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
 export const INSTALL_PROMPT = `You are setting up my global AI coding-agent environment. Build ONE shared source of truth at ~/.agents/ and symlink it into every coding CLI I already have installed.
 
 Rules:
-- Be idempotent. If something already exists, UPDATE it to the latest version instead of duplicating.
-- Never delete my data. Back up any real file you replace to <file>.bak-<timestamp> before symlinking over it.
-- Resolve ~ to my home directory on the current OS, and use the matching link command:
-    macOS/Linux: ln -s
-    Windows (PowerShell): New-Item -ItemType SymbolicLink -- needs Developer Mode or an admin terminal. If neither is available, fall back by target type: a directory -> New-Item -ItemType Junction (no elevation needed); a file -> New-Item -ItemType HardLink (same drive, no elevation); copy only as a last resort and tell me it will not auto-update.
-- Do not commit or push anything. Print a summary of created / updated / skipped / backed-up at the end.
+- Be idempotent. If something already exists, UPDATE it to the latest instead of duplicating. If a path is
+  already a link into ~/.agents, leave it.
+- NEVER leave a config path empty. Put the new link in place BEFORE removing the original, and only ever back
+  up a REAL file/dir, never a link. Safe order PER target:
+    1. Confirm the ~/.agents source (file or dir) exists. If not, skip this target and say so -- do NOT touch the original.
+    2. Create the link at a temp name beside the target (e.g. <path>.newlink).
+    3. If link creation FAILED: delete the temp, leave the original untouched, report the exact error, move on.
+       (Never reach step 4 on failure -- this is what caused empty config paths before.)
+    4. Only now: if the original is a real file/dir, move it to <path>.bak-<timestamp>; then rename <path>.newlink to <path>.
+  If any path ever ends up empty, restore it from its <path>.bak-* immediately.
+- Resolve ~ to my home dir on the current OS, and pick the link type by TARGET TYPE (file vs directory):
+    macOS/Linux: ln -s            (works for both files and directories, no elevation)
+    Windows, a FILE:      New-Item -ItemType SymbolicLink (needs Developer Mode or admin). If denied,
+                          fall back to New-Item -ItemType HardLink (same drive only, no elevation).
+    Windows, a DIRECTORY: New-Item -ItemType SymbolicLink (needs Developer Mode or admin). If denied,
+                          fall back to New-Item -ItemType Junction (no elevation). NEVER hardlink a directory --
+                          mklink /H / hardlinks do not work on folders (this is why the skills links failed).
+    If a fallback cannot apply (e.g. ~/.agents is on a different drive, so a junction/hardlink cannot span
+    volumes), COPY instead and tell me it will not auto-update.
+- Do not commit or push anything. Print a summary of created / updated / skipped / backed-up / restored at the end.
 
 1. Create the unified directory
    - ~/.agents/AGENTS.md      my global system prompt (coding rules), shared by every tool
@@ -91,8 +105,9 @@ Rules:
    Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
    config path). For each present tool, replace its global rules file with a symlink to
    ~/.agents/AGENTS.md -- the link NAME differs per tool (CLAUDE.md / AGENTS.md / GEMINI.md) but
-   all point at the one file -- and where the tool has a global skills dir, symlink it to
-   ~/.agents/skills. Back up any real file first. Current (2026) per-tool paths:
+   all point at the one file -- and where the tool has a global skills dir, link it to
+   ~/.agents/skills (a DIRECTORY: on Windows that means a junction, never a hardlink). Use the safe
+   link-before-backup order from the Rules above. Current (2026) per-tool paths:
      Claude Code   rules ~/.claude/CLAUDE.md             skills ~/.claude/skills
      Codex CLI     rules ~/.codex/AGENTS.md              skills ~/.codex/skills
      OpenCode      rules ~/.config/opencode/AGENTS.md    (AGENTS.md overrides CLAUDE.md here)
