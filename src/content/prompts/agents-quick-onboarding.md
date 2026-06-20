@@ -28,6 +28,8 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 ## 함정
 
 - **심링크 권한**: Windows는 개발자 모드(Developer Mode) 또는 관리자 터미널이 있어야 심링크를 만든다.
+  둘 다 없으면 프롬프트가 자동으로 폴백한다 — 폴더는 정션(junction), 파일은 하드링크(hardlink)로
+  연결(둘 다 권한 불필요). macOS·Linux는 `ln -s` 한 줄로 끝나 별도 권한이 필요 없다.
 - **기존 파일 보존**: 프롬프트가 덮어쓰기 전에 `<파일>.bak-<시각>`으로 백업하도록 지시한다 —
   그래도 중요한 `CLAUDE.md`가 있다면 먼저 따로 챙겨 두자.
 - **도구별 스킬 지원 차이**: 전역 `skills/` 폴더를 읽지 않는 CLI는 규칙 파일만 연결된다.
@@ -40,7 +42,9 @@ You are setting up my global AI coding-agent environment. Build ONE shared sourc
 Rules:
 - Be idempotent. If something already exists, UPDATE it to the latest version instead of duplicating.
 - Never delete my data. Back up any real file you replace to <file>.bak-<timestamp> before symlinking over it.
-- Detect my OS and use the matching commands (ln -s on macOS/Linux; New-Item -ItemType SymbolicLink in PowerShell, which needs Developer Mode or an admin terminal on Windows).
+- Resolve ~ to my home directory on the current OS, and use the matching link command:
+    macOS/Linux: ln -s
+    Windows (PowerShell): New-Item -ItemType SymbolicLink -- needs Developer Mode or an admin terminal. If neither is available, fall back by target type: a directory -> New-Item -ItemType Junction (no elevation needed); a file -> New-Item -ItemType HardLink (same drive, no elevation); copy only as a last resort and tell me it will not auto-update.
 - Do not commit or push anything. Print a summary of created / updated / skipped / backed-up at the end.
 
 1. Create the unified directory
@@ -66,7 +70,8 @@ Rules:
      autoresearch                   github.com/uditgoenka/autoresearch        (install per its README; it is a plugin/skill)
 
 3. Symlink ~/.agents into every coding CLI I have
-   Detect which are installed (config dir present or binary on PATH). For each present tool,
+   Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
+   config path). For each present tool,
    replace its global rules file with a symlink to ~/.agents/AGENTS.md and, where the tool
    supports a global skills dir, replace it with a symlink to ~/.agents/skills. Back up first.
      Claude Code     ~/.claude/CLAUDE.md            and  ~/.claude/skills
