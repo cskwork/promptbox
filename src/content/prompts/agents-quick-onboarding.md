@@ -84,11 +84,10 @@ Rules:
 2. Install or update these skills into ~/.agents/skills/<name>/
    For each: clone into ~/.agents/.cache/ (or git pull if already there), then copy the
    folder that holds SKILL.md to ~/.agents/skills/<name>/ (overwrite to update).
-   mattpocock/skills holds four of them — clone it once and copy all four.
+   mattpocock/skills holds three of them — clone it once and copy all three.
      grill-with-docs                github.com/mattpocock/skills  -> skills/engineering/grill-with-docs
      improve-codebase-architecture  github.com/mattpocock/skills  -> skills/engineering/improve-codebase-architecture
      triage                         github.com/mattpocock/skills  -> skills/engineering/triage
-     zoom-out                       github.com/mattpocock/skills  -> skills/engineering/zoom-out
      skill-creator                  github.com/anthropics/skills  -> skills/skill-creator
      ssh-llm-connect                github.com/cskwork/ssh-llm-connect        (copy its SKILL.md; run install.sh per project when you need the SSH guard)
      claude-code-workflow-cheatsheet github.com/cskwork/claude-code-workflow-cheatsheet

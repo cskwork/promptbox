@@ -177,7 +177,7 @@ Plan:       /grill-with-docs -> /to-prd -> /to-issues
 Bug:        /diagnose (6-phase: feedback loop -> reproduce -> hypothesise -> instrument -> fix+regression -> cleanup)
 Feature:    /tdd (vertical tracer bullets) | /prototype (LOGIC or UI)
 Triage:     /triage — sort new issues into needs-info / ready-for-agent / ready-for-human / wontfix; run when issues pile up or before handing one to an agent
-Explore:    /zoom-out | /improve-codebase-architecture
+Explore:    /improve-codebase-architecture
 ```
 
 ### Vanilla Claude Code (Minimal)
