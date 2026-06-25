@@ -84,10 +84,11 @@ Rules:
 2. Install or update these skills into ~/.agents/skills/<name>/
    For each: clone into ~/.agents/.cache/ (or git pull if already there), then copy the
    folder that holds SKILL.md to ~/.agents/skills/<name>/ (overwrite to update).
-   mattpocock/skills holds three of them — clone it once and copy all three.
+   mattpocock/skills holds four of them — clone it once and copy all four.
      grill-with-docs                github.com/mattpocock/skills  -> skills/engineering/grill-with-docs
      improve-codebase-architecture  github.com/mattpocock/skills  -> skills/engineering/improve-codebase-architecture
      triage                         github.com/mattpocock/skills  -> skills/engineering/triage
+     writing-great-skills           github.com/mattpocock/skills  -> skills/productivity/writing-great-skills   (reference for authoring/improving any skill)
      skill-creator                  github.com/anthropics/skills  -> skills/skill-creator
      ssh-llm-connect                github.com/cskwork/ssh-llm-connect        (copy its SKILL.md; run install.sh per project when you need the SSH guard)
      claude-code-workflow-cheatsheet github.com/cskwork/claude-code-workflow-cheatsheet
@@ -104,6 +105,9 @@ Rules:
    Command-line tools in the kit (install the binary; no skill folder needed):
      supertonic-tts   npm i -g supertonic-tts    (local text-to-speech CLI)
      figma-cli        npm i -g figma-ds-cli       (Figma design-system CLI; add a SKILL.md wrapper so agents can drive it -> skills/figma-cli)
+
+   Treat writing-great-skills as the authoring reference: whenever you create or improve a SKILL.md
+   in ~/.agents/skills/, consult it first.
 
 3. Symlink ~/.agents into every coding CLI I have
    Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct

@@ -27,6 +27,7 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'superhacker' },
   // build your own + infra/CLIs
   { category: 'skills', slug: 'skill-creator' },
+  { category: 'skills', slug: 'writing-great-skills' },
   { category: 'skills', slug: 'ssh-llm-connect' },
   { category: 'skills', slug: 'jk-jenkins-cli' },
   { category: 'skills', slug: 'figma-cli' },
@@ -79,15 +80,17 @@ Rules:
 2. Install or update these skills into ~/.agents/skills/<name>/
    For each: clone into ~/.agents/.cache/ (or git pull if already there), then copy the
    folder that holds SKILL.md to ~/.agents/skills/<name>/ (overwrite to update).
-   mattpocock/skills holds three of them — clone it once and copy all three.
+   mattpocock/skills holds four of them — clone it once and copy all four.
      grill-with-docs                github.com/mattpocock/skills  -> skills/engineering/grill-with-docs
      improve-codebase-architecture  github.com/mattpocock/skills  -> skills/engineering/improve-codebase-architecture
      triage                         github.com/mattpocock/skills  -> skills/engineering/triage
+     writing-great-skills           github.com/mattpocock/skills  -> skills/productivity/writing-great-skills   (reference for authoring/improving any skill)
      skill-creator                  github.com/anthropics/skills  -> skills/skill-creator
      ssh-llm-connect                github.com/cskwork/ssh-llm-connect        (copy its SKILL.md; run install.sh per project when you need the SSH guard)
      claude-code-workflow-cheatsheet github.com/cskwork/claude-code-workflow-cheatsheet
      jk (Jenkins CLI)               github.com/avivsinai/jenkins-cli          (install the jk binary per its README, then add a SKILL.md so agents can drive it)
      autoresearch                   github.com/uditgoenka/autoresearch        (install per its README; it is a plugin/skill)
+     call-agent                     github.com/cskwork/call-agent             (delegation skill -> routes to codex/agy/kiro/claude/notebooklm; copy its skills/call-agent folder, NOT its install.sh -- the symlink step below links it)
    These are whole-repo skills (SKILL.md plus agents/ reference/ templates/) -- copy the ENTIRE repo into ~/.agents/skills/<name>/, not just SKILL.md:
      supergoal                      github.com/cskwork/supergoal-skill
      superpm                        github.com/cskwork/superpm-skill
@@ -98,6 +101,9 @@ Rules:
    Command-line tools in the kit (install the binary; no skill folder needed):
      supertonic-tts   npm i -g supertonic-tts    (local text-to-speech CLI)
      figma-cli        npm i -g figma-ds-cli       (Figma design-system CLI; add a SKILL.md wrapper so agents can drive it -> skills/figma-cli)
+
+   Treat writing-great-skills as the authoring reference: whenever you create or improve a SKILL.md
+   in ~/.agents/skills/, consult it first.
 
 3. Symlink ~/.agents into every coding CLI I have
    Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
