@@ -95,7 +95,7 @@ SSH_KEY_PATH=~/.ssh/id_ed25519        # 또는 SSH_PASSWORD=... (sshpass 필요)
 ````markdown
 ---
 name: ssh-llm-connect
-description: Use when an LLM coding agent needs to SSH into remote servers safely. Loads per-host .env files (no credentials inline), refuses dangerous commands via a read-only guard, and registers a Claude Code PreToolUse hook that blocks the agent from bypassing the helper (direct ssh/scp/sftp or --shell / --allow-write flags). Use when the user says "ssh to prod", "read logs on remote", "에이전트가 서버 봐야 함", or has installed this repo.
+description: Safe SSH for an LLM coding agent - per-host .env (no inline credentials), a read-only command guard, and a Claude Code PreToolUse hook the agent cannot bypass. Use when an agent must read logs or status on a remote host over SSH without destructive commands or leaked credentials; e.g. "ssh to prod", "read logs on remote", "에이전트가 서버 봐야 함", or when this repo is installed in the project.
 argument-hint: "<host-slug> \"<read-only shell command>\""
 ---
 
@@ -120,6 +120,7 @@ manually if it really must mutate.
 
 ## Defense layers
 | Layer | Enforced by                  | Blocks |
+| ----- | ---------------------------- | --------------------------------------------------------- |
 | 1     | PreToolUse hook (harness)    | direct ssh/scp/sftp, bypass flags |
 | 2     | permissions.deny in settings | bypass flags (belt + suspenders) |
 | 3     | connect.sh read-only guard   | rm/sudo/redirect/systemctl write/curl POST/pkg install/-c |
@@ -142,9 +143,18 @@ ssh/hosts/<slug>.env:
   SSH_HOST=10.0.0.10
   SSH_PORT=22
   SSH_USER=deploy
-  SSH_KEY_PATH=~/.ssh/id_ed25519           # or SSH_PASSWORD=...
+  SSH_KEY_PATH=~/.ssh/id_ed25519           # or SSH_PASSWORD=... (needs sshpass)
   SSH_PROXY_JUMP=jumpbox                   # optional
   SSH_LOCAL_FORWARD=8080:127.0.0.1:8080    # optional
+
+## Install (per project — run once per repo that needs SSH)
+```bash
+# from this repo
+./install.sh /path/to/your/project
+```
+Copies `connect.sh` → `<project>/ssh/connect.sh`, host templates → `<project>/ssh/hosts/`,
+the hook → `<project>/.claude/hooks/ssh-guard.sh`, appends `ssh/hosts/*.env` to `.gitignore`,
+and prints a settings.json snippet for you to paste (it does not edit agent config itself).
 
 ## Failure modes
 - Hook absent → bash command goes through unguarded. Refuse to ssh and ask the
