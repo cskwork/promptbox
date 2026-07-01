@@ -26,7 +26,6 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'superoffice' },
   { category: 'skills', slug: 'superhacker' },
   // build your own + infra/CLIs
-  { category: 'skills', slug: 'skill-creator' },
   { category: 'skills', slug: 'writing-great-skills' },
   { category: 'skills', slug: 'ssh-llm-connect' },
   { category: 'skills', slug: 'jk-jenkins-cli' },
@@ -85,7 +84,6 @@ Rules:
      improve-codebase-architecture  github.com/mattpocock/skills  -> skills/engineering/improve-codebase-architecture
      triage                         github.com/mattpocock/skills  -> skills/engineering/triage
      writing-great-skills           github.com/mattpocock/skills  -> skills/productivity/writing-great-skills   (reference for authoring/improving any skill)
-     skill-creator                  github.com/anthropics/skills  -> skills/skill-creator
      ssh-llm-connect                github.com/cskwork/ssh-llm-connect        (copy its SKILL.md; run install.sh per project when you need the SSH guard)
      claude-code-workflow-cheatsheet github.com/cskwork/claude-code-workflow-cheatsheet
      jk (Jenkins CLI)               github.com/avivsinai/jenkins-cli          (install the jk binary per its README, then add a SKILL.md so agents can drive it)
@@ -99,6 +97,13 @@ Rules:
      superhacker                    github.com/cskwork/superhacker-skill      (authorized security testing / CTF / learning only)
 
    Command-line tools in the kit (install the binary; no skill folder needed):
+     rtk              Rust Token Killer -- a CLI proxy that cuts 60-90% of tokens on common dev commands.
+                      Install: brew install rtk (macOS/Linux) OR cargo install --git https://github.com/rtk-ai/rtk (any OS with Rust).
+                      It gets wired into each agent in step 4 via rtk init.
+     playwright-cli   npm i -g @playwright/cli@latest    (github.com/microsoft/playwright-cli -- token-efficient Playwright browser
+                      automation for agents: record/generate code, inspect selectors, take screenshots)
+
+   Optional CLI tools (install only if you want them):
      supertonic-tts   npm i -g supertonic-tts    (local text-to-speech CLI)
      figma-cli        npm i -g figma-ds-cli       (Figma design-system CLI; add a SKILL.md wrapper so agents can drive it -> skills/figma-cli)
 
@@ -129,5 +134,22 @@ Rules:
      any other agents.md-compatible CLI -> its global config dir + skills dir
    Skip tools that are not installed and list which you skipped.
 
-4. Verify
-   List ~/.agents/skills/, confirm every symlink resolves to ~/.agents, and print the summary.`;
+4. Enable shared agent tooling on the tools you detected in step 3
+   a. rtk token proxy -- for each installed agent, run its rtk init so common dev/bash commands auto-rewrite to
+      rtk and cut 60-90% of tokens (the rtk binary was installed in step 2):
+        rtk init -g                    Claude Code (default)
+        rtk init -g --agent cursor     Cursor
+        rtk init -g --agent windsurf   Windsurf
+        rtk init --agent cline         Cline / Roo Code
+      rtk covers 14+ agents -- run rtk init --help to match each tool you have; skip any it does not support.
+   b. codebase-memory-mcp -- a global MCP server that indexes your codebase into a persistent knowledge graph
+      (158 languages, sub-millisecond queries, ~99% fewer tokens than reading files one by one). Install it once;
+      its installer AUTO-DETECTS and configures the MCP for every agent you have (Claude Code, Codex, Gemini, and more):
+        macOS/Linux:  curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
+        Windows:      iwr -Uri https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.ps1 -OutFile install.ps1; ./install.ps1
+      If the auto-config misses a tool, add it to that tool's MCP config by hand (e.g. ~/.claude/.mcp.json):
+        "codebase-memory-mcp": { "command": "<path-to-installed-binary>", "args": [] }
+
+5. Verify
+   List ~/.agents/skills/, confirm every symlink resolves to ~/.agents, confirm rtk init ran for each agent and
+   codebase-memory-mcp appears in each tool's MCP list, then print the created / updated / skipped / backed-up summary.`;
