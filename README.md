@@ -1,19 +1,35 @@
-# prompt-collection
+# promptbox
 
-자주 쓰는 프롬프트·스킬·MCP 설정을 한 곳에 모아놓고 GitHub Pages에서 카드/사이드바 UI로 바로 복사해서 쓰는 컬렉션 사이트.
+AI 코딩 에이전트용 프롬프트·스킬·플러그인·MCP 설정·CLI 도구를 한 곳에 모아놓고 GitHub Pages에서 카드/사이드바 UI로 바로 복사해서 쓰는 컬렉션 사이트.
 
 - **스택**: Astro 5 + Tailwind 3 + MDX + Content Collections
 - **출력**: 정적 사이트, `dist/` → GitHub Pages
-- **콘텐츠**: `src/content/{prompts,skills,configs,mcps}/*.md`
+- **콘텐츠**: `src/content/{prompts,skills,plugins,harnesses,hooks,configs,mcps,tools}/*.md`
+
+## 한 방 온보딩
+
+첫 화면의 “개발자 추천 — 여기서 시작”은 코딩 에이전트 채팅창에 그대로 붙여넣는 설치 프롬프트다. `~/.agents/`를 단일 출처로 만들고, 설치된 Claude Code·Codex CLI·Gemini CLI·OpenCode 등에 공통 `AGENTS.md`와 `skills/`를 심링크한다.
+
+기본 묶음에는 `handoff`가 포함된다. 작업 상태를 파일로 남겨 세션을 중단·재개하거나 다른 에이전트에게 넘길 때 쓰는 스킬이며, 설치 프롬프트는 `github.com/cskwork/handoff-skill`의 `skill/SKILL.md`를 `~/.agents/skills/handoff/SKILL.md`로 복사하도록 지시한다.
+
+대표 포함 항목:
+
+- 스킬: `grill-with-docs`, `improve-codebase-architecture`, `triage`, `writing-great-skills`, `ssh-llm-connect`, `call-agent`, `handoff`, `supergoal`, `superpm`, `superdesign`, `superoffice`, `superhacker`
+- 도구/MCP: `rtk`, `playwright-cli`, `codebase-memory-mcp`
+- 선택 도구: `supertonic-tts`, `figma-cli`
 
 ## 카테고리
 
 | 폴더 | 용도 | 예 |
 |---|---|---|
-| `prompts/` | 그대로 복사해 쓰는 프롬프트 템플릿 | transcription-cleanup |
-| `skills/` | Claude Code · Codex · Hermes용 `SKILL.md` | clone-personalize, stitch-landing |
-| `configs/` | `CLAUDE.md`, `AGENTS.md` 같은 에이전트 시스템 프롬프트 | Ten Commandments |
-| `mcps/` | MCP 서버 설정 스니펫 | (추가 예정) |
+| `prompts/` | 그대로 복사해 쓰는 프롬프트 템플릿 | agents-quick-onboarding |
+| `skills/` | Claude Code · Codex · Hermes용 `SKILL.md` | handoff, ssh-llm-connect |
+| `plugins/` | 여러 스킬·명령을 묶은 설치 단위 | autoresearch, superpowers |
+| `harnesses/` | 코딩 에이전트 자체 또는 실행 워크플로우 레이어 | oh-my-codex |
+| `hooks/` | 도구 실행 전후에 개입하는 스크립트 | git-guardrails-mattpocock |
+| `configs/` | `CLAUDE.md`, `AGENTS.md` 같은 에이전트 시스템 프롬프트 | agents-md |
+| `mcps/` | MCP 서버 설정 스니펫 | codebase-memory-mcp |
+| `tools/` | 에이전트 작업을 돕는 별도 CLI·앱 | rtk, supertonic-tts |
 
 ## 로컬 실행
 
@@ -61,6 +77,11 @@ order: 10                          # 정렬 우선순위 (낮을수록 위)
 # 카테고리별 확장 필드
 trigger: "..."                     # skills 전용
 install: "..."                     # skills 전용
+harnesses: [Claude Code]           # plugins 전용
+event: "PreToolUse"                # hooks 전용
+server_name: "..."                 # mcps 전용
+transport: stdio                   # mcps 전용
+platforms: [macOS, Linux]          # harnesses/tools 전용
 target_file: "..."                 # configs 전용
 tools: [Claude Code]               # configs 전용
 use_case: "..."                    # prompts 전용
@@ -90,8 +111,12 @@ src/
 │   ├── config.ts                # Content Collections 스키마
 │   ├── prompts/*.md
 │   ├── skills/*.md
+│   ├── plugins/*.md
+│   ├── harnesses/*.md
+│   ├── hooks/*.md
 │   ├── configs/*.md
-│   └── mcps/*.md
+│   ├── mcps/*.md
+│   └── tools/*.md
 ├── components/
 │   ├── Header.astro             # 상단 nav + 테마 토글
 │   ├── Sidebar.astro            # 좌측 카테고리 네비 + 검색
