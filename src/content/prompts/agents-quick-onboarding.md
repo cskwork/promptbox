@@ -29,6 +29,7 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 | jk (Jenkins CLI) | 스킬 + CLI | avivsinai/jenkins-cli | 에이전트가 Jenkins를 조작 |
 | autoresearch | 스킬/플러그인 | uditgoenka/autoresearch | 자율 리서치 루프 |
 | call-agent | 스킬 | cskwork/call-agent | codex·agy·kiro·claude·notebooklm로 위임 라우팅 |
+| handoff | 스킬 | cskwork/handoff-skill | 작업 상태를 패킷으로 저장해 중단·재개·다른 에이전트 인계 |
 | supergoal | 스킬(전체 레포) | cskwork/supergoal-skill | 베이스라인 우선 목표→검증 전달 |
 | superpm | 스킬(전체 레포) | cskwork/superpm-skill | PM 산출물(PRD·전략·OKR 등) |
 | superdesign | 스킬(전체 레포) | cskwork/superdesign-skill | UI/UX 디자인 라우팅 |
@@ -127,6 +128,7 @@ Rules:
      jk (Jenkins CLI)               github.com/avivsinai/jenkins-cli          (install the jk binary per its README, then add a SKILL.md so agents can drive it)
      autoresearch                   github.com/uditgoenka/autoresearch        (install per its README; it is a plugin/skill)
      call-agent                     github.com/cskwork/call-agent             (delegation skill -> routes to codex/agy/kiro/claude/notebooklm; copy its skills/call-agent folder, NOT its install.sh -- the symlink step below links it)
+     handoff                        github.com/cskwork/handoff-skill -> skill (handoff packet workflow for pausing, resuming, or transferring work; copy skill/SKILL.md to ~/.agents/skills/handoff/SKILL.md)
    These are whole-repo skills (SKILL.md plus agents/ reference/ templates/) -- copy the ENTIRE repo into ~/.agents/skills/<name>/, not just SKILL.md:
      supergoal                      github.com/cskwork/supergoal-skill
      superpm                        github.com/cskwork/superpm-skill
