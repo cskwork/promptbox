@@ -30,6 +30,7 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'ssh-llm-connect' },
   { category: 'skills', slug: 'jk-jenkins-cli' },
   { category: 'skills', slug: 'figma-cli' },
+  { category: 'mcps', slug: 'codebase-memory-mcp' },
   { category: 'tools', slug: 'supertonic-tts' },
   // autonomous loop
   { category: 'plugins', slug: 'autoresearch' },
@@ -150,7 +151,44 @@ Rules:
         Windows:      iwr -Uri https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.ps1 -OutFile install.ps1; ./install.ps1
       If the auto-config misses a tool, add it to that tool's MCP config by hand (e.g. ~/.claude/.mcp.json):
         "codebase-memory-mcp": { "command": "<path-to-installed-binary>", "args": [] }
+      Immediately after installation, disable background auto-indexing globally. This avoids watcher crashes on
+      large repos, generated files, parent directories, and worktree folders that surface to agents as
+      "Transport closed":
+        codebase-memory-mcp config set auto_index false
+        codebase-memory-mcp config list
+      The config list MUST show auto_index = false.
+      For every project, create a .cbmignore before the first index. Exclude generated files, dependency caches,
+      agent state, worktrees, graph exports, local DB files, and SQL dumps. Good starter patterns:
+        **/node_modules/
+        **/dist/
+        **/build/
+        **/target/
+        **/.gradle/
+        **/.next/
+        **/.nuxt/
+        **/.cache/
+        **/.venv/
+        **/venv/
+        worktrees/
+        **/worktrees/
+        .agents/
+        .claude/
+        .codex/
+        .gemini/
+        **/graphify-out/
+        **/graph.json
+        **/merged-graph.json
+        **/*.db
+        **/*.sqlite
+        **/dump-*.sql
+      Do NOT index a parent umbrella directory such as ~/Documents/.../Project. Index the actual repository root:
+        codebase-memory-mcp cli index_repository '{"repo_path":"<absolute-project-root>","mode":"fast"}'
+        codebase-memory-mcp cli list_projects
+        codebase-memory-mcp cli index_status '{"project":"<project-name>"}'
+      If MCP calls still fail with "Transport closed", use the CLI commands above to inspect the cache and restart
+      the agent session; do not hide the failure as success.
 
 5. Verify
    List ~/.agents/skills/, confirm every symlink resolves to ~/.agents, confirm rtk init ran for each agent and
-   codebase-memory-mcp appears in each tool's MCP list, then print the created / updated / skipped / backed-up summary.`;
+   codebase-memory-mcp appears in each tool's MCP list, confirm auto_index=false, and confirm at least one target
+   repo indexes successfully with fast mode, then print the created / updated / skipped / backed-up summary.`;
