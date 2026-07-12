@@ -35,6 +35,7 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 | superdesign | 스킬(전체 레포) | cskwork/superdesign-skill | UI/UX 디자인 라우팅 |
 | superoffice | 스킬(전체 레포) | cskwork/superoffice-skills | 한국형 업무 문서 생성 |
 | superhacker | 스킬(전체 레포) | cskwork/superhacker-skill | 인가된 보안 테스트·CTF·학습 |
+| superqa | 스킬(전체 레포) | cskwork/superqa-skill | 웹사이트 브라우저 QA(시나리오 생성·실행·리포트) — Python 3.10+ 필요 |
 | **rtk** | CLI 토큰 프록시 (기본) | rtk-ai/rtk | 일반 개발 명령 토큰 60-90% 절감, 에이전트별 `rtk init` |
 | **playwright-cli** | CLI (기본) | microsoft/playwright-cli | 토큰 효율적 브라우저 자동화(코드 생성·셀렉터·스크린샷) |
 | **codebase-memory-mcp** | MCP 서버 (전역) | DeusData/codebase-memory-mcp | 코드베이스를 지식 그래프로 인덱싱, 토큰 ~99% 절감 |
@@ -138,6 +139,7 @@ Rules:
      superdesign                    github.com/cskwork/superdesign-skill
      superoffice                    github.com/cskwork/superoffice-skills
      superhacker                    github.com/cskwork/superhacker-skill      (authorized security testing / CTF / learning only)
+     superqa                        github.com/cskwork/superqa-skill          (browser QA on any site; after copying, also run: pip3 install textual playwright pyyaml && python3 -m playwright install chromium  -- needs Python 3.10+)
 
    Command-line tools in the kit (install the binary; no skill folder needed):
      rtk              Rust Token Killer -- a CLI proxy that cuts 60-90% of tokens on common dev commands.
