@@ -97,6 +97,7 @@ Rules:
      superdesign                    github.com/cskwork/superdesign-skill
      superoffice                    github.com/cskwork/superoffice-skills
      superhacker                    github.com/cskwork/superhacker-skill      (authorized security testing / CTF / learning only)
+     superqa                        github.com/cskwork/superqa-skill          (browser QA on any site; after copying, also run: pip3 install textual playwright pyyaml && python3 -m playwright install chromium  -- needs Python 3.10+)
 
    Command-line tools in the kit (install the binary; no skill folder needed):
      rtk              Rust Token Killer -- a CLI proxy that cuts 60-90% of tokens on common dev commands.
