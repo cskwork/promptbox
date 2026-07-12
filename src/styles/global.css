@@ -85,6 +85,7 @@
 .cat-configs   { --cat: #14b8a6; --cat-text: #0f766e; }
 .cat-mcps      { --cat: #6366f1; --cat-text: #4338ca; } /* taste-ok: category wayfinding hue, brand accent stays emerald */
 .cat-tools     { --cat: #3b82f6; --cat-text: #1d4ed8; }
+.cat-apps      { --cat: #10b981; --cat-text: #047857; }
 
 .dark .cat-prompts   { --cat-text: #38bdf8; }
 .dark .cat-skills    { --cat-text: #a78bfa; } /* taste-ok: category wayfinding hue */
@@ -94,10 +95,11 @@
 .dark .cat-configs   { --cat-text: #2dd4bf; }
 .dark .cat-mcps      { --cat-text: #818cf8; } /* taste-ok: category wayfinding hue */
 .dark .cat-tools     { --cat-text: #60a5fa; }
+.dark .cat-apps      { --cat-text: #34d399; }
 
 /* derive soft/line only on the hue classes (where --cat is defined) */
 .cat-prompts, .cat-skills, .cat-plugins, .cat-harnesses,
-.cat-hooks, .cat-configs, .cat-mcps, .cat-tools {
+.cat-hooks, .cat-configs, .cat-mcps, .cat-tools, .cat-apps {
   --cat-soft: color-mix(in srgb, var(--cat) 14%, transparent);
   --cat-line: color-mix(in srgb, var(--cat) 32%, transparent);
 }

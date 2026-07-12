@@ -89,7 +89,17 @@ const tools = defineCollection({
   }),
 });
 
-export const collections = { prompts, skills, configs, mcps, plugins, hooks, harnesses, tools };
+const apps = defineCollection({
+  type: 'content',
+  schema: z.object({
+    ...baseFields,
+    languages: z.array(z.string()).default([]),
+    platforms: z.array(z.string()).default([]),
+    install: z.string().optional(),
+  }),
+});
+
+export const collections = { prompts, skills, configs, mcps, plugins, hooks, harnesses, tools, apps };
 
 /**
  * Canonical display order (home + sidebar both follow this).
@@ -104,6 +114,7 @@ export const CATEGORY_ORDER = [
   'configs',
   'mcps',
   'tools',
+  'apps',
 ] as const;
 
 export type CategoryKey = (typeof CATEGORY_ORDER)[number];
@@ -183,9 +194,17 @@ export const CATEGORY_META: Record<CategoryKey, CategoryMeta> = {
   tools: {
     label: '도구',
     label_en: 'Tools',
-    blurb: '에이전트·개발자 워크플로와 1인 기업·스타트업에 유용한 오픈소스 도구 — CLI, 위키, 프로젝트 관리, 회의록, 디자인 시스템 등.',
-    blurb_en: 'Open-source tools for developer workflows and startups — CLIs, wikis, project management, meeting notes, design systems.',
+    blurb: '에이전트 작업을 돕는 별도 CLI·앱 (인덱서, 토큰 절약기 등).',
+    blurb_en: 'Standalone CLIs and apps that assist agent work (indexers, token savers, …).',
     icon: 'tool',
     hue: 'tools',
+  },
+  apps: {
+    label: '오픈소스 앱',
+    label_en: 'Apps',
+    blurb: '1인 기업·스타트업에 유용한 오픈소스 앱·프로덕트 — 위키, 프로젝트 관리, 회의록, 디자인 도구, 채용 도구 등.',
+    blurb_en: 'Open-source apps and products for startups and solo founders — wikis, project management, meeting tools, design editors, hiring tools.',
+    icon: 'app',
+    hue: 'apps',
   },
 };
