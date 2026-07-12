@@ -9,6 +9,7 @@ license: MIT
 order: 26
 trigger: "evaluate skill · does my skill work · skill A/B · compare CLIs · claude vs codex vs gemini"
 install: 'git clone https://github.com/cskwork/skill-ab-eval && ln -s "$(pwd)/skill-ab-eval" ~/.claude/skills/skill-ab-eval'
+hidden: true
 ---
 
 ## 한 줄

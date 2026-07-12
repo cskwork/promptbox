@@ -9,6 +9,7 @@ license: vercel-labs/agent-browser 참조
 order: 38
 trigger: "open website / fill form / click button / take screenshot / scrape data / test web app / login to site / Electron 앱·Slack·VS Code 자동화"
 install: "npm i -g agent-browser && agent-browser install"
+hidden: true
 ---
 
 ## 한 줄

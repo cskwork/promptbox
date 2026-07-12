@@ -9,6 +9,7 @@ license: MIT
 order: 42
 trigger: "slash command 잊어버려 / setup-announcements / workflow cheatsheet / 매 세션마다 워크플로우 리마인드 / harness preset"
 install: "cp -r ~/Downloads/Code/claude-code-workflow-cheatsheet ~/.claude/skills/company-announcements"
+hidden: true
 ---
 
 ## 한 줄

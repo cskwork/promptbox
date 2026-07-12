@@ -10,6 +10,7 @@ languages: [TypeScript]
 platforms: [macOS, Linux, Windows]
 order: 10
 install: "curl -fsSL https://raw.githubusercontent.com/colbymchenry/codegraph/main/install.sh | sh"
+hidden: true
 ---
 
 ## 한 줄

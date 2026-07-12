@@ -9,6 +9,7 @@ license: MIT
 order: 35
 trigger: "/codex-cli / use codex / ask codex / have codex / second-opinion review / generate image"
 install: "curl -fsSL https://raw.githubusercontent.com/cskwork/claude-codex-skill/main/install.sh | bash  # PowerShell: iwr -useb .../install.ps1 | iex"
+hidden: true
 ---
 
 ## 한 줄

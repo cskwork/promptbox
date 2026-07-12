@@ -9,6 +9,7 @@ license: MIT
 order: 40
 trigger: "fizzy-cli setup / fizzy 카드 만들기 / Jira → Fizzy 이전 / fizzy 마크다운 안 됨"
 install: "git clone https://github.com/cskwork/fizzy-skill ~/.claude/skills/fizzy"
+hidden: true
 ---
 
 ## 한 줄
