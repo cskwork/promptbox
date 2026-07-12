@@ -15,16 +15,16 @@ export interface OnboardingPick {
 
 export const ONBOARDING_PICKS: OnboardingPick[] = [
   // orient + plan
-  { category: 'skills', slug: 'claude-code-workflow-cheatsheet' },
   { category: 'skills', slug: 'grill-with-docs' },
   { category: 'skills', slug: 'improve-codebase-architecture' },
-  { category: 'skills', slug: 'triage' },
+  { category: 'skills', slug: 'handoff' },
   // super* end-to-end suite
   { category: 'skills', slug: 'supergoal' },
   { category: 'skills', slug: 'superpm' },
   { category: 'skills', slug: 'superdesign' },
   { category: 'skills', slug: 'superoffice' },
   { category: 'skills', slug: 'superhacker' },
+  { category: 'skills', slug: 'superqa' },
   // build your own + infra/CLIs
   { category: 'skills', slug: 'writing-great-skills' },
   { category: 'skills', slug: 'ssh-llm-connect' },

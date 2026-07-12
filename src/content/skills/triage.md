@@ -9,6 +9,7 @@ license: mattpocock/skills 참조
 order: 34
 trigger: "triage / 이슈 분류 / review incoming bugs / prepare for AFK agent / 이슈 워크플로우 관리"
 install: "npx skills add https://github.com/mattpocock/skills --skill triage"
+hidden: true
 ---
 
 ## 한 줄

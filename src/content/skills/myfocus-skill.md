@@ -9,6 +9,7 @@ license: MIT
 order: 50
 trigger: "/myfocus / what next / next task / 다음 작업 / 다음에 뭐 할까 / prioritize"
 install: "git clone https://github.com/cskwork/myfocus-skill ~/myfocus-skill && ln -s ~/myfocus-skill ~/.claude/skills/myfocus"
+hidden: true
 ---
 
 ## 한 줄

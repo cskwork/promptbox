@@ -9,6 +9,7 @@ license: mattpocock/skills 참조
 order: 30
 trigger: "set up matt pocock skills / setup-matt-pocock-skills / configure issue tracker / triage label setup / 도메인 docs 설정"
 install: "npx skills add https://github.com/mattpocock/skills --skill setup-matt-pocock-skills"
+hidden: true
 ---
 
 ## 한 줄
