@@ -14,10 +14,19 @@ export interface OnboardingPick {
 }
 
 export const ONBOARDING_PICKS: OnboardingPick[] = [
+  // start here — the router over everything else
+  { category: 'skills', slug: 'ask-matt' },
+  { category: 'skills', slug: 'setup-matt-pocock-skills' },
   // orient + plan
   { category: 'skills', slug: 'grill-with-docs' },
   { category: 'skills', slug: 'improve-codebase-architecture' },
+  { category: 'skills', slug: 'triage' },
   { category: 'skills', slug: 'handoff' },
+  // build + verify
+  { category: 'skills', slug: 'tdd' },
+  { category: 'skills', slug: 'prototype' },
+  { category: 'skills', slug: 'diagnose' },
+  { category: 'mcps', slug: 'code-review-graph' },
   // super* end-to-end suite
   { category: 'skills', slug: 'supergoal' },
   { category: 'skills', slug: 'superpm' },
@@ -25,13 +34,16 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'superoffice' },
   { category: 'skills', slug: 'superhacker' },
   { category: 'skills', slug: 'superqa' },
-  // build your own + infra/CLIs
+  // build your own
   { category: 'skills', slug: 'writing-great-skills' },
-  { category: 'skills', slug: 'ssh-llm-connect' },
-  { category: 'skills', slug: 'jk-jenkins-cli' },
-  { category: 'skills', slug: 'figma-cli' },
-  { category: 'mcps', slug: 'codebase-memory-mcp' },
-  { category: 'tools', slug: 'supertonic-tts' },
+  // design + docs + media
+  { category: 'skills', slug: 'hallmark' },
+  { category: 'skills', slug: 'archify' },
+  { category: 'skills', slug: 'gpt-image-2' },
+  { category: 'tools', slug: 'officecli' },
+  // infra + cost
+  { category: 'tools', slug: 'herdr' },
+  { category: 'skills', slug: 'context-diet' },
   // autonomous loop
   { category: 'plugins', slug: 'autoresearch' },
 ];
@@ -45,151 +57,210 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
  * KEEP IN SYNC with the fenced payload in
  * src/content/prompts/agents-quick-onboarding.md — that file is the catalog copy.
  */
-export const INSTALL_PROMPT = `You are setting up my global AI coding-agent environment. Build ONE shared source of truth at ~/.agents/ and symlink it into every coding CLI I already have installed.
+export const INSTALL_PROMPT = `Set up and maintain a global coding-agent environment on native macOS or Windows PowerShell.
+The process must be IDEMPOTENT and SELF-HEALING: if an item already exists, update or repair it —
+never duplicate it, never delete my work to make room for it.
 
-Rules:
-- Be idempotent. If something already exists, UPDATE it to the latest instead of duplicating. If a path is
-  already a link into ~/.agents, leave it.
-- NEVER leave a config path empty. Put the new link in place BEFORE removing the original, and only ever back
-  up a REAL file/dir, never a link. Safe order PER target:
-    1. Confirm the ~/.agents source (file or dir) exists. If not, skip this target and say so -- do NOT touch the original.
-    2. Create the link at a temp name beside the target (e.g. <path>.newlink).
-    3. If link creation FAILED: delete the temp, leave the original untouched, report the exact error, move on.
-       (Never reach step 4 on failure -- this is what caused empty config paths before.)
-    4. Only now: if the original is a real file/dir, move it to <path>.bak-<timestamp>; then rename <path>.newlink to <path>.
-  If any path ever ends up empty, restore it from its <path>.bak-* immediately.
-- Resolve ~ to my home dir on the current OS, and pick the link type by TARGET TYPE (file vs directory):
-    macOS/Linux: ln -s            (works for both files and directories, no elevation)
-    Windows, a FILE:      New-Item -ItemType SymbolicLink (needs Developer Mode or admin). If denied,
-                          fall back to New-Item -ItemType HardLink (same drive only, no elevation).
-    Windows, a DIRECTORY: New-Item -ItemType SymbolicLink (needs Developer Mode or admin). If denied,
-                          fall back to New-Item -ItemType Junction (no elevation). NEVER hardlink a directory --
-                          mklink /H / hardlinks do not work on folders (this is why the skills links failed).
-    If a fallback cannot apply (e.g. ~/.agents is on a different drive, so a junction/hardlink cannot span
-    volumes), COPY instead and tell me it will not auto-update.
-- Do not commit or push anything. Print a summary of created / updated / skipped / backed-up / restored at the end.
+=== 0. GROUND RULES (apply to every phase) ===
 
-1. Create the unified directory
-   - ~/.agents/AGENTS.md      my global system prompt (coding rules), shared by every tool
-   - ~/.agents/skills/        every skill lives here, one folder per skill containing a SKILL.md
-   - ~/.agents/.cache/        clones of the source repos, used for updates
-   If ~/.agents/AGENTS.md is missing, fetch the latest from
-   https://raw.githubusercontent.com/cskwork/coding-agent-rules/main/AGENTS.md
-   If it already exists, keep my edits and just tell me it can be refreshed from that URL.
+DEFINITION OF "INSTALLED". A skill counts as installed only if <skills-dir>/<name>/SKILL.md is
+READABLE and non-empty. A directory that exists is not evidence of anything — an interrupted
+installer leaves empty directories with correct names, and every agent then reports the skill as
+missing while the filesystem claims it is there. Never test with [ -d ... ].
 
-2. Install or update these skills into ~/.agents/skills/<name>/
-   For each: clone into ~/.agents/.cache/ (or git pull if already there), then copy the
-   folder that holds SKILL.md to ~/.agents/skills/<name>/ (overwrite to update).
-   mattpocock/skills holds four of them — clone it once and copy all four.
-     grill-with-docs                github.com/mattpocock/skills  -> skills/engineering/grill-with-docs
-     improve-codebase-architecture  github.com/mattpocock/skills  -> skills/engineering/improve-codebase-architecture
-     triage                         github.com/mattpocock/skills  -> skills/engineering/triage
-     writing-great-skills           github.com/mattpocock/skills  -> skills/productivity/writing-great-skills   (reference for authoring/improving any skill)
-     ssh-llm-connect                github.com/cskwork/ssh-llm-connect        (copy its SKILL.md; run install.sh per project when you need the SSH guard)
-     claude-code-workflow-cheatsheet github.com/cskwork/claude-code-workflow-cheatsheet
-     jk (Jenkins CLI)               github.com/avivsinai/jenkins-cli          (install the jk binary per its README, then add a SKILL.md so agents can drive it)
-     autoresearch                   github.com/uditgoenka/autoresearch        (install per its README; it is a plugin/skill)
-     call-agent                     github.com/cskwork/call-agent             (delegation skill -> routes to codex/agy/kiro/claude/notebooklm; copy its skills/call-agent folder, NOT its install.sh -- the symlink step below links it)
-     handoff                        github.com/cskwork/handoff-skill -> skill (handoff packet workflow for pausing, resuming, or transferring work; copy skill/SKILL.md to ~/.agents/skills/handoff/SKILL.md)
-   These are whole-repo skills (SKILL.md plus agents/ reference/ templates/) -- copy the ENTIRE repo into ~/.agents/skills/<name>/, not just SKILL.md:
-     supergoal                      github.com/cskwork/supergoal-skill
-     superpm                        github.com/cskwork/superpm-skill
-     superdesign                    github.com/cskwork/superdesign-skill
-     superoffice                    github.com/cskwork/superoffice-skills
-     superhacker                    github.com/cskwork/superhacker-skill      (authorized security testing / CTF / learning only)
-     superqa                        github.com/cskwork/superqa-skill          (browser QA on any site; after copying, also run: pip3 install textual playwright pyyaml && python3 -m playwright install chromium  -- needs Python 3.10+)
+NEVER DESTROY TO INSTALL. Do not run rm -rf, git clean, or any recursive delete on a path you did
+not create in this run. To replace something, mv it into the timestamped backup directory first.
+This applies to upstream installer scripts too: read them before running them, and if one does
+rm -rf on existing targets, do not run it — reimplement its linking step with backup semantics.
 
-   Command-line tools in the kit (install the binary; no skill folder needed):
-     rtk              Rust Token Killer -- a CLI proxy that cuts 60-90% of tokens on common dev commands.
-                      Install: brew install rtk (macOS/Linux) OR cargo install --git https://github.com/rtk-ai/rtk (any OS with Rust).
-                      It gets wired into each agent in step 4 via rtk init.
-     playwright-cli   npm i -g @playwright/cli@latest    (github.com/microsoft/playwright-cli -- token-efficient Playwright browser
-                      automation for agents: record/generate code, inspect selectors, take screenshots)
+GLOBAL SCOPE ONLY. Many tools ship an "install" command that claims to be global but writes into
+the current working directory's repository. Before running any third-party installer, run its
+--dry-run and read the file list. If it would touch a file inside a git repository you did not
+create, do not run it in that mode; restrict it to global-only flags/platforms. If a repo file is
+modified anyway, revert that hunk and report it.
 
-   Optional CLI tools (install only if you want them):
-     supertonic-tts   npm i -g supertonic-tts    (local text-to-speech CLI)
-     figma-cli        npm i -g figma-ds-cli       (Figma design-system CLI; add a SKILL.md wrapper so agents can drive it -> skills/figma-cli)
+DO NOT PASS FLAGS TO YOUR OWN SCRIPTS THAT THEY DO NOT IMPLEMENT. A script that ignores an
+unrecognised --dry-run will silently perform its real, mutating work while you believe you are
+inspecting. Verification must use a separate, provably read-only script.
 
-   Treat writing-great-skills as the authoring reference: whenever you create or improve a SKILL.md
-   in ~/.agents/skills/, consult it first.
+RESOLVE INTERPRETERS TO ABSOLUTE PATHS. Version managers (nvm, pyenv, rbenv) frequently do not
+initialise in a non-interactive shell — 'node' may resolve to a broken shim. Detect the real
+binary path once and use it everywhere.
 
-3. Symlink ~/.agents into every coding CLI I have
-   Detect which are installed (config dir present or binary on PATH; use each tool's OS-correct
-   config path). For each present tool, replace its global rules file with a symlink to
-   ~/.agents/AGENTS.md -- the link NAME differs per tool (CLAUDE.md / AGENTS.md / GEMINI.md) but
-   all point at the one file -- and where the tool has a global skills dir, link it to
-   ~/.agents/skills (a DIRECTORY: on Windows that means a junction, never a hardlink). Use the safe
-   link-before-backup order from the Rules above. Current (2026) per-tool paths:
-     Claude Code   rules ~/.claude/CLAUDE.md             skills ~/.claude/skills
-     Codex CLI     rules ~/.codex/AGENTS.md              skills ~/.codex/skills
-     OpenCode      rules ~/.config/opencode/AGENTS.md    (AGENTS.md overrides CLAUDE.md here)
-     Gemini CLI    rules ~/.gemini/GEMINI.md             Gemini's DEFAULT file is GEMINI.md, NOT AGENTS.md.
-                     To use the AGENTS.md name instead, first add
-                     "context": { "fileName": ["AGENTS.md", "GEMINI.md"] } to ~/.gemini/settings.json.
-                     No global skills dir.
-     Antigravity   rules ~/.gemini/GEMINI.md             Shares Gemini's global file (known conflict, issue #16058).
-                     Per-workspace it NATIVELY reads a .agents/ dir (.agents/agents.md + .agents/skills/), so point
-                     that skills dir at ~/.agents/skills too.
-     Windsurf      per-repo AGENTS.md at the repo root   Renamed "Devin Desktop". AGENTS.md is always-on at the root;
-                     project rules engine is .devin/rules/ (legacy .windsurf/rules/). No confirmed home-dir global file.
-     Cursor        per-repo AGENTS.md at the repo root   (no global rules file; .cursor/rules/ for scoped extras)
-     Kilo Code     rules ~/.config/kilo/AGENTS.md        (a project AGENTS.md overrides it; in-project AGENTS.md loads, then .kilocode/rules/)
-     any other agents.md-compatible CLI -> its global config dir + skills dir
-   Skip tools that are not installed and list which you skipped.
+=== 1. DETECTION ===
 
-4. Enable shared agent tooling on the tools you detected in step 3
-   a. rtk token proxy -- for each installed agent, run its rtk init so common dev/bash commands auto-rewrite to
-      rtk and cut 60-90% of tokens (the rtk binary was installed in step 2):
-        rtk init -g                    Claude Code (default)
-        rtk init -g --agent cursor     Cursor
-        rtk init -g --agent windsurf   Windsurf
-        rtk init --agent cline         Cline / Roo Code
-      rtk covers 14+ agents -- run rtk init --help to match each tool you have; skip any it does not support.
-   b. codebase-memory-mcp -- a global MCP server that indexes your codebase into a persistent knowledge graph
-      (158 languages, sub-millisecond queries, ~99% fewer tokens than reading files one by one). Install it once;
-      its installer AUTO-DETECTS and configures the MCP for every agent you have (Claude Code, Codex, Gemini, and more):
-        macOS/Linux:  curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
-        Windows:      iwr -Uri https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.ps1 -OutFile install.ps1; ./install.ps1
-      If the auto-config misses a tool, add it to that tool's MCP config by hand (e.g. ~/.claude/.mcp.json):
-        "codebase-memory-mcp": { "command": "<path-to-installed-binary>", "args": [] }
-      Immediately after installation, disable background auto-indexing globally. This avoids watcher crashes on
-      large repos, generated files, parent directories, and worktree folders that surface to agents as
-      "Transport closed":
-        codebase-memory-mcp config set auto_index false
-        codebase-memory-mcp config list
-      The config list MUST show auto_index = false.
-      For every project, create a .cbmignore before the first index. Exclude generated files, dependency caches,
-      agent state, worktrees, graph exports, local DB files, and SQL dumps. Good starter patterns:
-        **/node_modules/
-        **/dist/
-        **/build/
-        **/target/
-        **/.gradle/
-        **/.next/
-        **/.nuxt/
-        **/.cache/
-        **/.venv/
-        **/venv/
-        worktrees/
-        **/worktrees/
-        .agents/
-        .claude/
-        .codex/
-        .gemini/
-        **/graphify-out/
-        **/graph.json
-        **/merged-graph.json
-        **/*.db
-        **/*.sqlite
-        **/dump-*.sql
-      Do NOT index a parent umbrella directory such as ~/Documents/.../Project. Index the actual repository root:
-        codebase-memory-mcp cli index_repository '{"repo_path":"<absolute-project-root>","mode":"fast"}'
-        codebase-memory-mcp cli list_projects
-        codebase-memory-mcp cli index_status '{"project":"<project-name>"}'
-      If MCP calls still fail with "Transport closed", use the CLI commands above to inspect the cache and restart
-      the agent session; do not hide the failure as success.
+Detect OS, architecture, Git, Node.js, Python 3.10+, and available package managers. For each
+interpreter record the ABSOLUTE PATH THAT ACTUALLY WORKS IN A NON-INTERACTIVE SHELL.
 
-5. Verify
-   List ~/.agents/skills/, confirm every symlink resolves to ~/.agents, confirm rtk init ran for each agent and
-   codebase-memory-mcp appears in each tool's MCP list, confirm auto_index=false, and confirm at least one target
-   repo indexes successfully with fast mode, then print the created / updated / skipped / backed-up summary.`;
+Identify installed agents: Claude Code, Codex, Kiro, Antigravity/agy, Gemini CLI, OpenCode, Cursor.
+For each, record its global instruction file path and its global skills directory path — and
+whether each is currently a real file/directory, a symlink, or absent.
+
+Treat WSL as a separate environment and perform detection independently within it.
+
+=== 2. PRE-FLIGHT INVENTORY (before touching anything) ===
+
+Write ~/.agents/setup-backups/<timestamp>/inventory.tsv recording, for EVERY entry in every agent
+skills directory and for every instruction file:
+
+  path <TAB> kind(symlink|dir|file|absent) <TAB> target(if symlink) <TAB> has_SKILL.md
+
+This inventory is the restore manifest. I keep my own symlinks pointing at personal repositories
+outside ~/.agents; without this record you cannot tell a skill you installed from one I hand-linked,
+and a later repair will silently drop mine. Treat any symlink whose target lies outside
+~/.agents/sources as USER-OWNED: never retarget it, and restore it verbatim if a later step
+removes it.
+
+=== 3. LAYOUT AND BACKUP ===
+
+  ~/.agents/sources/<owner>/<repo>     upstream repositories (shallow clones)
+  ~/.agents/skills/                    canonical skills — one entry per skill
+  ~/.agents/work/                      setup scripts and subagent briefs
+  ~/.agents/docs/                      operator notes
+  ~/.agents/install-manifest.json      machine-readable state
+  ~/.agents/setup-backups/<timestamp>/ everything replaced this run
+
+Back up every file BEFORE modifying it. Backups are timestamped and additive; never overwrite a
+previous run's backup directory. Record the active backup path in ~/.agents/.last-backup.
+
+=== 4. INSTALL SKILLS ===
+
+Clone or update once into ~/.agents/sources/<owner>/<repo>. Prefer each repository's official Agent
+Skills installer ONLY IF it is non-interactive and non-destructive; otherwise clone and link yourself.
+
+  Matt Pocock Skills, incl. ask-matt  https://github.com/mattpocock/skills
+  Context Diet                        https://github.com/cskwork/context-diet-skill
+  Autoresearch                        https://github.com/uditgoenka/autoresearch
+  Call Agent                          https://github.com/cskwork/call-agent
+  Archify                             https://github.com/tt-a1i/archify
+  Hallmark                            https://github.com/Nutlope/hallmark
+  GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
+  Code Review Graph (skill + MCP)     https://github.com/tirth8205/code-review-graph
+  OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
+  Herdr                               https://github.com/ogulcancelik/herdr
+  SuperQA                             https://github.com/cskwork/superqa-skill
+    Whole-repo skill. After linking, also run:
+      pip3 install textual playwright pyyaml && python3 -m playwright install chromium
+    Needs Python 3.10+. Do not run the browser install if Python is older — report instead.
+
+Derive each skill's canonical name from its SKILL.md frontmatter 'name:' field, not from the
+directory name, and fail loudly on a collision instead of silently overwriting.
+
+=== 5. INSTALL STANDALONE TOOLS ===
+
+Install or update via the official package manager. USE THE SAME MECHANISM THE TOOL IS ALREADY
+INSTALLED WITH — switching from a curl installer to Homebrew (or pip to uv) leaves two binaries on
+PATH and the wrong one wins.
+
+  Code Review Graph   pipx install code-review-graph   (or uv tool install)
+  OfficeCLI           brew install officecli
+  Herdr               official installer, or 'herdr update'
+
+If a tool cannot update because the current session is running inside it (Herdr does this), do not
+work around it. Report the exact command for me to run after I exit.
+
+=== 6. MCP INTEGRATION ===
+
+For any tool registering an MCP server:
+
+ 1. Set 'command' to the ABSOLUTE PATH OF THE BINARY YOU ACTUALLY INSTALLED. Installers routinely
+    guess the wrong runner (writing 'uvx' for a pipx install), which makes the client download the
+    package on every cold start and time out during handshake. This presents as "loading forever",
+    not as an error.
+ 2. Remove any 'cwd' the installer hardcoded. A global config must not pin to whatever directory
+    setup happened to run in.
+ 3. VALIDATE WITH A REAL HANDSHAKE BEFORE DECLARING SUCCESS: drive the server over stdio with
+    initialize -> notifications/initialized -> tools/list, and report the measured time and tool
+    count. A server that starts is not the same as a server that answers.
+ 4. If the tool supports a multi-repo registry, register each built graph so the tools work from a
+    parent directory as well as from inside each repo.
+
+=== 7. GLOBAL INSTRUCTION FILES ===
+
+Replace every detected agent's global instruction file with exactly these seven rules:
+
+ 1. Inspect repository instructions, tests, and similar code before editing.
+ 2. Use Ask Matt for architecture, debugging, testing, and implementation trade-offs.
+ 3. Clarify only consequential decisions; otherwise, choose a reversible assumption and continue.
+ 4. Make the smallest maintainable change and avoid unrelated refactoring.
+ 5. Batch independent reads in one turn and delegate independent work to fresh-context subagents.
+ 6. Pass subagent briefs and results through files, never by dumping large outputs into the main context.
+ 7. Verify work with tests, type checks, builds, or reproducible commands, explain it plainly, and
+    never claim unverified success.
+
+Targets: global CLAUDE.md, AGENTS.md, GEMINI.md, OpenCode instructions, Kiro steering.
+Preserve only a timestamped backup of the previous content.
+
+Prefer ONE canonical file (~/.agents/AGENTS.md) with each agent's path symlinked to it, so a single
+write propagates everywhere. After writing, verify by comparing checksums across all target paths —
+they must be identical, and the count must equal the number of detected agents.
+
+Sweep for STALE SIBLING INSTRUCTION FILES the previous configuration left behind (for example an
+extra file in Kiro's steering directory). One of them silently re-injects the old rules alongside
+the new ones. Back up, then remove.
+
+If an agent has no documented global instruction file, skip it and say so. Do not invent a config path.
+
+=== 8. LINKING ===
+
+Link each canonical skill into ~/.agents/skills from its source repository. Preserve every complete
+skill directory — SKILL.md, scripts, hooks, references, templates, schemas, galleries, assets.
+
+For each target, branch on the current state and log which branch ran:
+
+  symlink -> correct source   leave alone            log UNCHANGED
+  symlink -> different target retarget               log REPAIRED
+  real directory              mv to backup, then link log REPLACED
+  empty directory             rmdir, then link       log REPAIRED
+  absent                      link                   log INSTALLED
+
+Never create duplicate repositories, nested copies, or alternate names such as skill-2 or
+skill.bak-<date>. If prior runs left such duplicates, ARCHIVE them to
+~/.agents/skills-bak/<timestamp>/ — do not delete, and do not leave them in place where they load
+as separate skills and bloat every agent's context.
+
+Then link each agent's global skills directory to ~/.agents/skills:
+  macOS/Linux: directory symlink (ln -s handles both files and directories).
+  Windows, a FILE:      New-Item -ItemType SymbolicLink; if denied, fall back to HardLink (same drive).
+  Windows, a DIRECTORY: New-Item -ItemType SymbolicLink; if denied, fall back to Junction.
+                        NEVER hardlink a directory — mklink /H does not work on folders.
+  Copying is a documented last resort only. A 350 MB copy that drifts from canonical is worse than
+  no installation.
+  Never replace an unrelated user-owned directory, and never create a link that resolves inside
+  itself. Before linking X -> Y, confirm Y does not resolve under X.
+
+=== 9. VERIFICATION ===
+
+Produce a SEPARATE, READ-ONLY audit script (~/.agents/work/audit-skills.sh) that mutates nothing and
+classifies every entry: symlink-with-SKILL.md, realdir-with-SKILL.md, broken link, empty directory,
+missing SKILL.md. Run it and report the counts.
+EMPTY DIRECTORIES AND BROKEN LINKS MUST BOTH BE ZERO.
+
+Also verify:
+  - Every CLI responds to --version / --help.
+  - Every MCP server passes the handshake probe from step 6.3.
+  - Instruction-file checksums are identical across all agent paths.
+  - No autonomous loop was started, no Context Diet restriction was activated, no paid service was
+    authenticated, and no credits were spent.
+  - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
+  - No git repository outside ~/.agents has new modified or untracked files attributable to this
+    run. Check git status in each repo you entered.
+
+Rerun the ENTIRE setup to confirm idempotency: the second run must report UNCHANGED for every item
+and produce no new backup entries.
+
+=== 10. LEAVE A REPAIR PATH ===
+
+Empty-directory damage is caused by OTHER tools after setup finishes, so the environment needs a
+repair path that outlives this run. Leave behind:
+  - audit-skills.sh  read-only, safe to run any time
+  - link-skills.sh   idempotent repair, safe to re-run
+  - a note in ~/.agents/docs/: if an agent reports a skill as missing, run the audit first; if it
+    shows empty directories, run the linker.
+
+=== 11. REPORT ===
+
+Report every item as installed / updated / unchanged / repaired / skipped / failed, with the backup
+directory and the exact rollback command. State plainly what was verified and by what evidence, what
+was skipped and why, and what remains for me to run manually. Do not describe an unverified step as
+done. Do not commit or push anything.`;
