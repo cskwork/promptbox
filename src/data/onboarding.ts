@@ -177,10 +177,11 @@ For any tool registering an MCP server:
 
 === 7. GLOBAL INSTRUCTION FILES ===
 
-Replace every detected agent's global instruction file with exactly these eight rules:
+Replace every detected agent's global instruction file with exactly these eleven rules:
 
  1. Inspect repository instructions, tests, and similar code before editing.
- 2. Use Ask Matt for architecture, debugging, testing, and implementation trade-offs.
+ 2. Use the ask-matt skill to pick the skill for architecture, debugging, testing, and
+    implementation trade-offs — open it before starting, not after.
  3. Clarify only consequential decisions; otherwise, choose a reversible assumption and continue.
  4. Make the smallest maintainable change and avoid unrelated refactoring.
  5. Batch independent reads in one turn and delegate independent work to fresh-context subagents.
@@ -189,6 +190,9 @@ Replace every detected agent's global instruction file with exactly these eight 
     never claim unverified success.
  8. Structure explanations in two layers: put a short plain-language conclusion and next action
     first, then place technical details, evidence, code paths, commands, and caveats below it.
+ 9. Look up any tool, skill, or path you do not recognize; never skip a reference as vague.
+10. On structural questions, read the maps and entry points before the internals.
+11. Cite the definition site, not a comment about it, and state what you did not check.
 
 Targets: global CLAUDE.md, AGENTS.md, GEMINI.md, OpenCode instructions, Kiro steering.
 Preserve only a timestamped backup of the previous content.
