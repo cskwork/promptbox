@@ -21,7 +21,7 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 
 | 이름 | 종류 | 소스 | 무엇을 더해주나 |
 |---|---|---|---|
-| AGENTS.md | 공통 규칙 | 프롬프트 내장 8개 규칙 | 모든 CLI가 공유하는 시스템 프롬프트 |
+| AGENTS.md | 공통 규칙 | 프롬프트 내장 11개 규칙 | 모든 CLI가 공유하는 시스템 프롬프트 |
 | **Matt Pocock Skills** (37종) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec` 등 |
 | context-diet | 스킬 | cskwork/context-diet-skill | 시스템 프롬프트 비대화 측정·감축 |
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
@@ -207,10 +207,11 @@ For any tool registering an MCP server:
 
 === 7. GLOBAL INSTRUCTION FILES ===
 
-Replace every detected agent's global instruction file with exactly these eight rules:
+Replace every detected agent's global instruction file with exactly these eleven rules:
 
  1. Inspect repository instructions, tests, and similar code before editing.
- 2. Use Ask Matt for architecture, debugging, testing, and implementation trade-offs.
+ 2. Use the ask-matt skill to pick the skill for architecture, debugging, testing, and
+    implementation trade-offs — open it before starting, not after.
  3. Clarify only consequential decisions; otherwise, choose a reversible assumption and continue.
  4. Make the smallest maintainable change and avoid unrelated refactoring.
  5. Batch independent reads in one turn and delegate independent work to fresh-context subagents.
@@ -219,6 +220,9 @@ Replace every detected agent's global instruction file with exactly these eight 
     never claim unverified success.
  8. Structure explanations in two layers: put a short plain-language conclusion and next action
     first, then place technical details, evidence, code paths, commands, and caveats below it.
+ 9. Look up any tool, skill, or path you do not recognize; never skip a reference as vague.
+10. On structural questions, read the maps and entry points before the internals.
+11. Cite the definition site, not a comment about it, and state what you did not check.
 
 Targets: global CLAUDE.md, AGENTS.md, GEMINI.md, OpenCode instructions, Kiro steering.
 Preserve only a timestamped backup of the previous content.
