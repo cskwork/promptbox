@@ -190,7 +190,7 @@ Replace every detected agent's global instruction file with exactly these eleven
     never claim unverified success.
  8. Structure explanations in two layers: put a short plain-language conclusion and next action
     first, then place technical details, evidence, code paths, commands, and caveats below it.
- 9. Look up any tool, skill, or path you do not recognize; never skip a reference as vague.
+ 9. Do not assert anything you have not verified; check it, or say plainly that it is unchecked.
 10. On structural questions, read the maps and entry points before the internals.
 11. Cite the definition site, not a comment about it, and state what you did not check.
 
