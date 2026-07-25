@@ -1,7 +1,7 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
-summary: "스킬 62종과 공통 시스템 프롬프트, CLI 도구(code-review-graph·officecli·herdr)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(.claude·.codex·.gemini·.cursor·.kiro·opencode)에 자동으로 심링크·MCP 연결하는 복사-붙여넣기 프롬프트. 이미 있으면 최신으로 업데이트하고, 깨진 링크는 복구한다."
-summary_en: "One paste-and-go prompt that installs 62 skills, a shared system prompt, and CLI tools (code-review-graph, officecli, herdr) into a single ~/.agents/ dir, then wires it into every coding CLI you have — updating what exists and repairing what broke."
+summary: "스킬 62종과 공통 시스템 프롬프트, CLI 도구(code-review-graph·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(.claude·.codex·.gemini·.cursor·.kiro·opencode)에 자동으로 심링크·MCP 연결하는 복사-붙여넣기 프롬프트. 이미 있으면 최신으로 업데이트하고, 깨진 링크는 복구한다."
+summary_en: "One paste-and-go prompt that installs 62 skills, a shared system prompt, CLI tools (code-review-graph, officecli, herdr), and the ego lite agent browser (macOS) into a single ~/.agents/ dir, then wires it into every coding CLI you have — updating what exists and repairing what broke."
 tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent]
 author: cskwork
 order: 5
@@ -29,7 +29,7 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 | archify | 스킬 | tt-a1i/archify | 아키텍처·시퀀스·데이터플로 다이어그램을 단일 HTML로 |
 | hallmark | 스킬 | Nutlope/hallmark | AI 티 안 나는 UI 디자인·감사·리디자인 |
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
-| superqa | 스킬(전체 레포) | cskwork/superqa-skill | 웹사이트 브라우저 QA(시나리오 생성·실행·리포트) — Python 3.10+ 필요 |
+| **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화). **macOS 전용**, Playwright 대체 |
 | **code-review-graph** (7종) | 스킬 + CLI + MCP | tirth8205/code-review-graph | 코드를 지식 그래프로 인덱싱, 영향 반경·리뷰 컨텍스트를 토큰 효율적으로 |
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
 | **herdr** | 스킬 + CLI | ogulcancelik/herdr | 코딩 에이전트용 터미널 멀티플렉서 |
@@ -76,6 +76,10 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
   나는데 `/opt/homebrew/bin/node`는 멀쩡하다. 인터프리터는 절대경로로 고정한다.
 - **자기 안에서 도는 도구는 자기를 업데이트 못 한다**: herdr 세션 안에서 `herdr update`를 하면 다운로드만
   되고 교체가 막힌다. 우회하지 말고 사용자에게 명령을 넘긴다.
+- **브라우저는 에이전트가 끝까지 못 깐다 (ego lite)**: DMG 설치까지는 스크립트로 되지만, `ego-browser`
+  명령을 `~/.local/bin`에 등록하는 건 앱 **첫 실행 GUI 온보딩**이다. 사람이 끝내기 전에는 "설치됨"이
+  아니고, Chrome 데이터 이관 여부는 에이전트가 대신 답하면 안 된다. 그래서 프롬프트는 5b에서 멈추고
+  기다린다. macOS 전용이라 다른 OS에서는 그냥 건너뛴다.
 - **이전 설정의 형제 파일이 남는다**: 지시문 정본을 바꿔도 `~/.kiro/steering/`에 남은 옛 파일이 같이
   로드된다. 디렉터리를 훑어 잔재를 정리해야 한다.
 - **심링크 권한 + 파일/폴더 구분 (Windows 핵심 함정)**: 심볼릭 링크는 개발자 모드나 관리자 권한이 필요하다.
@@ -168,10 +172,16 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Code Review Graph (skill + MCP)     https://github.com/tirth8205/code-review-graph
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
-  SuperQA                             https://github.com/cskwork/superqa-skill
-    Whole-repo skill. After linking, also run:
-      pip3 install textual playwright pyyaml && python3 -m playwright install chromium
-    Needs Python 3.10+. Do not run the browser install if Python is older — report instead.
+  ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
+    macOS ONLY. This is the browser layer for this kit — see step 5b for the app install.
+    Skill-only route: npx skills add citrolabs/ego-lite
+    Installing the ego lite app also registers the skill into every agent skills directory, so run
+    step 5b FIRST and then reconcile: if <skills-dir>/ego-browser already exists and points at
+    ~/.local/share/ego/ego-skills, treat it as INSTALLED and do not clone a second copy.
+    DO NOT install Playwright, Puppeteer, Selenium, or any headless-Chromium stack for browser
+    testing. ego lite replaces them and reuses my real logged-in session. If a previous run of this
+    setup installed the SuperQA skill or a playwright/chromium download, leave the existing files
+    alone but report them as SUPERSEDED and tell me the exact uninstall command — do not run it.
 
 Derive each skill's canonical name from its SKILL.md frontmatter 'name:' field, not from the
 directory name, and fail loudly on a collision instead of silently overwriting.
@@ -188,6 +198,29 @@ PATH and the wrong one wins.
 
 If a tool cannot update because the current session is running inside it (Herdr does this), do not
 work around it. Report the exact command for me to run after I exit.
+
+=== 5b. INSTALL THE ego lite BROWSER (macOS only) ===
+
+ego lite is the browser both I and the agent drive. There is no Homebrew formula; it is a DMG.
+
+ 1. Skip this whole step on non-macOS and say so. Do not improvise a Linux/Windows install.
+ 2. If /Applications/'ego lite.app' or ~/Applications/'ego lite.app' already exists, do not
+    reinstall — log UNCHANGED and go to 5b.5.
+ 3. Otherwise run the skill's own installer, which downloads the arch-correct DMG, installs the app,
+    clears the quarantine attribute, and opens it:
+      sh ~/.agents/skills/ego-browser/scripts/install.sh
+    (read ego-browser/references/install.md before running it)
+ 4. STOP AND WAIT. First-run onboarding is a GUI step only I can complete: it asks whether to import
+    Chrome data and it is what registers the 'ego-browser' command under ~/.local/bin. Do not click
+    through it, do not answer the Chrome-migration question for me, and do not report this step as
+    done before I confirm. If I am not present, mark it PENDING-USER and continue with the rest.
+ 5. Verify, without launching any browsing task:
+      command -v ego-browser            (if missing: export PATH="$HOME/.local/bin:$PATH" and retry)
+      ego-browser nodejs <<'EOF'
+      cliLog('ego-browser ready')
+      EOF
+    Printing 'ego-browser ready' is the only acceptable proof. An app that exists is not proof.
+ 6. Do not open any site, log into anything, or run any task in my session while verifying.
 
 === 6. MCP INTEGRATION ===
 
@@ -279,6 +312,9 @@ Also verify:
   - No autonomous loop was started, no Context Diet restriction was activated, no paid service was
     authenticated, and no credits were spent.
   - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
+  - ego-browser resolves on PATH and answers the heredoc probe from 5b.5 — or is reported as
+    PENDING-USER because GUI onboarding is unfinished. No site was visited, no login was performed,
+    and no Chrome data was migrated on my behalf. No Playwright/Puppeteer/Chromium download ran.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 
