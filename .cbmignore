@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.output/
+.astro/
+.tmp-sources/
+.agents/
+.claude/
+.codex/
+.gemini/
+worktrees/
+**/worktrees/
+**/graphify-out/
+**/graph.json
+**/merged-graph.json
+**/*.db
+**/*.sqlite
+**/dump-*.sql
