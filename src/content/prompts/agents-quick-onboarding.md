@@ -64,9 +64,10 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 - **MCP 설치기가 에이전트 설정도 바꾼다**: `codebase-memory-mcp` 설치기는 감지한 코딩 에이전트의
   MCP 설정·지침·스킬·훅까지 구성할 수 있다. 실행 전에 설치 스크립트를 읽고, 자동 설정이 불필요하면
   `--skip-config`로 바이너리만 설치한 뒤 기존 설정 규칙에 맞춰 수동 등록한다.
-- **자동 인덱싱 범위가 너무 크다**: 상위 폴더나 생성물까지 백그라운드에서 읽으면 MCP 연결이
-  `Transport closed`로 끊길 수 있다. 설치 직후 `auto_index=false`를 확인하고, 프로젝트마다
-  `.cbmignore`를 만든 뒤 실제 레포 루트만 수동 인덱싱한다.
+- **자동 인덱싱 범위가 너무 크다**: 상위 폴더나 생성물까지 백그라운드에서 읽으면 최초 인덱싱이
+  오래 걸리고 메모리를 많이 쓸 수 있다. v0.9.0 이상인지 확인하고, 프로젝트마다 `.cbmignore`를
+  먼저 만든 뒤 `auto_index_limit=50000`, `auto_watch=false`, `auto_index=true` 순서로 설정한다.
+  이렇게 하면 최초 자동 인덱싱은 유지하되 지속 watcher(변경 감시)는 끈다.
 - **MCP `cwd` 하드코딩**: 설치기가 실행된 디렉터리를 전역 설정에 박아버린다. 지워야 어느 프로젝트에서든
   올바른 그래프를 본다.
 - **사용자 소유 심링크가 같이 날아간다**: `~/.agents` 밖 개인 레포를 가리키는 링크는 복구 대상에서
@@ -194,7 +195,13 @@ PATH and the wrong one wins.
   Codebase Memory MCP
     macOS/Linux: curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
     Windows: download and inspect install.ps1 from the repository, then run it in PowerShell
-    Then run: codebase-memory-mcp config set auto_index false
+    Require v0.9.0 or newer before enabling automatic indexing.
+    Before restarting any agent, create a reviewed .cbmignore in every active repository root.
+    Then run, in this order:
+      codebase-memory-mcp config set auto_index_limit 50000
+      codebase-memory-mcp config set auto_watch false
+      codebase-memory-mcp config set auto_index true
+      codebase-memory-mcp config list
   OfficeCLI           brew install officecli
   Herdr               official installer, or 'herdr update'
 

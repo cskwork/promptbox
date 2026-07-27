@@ -161,7 +161,13 @@ PATH and the wrong one wins.
   Codebase Memory MCP
     macOS/Linux: curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
     Windows: download and inspect install.ps1 from the repository, then run it in PowerShell
-    Then run: codebase-memory-mcp config set auto_index false
+    Require v0.9.0 or newer before enabling automatic indexing.
+    Before restarting any agent, create a reviewed .cbmignore in every active repository root.
+    Then run, in this order:
+      codebase-memory-mcp config set auto_index_limit 50000
+      codebase-memory-mcp config set auto_watch false
+      codebase-memory-mcp config set auto_index true
+      codebase-memory-mcp config list
   OfficeCLI           brew install officecli
   Herdr               official installer, or 'herdr update'
 
