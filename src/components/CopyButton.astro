@@ -2,11 +2,13 @@
 interface Props {
   target: string;
   label?: string;
+  labelEn?: string;
+  labelKo?: string;
   size?: 'sm' | 'md';
   variant?: 'primary' | 'ghost';
   class?: string;
 }
-const { target, label = '복사', size = 'sm', variant = 'primary', class: className = '' } = Astro.props;
+const { target, label, labelEn = label || 'Copy', labelKo = label || '복사', size = 'sm', variant = 'primary', class: className = '' } = Astro.props;
 
 const sizes = {
   sm: 'px-2.5 py-1 text-xs',
@@ -21,7 +23,9 @@ const variants = {
   type="button"
   class:list={['btn pc-copy', sizes[size], variants[variant], className]}
   data-target={target}
-  aria-label={label}
+  aria-label={labelEn}
+  data-aria-en={labelEn}
+  data-aria-ko={labelKo}
 >
   <svg class="pc-ico-copy h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -30,5 +34,5 @@ const variants = {
   <svg class="pc-ico-check hidden h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
     <polyline points="20 6 9 17 4 12" />
   </svg>
-  <span class="pc-copy-label">{label}</span>
+  <span class="pc-copy-label"><span data-lang="en">{labelEn}</span><span data-lang="ko">{labelKo}</span></span>
 </button>

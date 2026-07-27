@@ -36,43 +36,49 @@ const prev = idx > 0 ? siblings[idx - 1] : null;
 const next = idx >= 0 && idx < siblings.length - 1 ? siblings[idx + 1] : null;
 
 // Build the bilingual "how to use" rows from whichever category fields exist
-interface Row { label: string; value?: string; mono?: boolean; chips?: string[] }
+interface Row { labelEn: string; labelKo: string; value?: string; valueEn?: string; mono?: boolean; chips?: string[] }
 const rows: Row[] = [];
-if (d.trigger) rows.push({ label: '트리거 · Trigger', value: d.trigger });
-if (d.use_case) rows.push({ label: '언제 · When to use', value: d.use_case });
-if (d.target_file) rows.push({ label: '어디에 둘까 · Where it goes', value: d.target_file, mono: true });
-if (d.event) rows.push({ label: '이벤트 · Event', value: d.event, mono: true });
-if (d.matcher) rows.push({ label: '대상 · Matcher', value: d.matcher, mono: true });
-if (d.scope) rows.push({ label: '범위 · Scope', value: d.scope, mono: true });
-if (d.transport) rows.push({ label: '전송 · Transport', value: d.transport, mono: true });
-if (d.server_name) rows.push({ label: '서버 · Server', value: d.server_name, mono: true });
-if (d.base_agent) rows.push({ label: '기반 · Base agent', value: d.base_agent });
-if (d.tools?.length) rows.push({ label: '읽는 도구 · Read by', chips: d.tools });
-if (d.harnesses?.length) rows.push({ label: '지원 · Works with', chips: d.harnesses });
-if (d.languages?.length) rows.push({ label: '언어 · Languages', chips: d.languages });
-if (d.platforms?.length) rows.push({ label: '플랫폼 · Platforms', chips: d.platforms });
-if (d.deps?.length) rows.push({ label: '의존성 · Requires', chips: d.deps });
+if (d.trigger) rows.push({ labelEn: 'Trigger', labelKo: '트리거', value: d.trigger });
+if (d.use_case) rows.push({ labelEn: 'When to use', labelKo: '언제', value: d.use_case, valueEn: d.use_case_en });
+if (d.target_file) rows.push({ labelEn: 'Where it goes', labelKo: '어디에 둘까', value: d.target_file, mono: true });
+if (d.event) rows.push({ labelEn: 'Event', labelKo: '이벤트', value: d.event, mono: true });
+if (d.matcher) rows.push({ labelEn: 'Matcher', labelKo: '대상', value: d.matcher, mono: true });
+if (d.scope) rows.push({ labelEn: 'Scope', labelKo: '범위', value: d.scope, mono: true });
+if (d.transport) rows.push({ labelEn: 'Transport', labelKo: '전송', value: d.transport, mono: true });
+if (d.server_name) rows.push({ labelEn: 'Server', labelKo: '서버', value: d.server_name, mono: true });
+if (d.base_agent) rows.push({ labelEn: 'Base agent', labelKo: '기반', value: d.base_agent, valueEn: d.base_agent_en });
+if (d.tools?.length) rows.push({ labelEn: 'Read by', labelKo: '읽는 도구', chips: d.tools });
+if (d.harnesses?.length) rows.push({ labelEn: 'Works with', labelKo: '지원', chips: d.harnesses });
+if (d.languages?.length) rows.push({ labelEn: 'Languages', labelKo: '언어', chips: d.languages });
+if (d.platforms?.length) rows.push({ labelEn: 'Platforms', labelKo: '플랫폼', chips: d.platforms });
+if (d.deps?.length) rows.push({ labelEn: 'Requires', labelKo: '의존성', chips: d.deps });
 
 const hasUsage = Boolean(d.install) || rows.length > 0;
 ---
 
-<BaseLayout title={`${d.title} — promptbox`} description={d.summary} currentHref={currentHref}>
-  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="경로">
-    <a href={base + '/'} class="hover:text-accent-700 dark:hover:text-accent-400">홈</a>
+<BaseLayout
+  title={`${d.title_en || d.title} — promptbox`}
+  titleKo={`${d.title} — promptbox`}
+  description={d.summary_en}
+  descriptionKo={d.summary}
+  currentHref={currentHref}
+>
+  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
+    <a href={base + '/'} class="hover:text-accent-700 dark:hover:text-accent-400"><span data-lang="en">Home</span><span data-lang="ko">홈</span></a>
     <span aria-hidden="true">›</span>
-    <a href={`${base}/#${category}`} class="hover:text-accent-700 dark:hover:text-accent-400">{meta.label}</a>
+    <a href={`${base}/#${category}`} class="hover:text-accent-700 dark:hover:text-accent-400"><span data-lang="en">{meta.label_en}</span><span data-lang="ko">{meta.label}</span></a>
     <span aria-hidden="true">›</span>
-    <span class="truncate text-ink-700 dark:text-ink-200">{d.title}</span>
+    <span class="truncate text-ink-700 dark:text-ink-200"><span data-lang="en">{d.title_en || d.title}</span><span data-lang="ko">{d.title}</span></span>
   </nav>
 
   <header class:list={['glass-panel mb-5 rounded-2xl p-5 lg:p-6', `cat-${category}`]}>
     <div class="mb-3 flex flex-wrap items-start justify-between gap-3">
       <span class="cat-chip">
         <CategoryIcon icon={meta.icon} class="h-3.5 w-3.5" />
-        {meta.label}<span class="opacity-60">· {meta.label_en}</span>
+        <span data-lang="en">{meta.label_en}</span><span data-lang="ko">{meta.label}</span>
       </span>
       <div class="flex items-center gap-2">
-        <CopyButton target="#pc-rawtext" label="원문 복사" size="md" />
+        <CopyButton target="#pc-rawtext" labelEn="Copy original" labelKo="원문 복사" size="md" />
         {d.source && (
           <a
             href={d.source}
@@ -80,15 +86,14 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
             rel="noopener"
             class="btn btn-ghost px-3.5 py-1.5 text-sm"
           >
-            원본 보기
+            <span data-lang="en">View source</span><span data-lang="ko">원본 보기</span>
             <svg class="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
         )}
       </div>
     </div>
-    <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">{d.title}</h1>
-    <p class="mt-2 text-pretty leading-relaxed text-ink-600 dark:text-ink-300">{d.summary}</p>
-    {d.summary_en && <p class="mt-1 text-pretty text-sm leading-relaxed text-ink-500 dark:text-ink-400">{d.summary_en}</p>}
+    <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl"><span data-lang="en">{d.title_en || d.title}</span><span data-lang="ko">{d.title}</span></h1>
+    <p class="mt-2 text-pretty leading-relaxed text-ink-600 dark:text-ink-300"><span data-lang="en">{d.summary_en || d.summary}</span><span data-lang="ko">{d.summary}</span></p>
     {d.tags?.length > 0 && (
       <div class="mt-3 flex flex-wrap gap-1">
         {d.tags.map((t: string) => (
@@ -101,16 +106,15 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
   {hasUsage && (
     <section class="mb-5 rounded-2xl border border-ink-100/90 bg-white/55 p-5 dark:border-white/10 dark:bg-ink-900/40">
       <div class="mb-3 flex items-baseline gap-2">
-        <h2 class="text-sm font-semibold text-ink-800 dark:text-ink-100">사용법</h2>
-        <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">How to use</span>
+        <h2 class="text-sm font-semibold text-ink-800 dark:text-ink-100"><span data-lang="en">How to use</span><span data-lang="ko">사용법</span></h2>
       </div>
 
       {d.install && (
         <div class="mb-4">
-          <div class="mb-1.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">설치 · Install</div>
+          <div class="mb-1.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400"><span data-lang="en">Install</span><span data-lang="ko">설치</span></div>
           <div class="flex items-stretch gap-2">
             <code id="pc-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{d.install}</code>
-            <CopyButton target="#pc-install" label="복사" size="sm" variant="ghost" class="shrink-0" />
+            <CopyButton target="#pc-install" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
           </div>
         </div>
       )}
@@ -119,20 +123,22 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
         <dl class="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
           {rows.map((r) => (
             <div>
-              <dt class="mb-0.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">{r.label}</dt>
+              <dt class="mb-0.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400"><span data-lang="en">{r.labelEn}</span><span data-lang="ko">{r.labelKo}</span></dt>
               {r.chips ? (
                 <dd class="flex flex-wrap gap-1">
                   {r.chips.map((c) => <span class="glass-chip rounded-full px-2 py-0.5 text-[0.7rem] font-medium">{c}</span>)}
                 </dd>
               ) : (
-                <dd class:list={['text-sm text-ink-700 dark:text-ink-200', r.mono && 'font-mono text-[0.82rem]']}>{r.value}</dd>
+                <dd class:list={['text-sm text-ink-700 dark:text-ink-200', r.mono && 'font-mono text-[0.82rem]']}>
+                  <span data-lang="en">{r.valueEn || r.value}</span><span data-lang="ko">{r.value}</span>
+                </dd>
               )}
             </div>
           ))}
           {(d.author || d.license) && (
             <div class="sm:col-span-2 flex flex-wrap gap-x-6 gap-y-1 border-t border-ink-100/80 pt-3 text-xs text-ink-500 dark:border-white/10">
-              {d.author && <span>작성자 · Author <strong class="font-medium text-ink-700 dark:text-ink-200">{d.author}</strong></span>}
-              {d.license && <span>라이선스 · License <strong class="font-medium text-ink-700 dark:text-ink-200">{d.license}</strong></span>}
+              {d.author && <span><span data-lang="en">Author</span><span data-lang="ko">작성자</span> <strong class="font-medium text-ink-700 dark:text-ink-200">{d.author}</strong></span>}
+              {d.license && <span><span data-lang="en">License</span><span data-lang="ko">라이선스</span> <strong class="font-medium text-ink-700 dark:text-ink-200">{d.license}</strong></span>}
             </div>
           )}
         </dl>
@@ -143,25 +149,30 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
   <!-- Desktop sticky copy affordance: keeps the core "원문 복사" action in reach while
        reading a long entry. top-20 clears the 56px sticky Header; z below the nav. -->
   <div class="mb-3 hidden lg:sticky lg:top-20 lg:z-20 lg:flex lg:justify-end">
-    <CopyButton target="#pc-rawtext" label="원문 복사" size="sm" variant="ghost" />
+    <CopyButton target="#pc-rawtext" labelEn="Copy original" labelKo="원문 복사" size="sm" variant="ghost" />
   </div>
 
-  <article class="prose-pc rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
+  <section data-lang="en" class="rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
+    <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50">About this item</h2>
+    <p class="mt-2 leading-relaxed text-ink-600 dark:text-ink-300">{d.summary_en}</p>
+    <p class="mt-3 text-sm leading-relaxed text-ink-500 dark:text-ink-400">Use “Copy original” above to copy the complete, unchanged entry. Switch to Korean to read the full curator notes.</p>
+  </section>
+  <article data-lang="ko" class="prose-pc rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
     <Content />
   </article>
 
   {(prev || next) && (
-    <nav class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="같은 카테고리 이동">
+    <nav class="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2" aria-label="More in this category" data-aria-en="More in this category" data-aria-ko="같은 카테고리 이동">
       {prev ? (
         <a href={`${base}/${category}/${prev.slug}/`} class="glass-card flex flex-col rounded-xl p-4">
-          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400"><span aria-hidden="true">←</span> 이전 · Prev</span>
-          <span class="mt-1 font-medium text-ink-800 dark:text-ink-100">{prev.data.title}</span>
+          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400"><span aria-hidden="true">←</span> <span data-lang="en">Previous</span><span data-lang="ko">이전</span></span>
+          <span class="mt-1 font-medium text-ink-800 dark:text-ink-100"><span data-lang="en">{prev.data.title_en || prev.data.title}</span><span data-lang="ko">{prev.data.title}</span></span>
         </a>
       ) : <span></span>}
       {next && (
         <a href={`${base}/${category}/${next.slug}/`} class="glass-card flex flex-col rounded-xl p-4 text-right">
-          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">다음 · Next <span aria-hidden="true">→</span></span>
-          <span class="mt-1 font-medium text-ink-800 dark:text-ink-100">{next.data.title}</span>
+          <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400"><span data-lang="en">Next</span><span data-lang="ko">다음</span> <span aria-hidden="true">→</span></span>
+          <span class="mt-1 font-medium text-ink-800 dark:text-ink-100"><span data-lang="en">{next.data.title_en || next.data.title}</span><span data-lang="ko">{next.data.title}</span></span>
         </a>
       )}
     </nav>

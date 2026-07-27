@@ -2,6 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+html[lang='en'] [data-lang='ko'],
+html[lang='ko'] [data-lang='en'] {
+  display: none !important;
+}
+
+
 /* ============================================================
    BASE
    ============================================================ */

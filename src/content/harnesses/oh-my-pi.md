@@ -8,6 +8,7 @@ author: Can Bölük (can1357), based on Pi by Mario Zechner
 license: MIT
 order: 30
 base_agent: 자체 (Pi fork)
+base_agent_en: Standalone (Pi fork)
 languages: [TypeScript, Rust, Bun]
 platforms: [macOS, Linux, Windows, Zed (ACP)]
 install: "curl -fsSL https://omp.sh/install | sh   # 또는 bun install -g @oh-my-pi/pi-coding-agent"

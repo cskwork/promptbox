@@ -6,6 +6,7 @@ tags: [transcription, cleanup, text-processing]
 author: cskwork
 order: 10
 use_case: STT(Whisper, Deepgram 등) 결과물을 사후 정리할 때, 또는 회의록·강의 받아쓰기 후처리 파이프라인의 마지막 단계로 사용.
+use_case_en: Clean up speech-to-text output from tools such as Whisper or Deepgram, including meeting notes and lecture transcripts.
 ---
 
 ## 언제 쓰는가

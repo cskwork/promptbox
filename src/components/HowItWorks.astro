@@ -6,21 +6,24 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const steps = [
   {
     n: '01',
-    title: '고르기',
-    en: 'Browse',
-    desc: '왼쪽 사이드바나 아래 카테고리에서 필요한 도구를 찾습니다. 검색창에 키워드를 넣어도 됩니다.',
+    titleEn: 'Browse',
+    titleKo: '고르기',
+    descEn: 'Find what you need in the sidebar, the categories below, or by searching for a keyword.',
+    descKo: '왼쪽 사이드바나 아래 카테고리에서 필요한 도구를 찾습니다. 검색창에 키워드를 넣어도 됩니다.',
   },
   {
     n: '02',
-    title: '복사',
-    en: 'Copy',
-    desc: '상세 페이지의 "원문 복사" 버튼을 누르면 바로 쓸 수 있는 원문이 클립보드에 담깁니다.',
+    titleEn: 'Copy',
+    titleKo: '복사',
+    descEn: 'Open an item and use “Copy original” to put its ready-to-use source on your clipboard.',
+    descKo: '상세 페이지의 "원문 복사" 버튼을 누르면 바로 쓸 수 있는 원문이 클립보드에 담깁니다.',
   },
   {
     n: '03',
-    title: '붙여넣기',
-    en: 'Use',
-    desc: '에이전트 설정 폴더(예: ~/.claude/skills/)에 붙여넣거나, 채팅창에 그대로 붙여 넣으면 끝입니다.',
+    titleEn: 'Use',
+    titleKo: '붙여넣기',
+    descEn: 'Paste it into an agent folder such as ~/.claude/skills/, or directly into your chat.',
+    descKo: '에이전트 설정 폴더(예: ~/.claude/skills/)에 붙여넣거나, 채팅창에 그대로 붙여 넣으면 끝입니다.',
   },
 ];
 ---
@@ -28,15 +31,16 @@ const steps = [
   <div class="glass-panel rounded-2xl p-6 lg:p-8">
     <div class="mb-6 flex flex-wrap items-end justify-between gap-2">
       <div>
-        <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50">처음이세요?</h2>
-        <p class="mt-1 text-sm text-ink-500">New here? It takes three steps: browse, copy, paste.</p>
+        <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50"><span data-lang="en">New here?</span><span data-lang="ko">처음이세요?</span></h2>
+        <p class="mt-1 text-sm text-ink-500"><span data-lang="en">It takes three steps: browse, copy, paste.</span><span data-lang="ko">세 단계면 됩니다: 고르고, 복사하고, 붙여넣기.</span></p>
       </div>
       <span class="font-mono text-[0.72rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">How it works</span>
     </div>
 
     <p class="mb-4 flex items-start gap-2 rounded-lg border border-accent-500/25 bg-accent-500/5 px-3 py-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
       <svg class="mt-0.5 h-4 w-4 shrink-0 text-accent-700 dark:text-accent-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
-      <span><strong class="font-semibold text-ink-800 dark:text-ink-100">준비물</strong>: Claude Code · Codex · Gemini CLI 같은 AI 코딩 에이전트가 먼저 설치돼 있어야 합니다. <span class="text-ink-500">You'll need an AI coding agent installed first.</span></span>
+      <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">Before you start:</strong> install an AI coding agent such as Claude Code, Codex, or Gemini CLI.</span>
+      <span data-lang="ko"><strong class="font-semibold text-ink-800 dark:text-ink-100">준비물</strong>: Claude Code · Codex · Gemini CLI 같은 AI 코딩 에이전트가 먼저 설치돼 있어야 합니다.</span>
     </p>
 
     <ol class="grid gap-4 sm:grid-cols-3">
@@ -44,18 +48,16 @@ const steps = [
         <li class="relative rounded-xl border border-ink-100/80 bg-white/50 p-4 dark:border-white/10 dark:bg-ink-900/40">
           <div class="mb-2 flex items-baseline gap-2">
             <span class="font-mono text-lg font-bold text-accent-700 dark:text-accent-400">{s.n}</span>
-            <h3 class="font-semibold text-ink-900 dark:text-ink-50">{s.title}</h3>
-            <span class="font-mono text-[0.72rem] text-ink-500 dark:text-ink-400">{s.en}</span>
+            <h3 class="font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">{s.titleEn}</span><span data-lang="ko">{s.titleKo}</span></h3>
           </div>
-          <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">{s.desc}</p>
+          <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300"><span data-lang="en">{s.descEn}</span><span data-lang="ko">{s.descKo}</span></p>
         </li>
       ))}
     </ol>
 
     <div class="mt-8 border-t border-ink-100/80 pt-6 dark:border-white/10">
       <div class="mb-3 flex flex-wrap items-baseline gap-x-2">
-        <h3 class="text-sm font-semibold text-ink-800 dark:text-ink-100">용어가 낯설다면</h3>
-        <span class="font-mono text-[0.72rem] text-ink-500 dark:text-ink-400">Jargon buster · what each category means</span>
+        <h3 class="text-sm font-semibold text-ink-800 dark:text-ink-100"><span data-lang="en">What does each category mean?</span><span data-lang="ko">용어가 낯설다면</span></h3>
       </div>
       <div class="grid gap-x-6 gap-y-3 sm:grid-cols-2">
         {CATEGORY_ORDER.map((key) => {
@@ -65,11 +67,9 @@ const steps = [
               <span class="cat-tile mt-0.5 h-8 w-8 shrink-0"><CategoryIcon icon={m.icon} class="h-4 w-4" /></span>
               <div class="min-w-0">
                 <div class="flex items-baseline gap-1.5">
-                  <span class="font-semibold text-ink-900 dark:text-ink-50">{m.label}</span>
-                  <span class="font-mono text-[0.7rem] text-ink-500 dark:text-ink-400">{m.label_en}</span>
+                  <span class="font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">{m.label_en}</span><span data-lang="ko">{m.label}</span></span>
                 </div>
-                <p class="text-[0.82rem] leading-snug text-ink-600 dark:text-ink-300">{m.blurb}</p>
-                <p class="text-[0.78rem] leading-snug text-ink-500 dark:text-ink-400">{m.blurb_en}</p>
+                <p class="text-[0.82rem] leading-snug text-ink-600 dark:text-ink-300"><span data-lang="en">{m.blurb_en}</span><span data-lang="ko">{m.blurb}</span></p>
               </div>
             </a>
           );

@@ -2,7 +2,7 @@
 import BaseLayout from '~/layouts/BaseLayout.astro';
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
-<BaseLayout title="404 — promptbox">
+<BaseLayout title="Page not found — promptbox" titleKo="페이지를 찾을 수 없습니다 — promptbox">
   <div class="mx-auto max-w-xl py-12 lg:py-16">
     <div class="pc-term mb-8" aria-hidden="true">
       <div class="pc-term-bar">
@@ -14,18 +14,17 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       <div class="space-y-2 p-4">
         <p><span class="text-accent-400">$</span> promptbox open <span class="text-ink-50">{'<this-page>'}</span></p>
         <p class="text-[#ff6b6b]">error: command not found: 404</p>
-        <p class="text-ink-400"># 페이지를 찾을 수 없습니다 · page not found</p>
+        <p class="text-ink-400"><span data-lang="en"># page not found</span><span data-lang="ko"># 페이지를 찾을 수 없습니다</span></p>
         <p><span class="text-accent-400">&gt;</span> <span class="caret"></span></p>
       </div>
     </div>
 
-    <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50">페이지를 찾을 수 없습니다</h1>
-    <p class="mt-1 text-ink-500">That page doesn't exist. The URL may have changed, or the item was removed from the catalog.</p>
-    <p class="mt-1 text-sm text-ink-500">URL이 바뀌었거나 컬렉션에서 제거된 항목일 수 있습니다.</p>
+    <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50"><span data-lang="en">Page not found</span><span data-lang="ko">페이지를 찾을 수 없습니다</span></h1>
+    <p class="mt-1 text-ink-500"><span data-lang="en">That page doesn't exist. The URL may have changed, or the item was removed from the catalog.</span><span data-lang="ko">URL이 바뀌었거나 컬렉션에서 제거된 항목일 수 있습니다.</span></p>
 
     <div class="mt-6 flex flex-wrap gap-3">
-      <a href={base + '/'} class="btn btn-primary px-5 py-2.5 text-sm">홈으로 · Home</a>
-      <a href={base + '/#catalog'} class="btn btn-ghost px-5 py-2.5 text-sm">카탈로그 둘러보기 · Browse</a>
+      <a href={base + '/'} class="btn btn-primary px-5 py-2.5 text-sm"><span data-lang="en">Home</span><span data-lang="ko">홈으로</span></a>
+      <a href={base + '/#catalog'} class="btn btn-ghost px-5 py-2.5 text-sm"><span data-lang="en">Browse catalog</span><span data-lang="ko">카탈로그 둘러보기</span></a>
     </div>
   </div>
 </BaseLayout>

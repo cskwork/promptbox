@@ -1,5 +1,6 @@
 ---
 title: claude-code-hooks (모음)
+title_en: claude-code-hooks collection
 summary: AI 코딩 도구의 명령을 실행 직전에 가로채 위험을 막거나 보완해 주는 개인용 훅 4종 묶음 - ssh 직접 접속 차단, 빌드 전 MyBatis XML 검사, 웹 검색에 올해 연도 자동 추가, 코드 검색 전 그래프 힌트까지 한 번에.
 summary_en: Four hooks that bar direct SSH, validate MyBatis XML before builds, keep web searches current, and nudge graph-aware code search.
 tags: [hook, claude-code, pretooluse, ssh-guard, mybatis, websearch]
