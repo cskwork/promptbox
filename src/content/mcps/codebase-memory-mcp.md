@@ -1,7 +1,7 @@
 ---
 title: codebase-memory-mcp
-summary: 코드베이스를 로컬 지식 그래프로 인덱싱해 에이전트가 구조 질문을 빠르게 답하게 하는 MCP. 설치 직후 자동 인덱싱은 끄고, .cbmignore와 수동 fast index로 시작한다.
-summary_en: Local codebase knowledge graph MCP for coding agents. Disable background auto-index after install; start with .cbmignore and explicit fast indexing.
+summary: 코드베이스를 로컬 지식 그래프로 인덱싱해 에이전트가 구조 질문을 빠르게 답하게 하는 MCP. .cbmignore를 먼저 만들고 자동 인덱싱 범위와 watcher를 제한한다.
+summary_en: Local codebase knowledge graph MCP for coding agents. Add .cbmignore first, then bound automatic indexing and disable continuous watching.
 tags: [mcp, codebase, memory, knowledge-graph, indexing, claude-code, codex, local]
 source: https://github.com/DeusData/codebase-memory-mcp
 author: DeusData
@@ -42,14 +42,19 @@ iwr -Uri https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/ins
 
 ## 설치 직후 안전 기본값
 
-대형 레포나 상위 폴더를 자동 인덱싱하면 백그라운드 watcher가 긴 파싱 작업 중 죽고, 에이전트 쪽에서는 `Transport closed`로 보일 수 있다. 설치 직후에는 자동 인덱싱을 끄고 프로젝트별로 명시적으로 인덱싱한다.
+자동 인덱싱 안정성 개선과 `auto_watch` 설정이 포함된 v0.9.0 이상인지 먼저 확인한다. 에이전트를
+재시작하기 전에 아래 `.cbmignore`를 각 작업 레포에 만든 후, 최초 자동 인덱싱은 켜고 지속
+watcher(변경 감시)는 끈다.
 
 ```bash
-codebase-memory-mcp config set auto_index false
+codebase-memory-mcp --version
+codebase-memory-mcp config set auto_index_limit 50000
+codebase-memory-mcp config set auto_watch false
+codebase-memory-mcp config set auto_index true
 codebase-memory-mcp config list
 ```
 
-`auto_index = false`가 보여야 한다.
+`auto_index = true`, `auto_index_limit = 50000`, `auto_watch = false`가 모두 보여야 한다.
 
 ## 프로젝트마다 먼저 `.cbmignore`
 
@@ -84,7 +89,8 @@ worktrees/
 
 ## 수동 인덱싱
 
-먼저 빠른 인덱스로 그래프가 정상 생성되는지 확인한다.
+자동 인덱싱을 기다리지 않고 즉시 확인하거나, 50,000파일 제한을 넘는 레포를 명시적으로 처리할 때
+빠른 인덱스를 실행한다.
 
 ```bash
 codebase-memory-mcp cli index_repository '{"repo_path":"'"$PWD"'","mode":"fast"}'
@@ -113,7 +119,7 @@ stdio MCP는 터미널에서 직접 실행하면 입력 대기 상태처럼 보�
 
 ## `Transport closed` RCA 체크리스트
 
-- `codebase-memory-mcp config list`에서 `auto_index = false`인지 확인
+- v0.9.0 이상인지, `auto_index_limit = 50000`, `auto_watch = false`인지 확인
 - `.cbmignore` 없이 부모 폴더나 생성물 폴더를 인덱싱했는지 확인
 - macOS라면 `~/Library/Logs/DiagnosticReports/codebase-memory-mcp-*.ips`에서 crash log 확인
 - `codebase-memory-mcp cli list_projects`와 `index_status`로 캐시가 정상인지 확인
@@ -121,7 +127,7 @@ stdio MCP는 터미널에서 직접 실행하면 입력 대기 상태처럼 보�
 
 ## 운영 원칙
 
-- 설치는 전역으로 한 번, 인덱싱은 프로젝트별로 수동 실행
+- 설치는 전역으로 한 번, `.cbmignore`는 프로젝트별로 자동 인덱싱 전에 작성
 - 큰 구조 변경 뒤에는 같은 레포 루트에서 다시 `index_repository`
 - 검색은 MCP 그래프 도구 우선, 문자열·설정·문서 검색은 일반 파일 검색 사용
 - 반복 실패 시 “성공처럼 숨기기”보다 `.cbmignore`, 인덱싱 범위, crash log를 먼저 본다
