@@ -8,10 +8,18 @@ import { CATEGORY_ORDER, type CategoryKey } from '~/content/config';
 
 interface Props {
   title: string;
+  titleKo?: string;
   description?: string;
+  descriptionKo?: string;
   currentHref?: string;
 }
-const { title, description = '복사해서 바로 쓰는 AI 코딩 에이전트용 프롬프트·스킬·훅·설정 모음. A copy-paste toolbox for AI coding agents.', currentHref } = Astro.props;
+const {
+  title,
+  titleKo = title,
+  description = 'A curated, copy-paste toolbox of prompts, skills, hooks, configs, and more for AI coding agents.',
+  descriptionKo = description,
+  currentHref,
+} = Astro.props;
 
 const COLLECTIONS: CategoryKey[] = [...CATEGORY_ORDER];
 const lists = await Promise.all(COLLECTIONS.map((c) => getCollection(c, (e: any) => !e.data.hidden)));
@@ -23,10 +31,11 @@ const items = lists.flatMap((entries, idx) => {
   return entries.map((entry: any) => ({
     slug: entry.slug,
     title: entry.data.title,
+    titleEn: entry.data.title_en,
     category,
     order: entry.data.order ?? 100,
     href: `${base}/${category}/${entry.slug}/`,
-    keywords: [entry.data.title, entry.data.summary, entry.data.summary_en, ...(entry.data.tags ?? [])]
+    keywords: [entry.data.title, entry.data.title_en, entry.data.summary, entry.data.summary_en, ...(entry.data.tags ?? [])]
       .filter(Boolean)
       .join(' ')
       .toLowerCase(),
@@ -35,7 +44,14 @@ const items = lists.flatMap((entries, idx) => {
 ---
 
 <!doctype html>
-<html lang="ko" class="scroll-smooth">
+<html
+  lang="en"
+  class="scroll-smooth"
+  data-title-en={title}
+  data-title-ko={titleKo}
+  data-description-en={description}
+  data-description-ko={descriptionKo}
+>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -63,10 +79,12 @@ const items = lists.flatMap((entries, idx) => {
       @font-face{font-family:'JetBrains Mono Variable';font-style:normal;font-display:swap;font-weight:100 900;src:url(${base}/fonts/jetbrains-mono-variable-latin.woff2) format('woff2-variations')}
     `}></style>
     <script is:inline>
-      // Mark JS available (gates scroll-reveal) + apply theme before paint (no flash)
+      // Mark JS available and apply saved preferences before paint.
       (function () {
         const root = document.documentElement;
         root.classList.add('js');
+        const language = localStorage.getItem('pc-language');
+        if (language === 'ko') root.lang = 'ko';
         const saved = localStorage.getItem('pc-theme');
         const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (saved === 'dark' || (!saved && prefersDark)) root.classList.add('dark');
@@ -74,7 +92,9 @@ const items = lists.flatMap((entries, idx) => {
     </script>
   </head>
   <body class="min-h-screen">
-    <a href="#main" class="skip-link btn btn-primary px-4 py-2 text-sm">본문으로 건너뛰기</a>
+    <a href="#main" class="skip-link btn btn-primary px-4 py-2 text-sm">
+      <span data-lang="en">Skip to content</span><span data-lang="ko">본문으로 건너뛰기</span>
+    </a>
     <Header />
     <div class="mx-auto flex max-w-8xl flex-col lg:flex-row">
       <Sidebar items={items} currentHref={currentHref} />
@@ -99,17 +119,19 @@ const items = lists.flatMap((entries, idx) => {
         const checkIco = btn.querySelector('.pc-ico-check');
         try {
           await navigator.clipboard.writeText(text);
-          const prev = labelEl?.textContent ?? '복사';
-          if (labelEl) labelEl.textContent = '복사됨';
+          const prev = labelEl?.innerHTML ?? 'Copy';
+          if (labelEl) labelEl.textContent = document.documentElement.lang === 'ko' ? '복사됨' : 'Copied';
           copyIco?.classList.add('hidden');
           checkIco?.classList.remove('hidden');
           window.setTimeout(() => {
-            if (labelEl) labelEl.textContent = prev;
+            if (labelEl) labelEl.innerHTML = prev;
             copyIco?.classList.remove('hidden');
             checkIco?.classList.add('hidden');
           }, 1500);
         } catch {
-          alert('클립보드 복사에 실패했습니다. 수동으로 복사해 주세요.');
+          alert(document.documentElement.lang === 'ko'
+            ? '클립보드 복사에 실패했습니다. 수동으로 복사해 주세요.'
+            : 'Could not copy to the clipboard. Please copy it manually.');
         }
       });
 

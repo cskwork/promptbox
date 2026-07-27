@@ -1,11 +1,13 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
+title_en: One-shot coding agent setup
 summary: "스킬 55종과 공통 시스템 프롬프트, CLI 도구(codebase-memory-mcp·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(.claude·.codex·.gemini·.cursor·.kiro·opencode)에 자동으로 심링크·MCP 연결하는 복사-붙여넣기 프롬프트. 이미 있으면 최신으로 업데이트하고, 깨진 링크는 복구한다."
 summary_en: "One paste-and-go prompt that installs 55 skills, a shared system prompt, CLI tools (codebase-memory-mcp, officecli, herdr), and the ego lite agent browser (macOS) into a single ~/.agents/ dir, then wires it into every coding CLI you have — updating what exists and repairing what broke."
 tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent]
 author: cskwork
 order: 5
 use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 한곳에서 관리하고 싶을 때. 에이전트 채팅창에 그대로 붙여넣으면 끝. 이미 설치된 환경이 깨졌을 때 복구용으로도 그대로 쓴다."
+use_case_en: "Set up a new machine, manage shared skills and rules across coding CLIs, or repair an existing installation by pasting one prompt into your agent."
 ---
 
 ## 한 줄

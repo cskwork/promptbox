@@ -5,6 +5,7 @@ import { CATEGORY_META, CATEGORY_ORDER, type CategoryKey } from '~/content/confi
 interface NavItem {
   slug: string;
   title: string;
+  titleEn?: string;
   category: CategoryKey;
   href: string;
   order: number;
@@ -40,13 +41,13 @@ const homeHref = base + '/';
   >
     <span class="flex items-center gap-2">
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      카테고리 둘러보기<span class="font-mono text-[0.7rem] text-ink-500 dark:text-ink-400">Browse</span>
+      <span data-lang="en">Browse categories</span><span data-lang="ko">카테고리 둘러보기</span>
     </span>
     <svg class="pc-nav-chev h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
   </button>
   <div id="pc-nav-body" class="hidden lg:block">
   <!-- Mobile-only swipeable category quick-jump; reuses cat hues + counts -->
-  <div class="-mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden" aria-label="카테고리 바로가기">
+  <div class="-mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden" aria-label="Category shortcuts" data-aria-en="Category shortcuts" data-aria-ko="카테고리 바로가기">
     {grouped.filter((g) => g.entries.length > 0).map((group) => (
       <a
         href={`#pc-cat-${group.key}`}
@@ -54,20 +55,22 @@ const homeHref = base + '/';
         class:list={['cat-chip min-h-[2.5rem] shrink-0 whitespace-nowrap', `cat-${group.key}`]}
       >
         <span class="cat-tile h-4 w-4" aria-hidden="true"><CategoryIcon icon={group.meta.icon} class="h-2.5 w-2.5" /></span>
-        <span class="font-sans">{group.meta.label}</span>
+        <span class="font-sans"><span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span></span>
         <span class="font-mono opacity-70">{group.entries.length}</span>
       </a>
     ))}
   </div>
   <div class="relative mb-5">
-    <label for="pc-search" class="sr-only">제목·요약·태그로 검색</label>
+    <label for="pc-search" class="sr-only"><span data-lang="en">Search titles, summaries, and tags</span><span data-lang="ko">제목·요약·태그로 검색</span></label>
     <svg class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
       <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
     </svg>
     <input
       type="search"
       id="pc-search"
-      placeholder="검색 · Search"
+      placeholder="Search"
+      data-placeholder-en="Search"
+      data-placeholder-ko="검색"
       class="glass-input w-full rounded-lg py-2.5 pl-8 pr-9 text-sm lg:py-1.5"
       autocomplete="off"
     />
@@ -76,7 +79,7 @@ const homeHref = base + '/';
   <!-- Live match count: visual reassurance while filtering (shown only on an active query) -->
   <p id="pc-search-count" class="mb-4 hidden px-1 font-mono text-[0.66rem] text-ink-500 dark:text-ink-400"></p>
 
-  <nav class="space-y-5 text-sm" aria-label="카탈로그">
+  <nav class="space-y-5 text-sm" aria-label="Catalog" data-aria-en="Catalog" data-aria-ko="카탈로그">
     <a
       href={homeHref}
       class:list={[
@@ -87,20 +90,21 @@ const homeHref = base + '/';
       ]}
     >
       <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-      전체 카탈로그
+      <span data-lang="en">All items</span><span data-lang="ko">전체 카탈로그</span>
     </a>
 
     {grouped.map((group) => (
       <div id={`pc-cat-${group.key}`} data-pc-group={group.key} class:list={['scroll-mt-16 space-y-1', `cat-${group.key}`]}>
         <div class="mb-1 flex items-center gap-2 px-1">
           <span class="cat-tile h-5 w-5"><CategoryIcon icon={group.meta.icon} class="h-3 w-3" /></span>
-          <span class="text-[0.72rem] font-semibold uppercase tracking-wider text-ink-700 dark:text-ink-200">{group.meta.label}</span>
-          <span class="font-mono text-[0.66rem] text-ink-500 dark:text-ink-400">{group.meta.label_en}</span>
+          <span class="text-[0.72rem] font-semibold uppercase tracking-wider text-ink-700 dark:text-ink-200">
+            <span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span>
+          </span>
           <span class="ml-auto font-mono text-[0.66rem] text-ink-500 dark:text-ink-400">{group.entries.length}</span>
         </div>
         <ul class="space-y-0.5">
           {group.entries.length === 0 && (
-            <li class="px-2 py-1 text-xs italic text-ink-500 dark:text-ink-400">아직 항목이 없습니다 · nothing here yet</li>
+            <li class="px-2 py-1 text-xs italic text-ink-500 dark:text-ink-400"><span data-lang="en">Nothing here yet</span><span data-lang="ko">아직 항목이 없습니다</span></li>
           )}
           {group.entries.map((entry) => (
             <li>
@@ -114,7 +118,7 @@ const homeHref = base + '/';
                     ? 'bg-accent-500/15 font-medium text-accent-700 ring-1 ring-accent-500/30 dark:text-accent-300'
                     : 'text-ink-600 hover:bg-white/60 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-900/60 dark:hover:text-ink-50',
                 ]}
-              >{entry.title}</a>
+              ><span data-lang="en">{entry.titleEn || entry.title}</span><span data-lang="ko">{entry.title}</span></a>
             </li>
           ))}
         </ul>
@@ -122,7 +126,7 @@ const homeHref = base + '/';
     ))}
 
     <p id="pc-noresults" class="hidden px-2 py-3 text-xs italic text-ink-500 dark:text-ink-400">
-      검색 결과가 없습니다 · No matches
+      <span data-lang="en">No matches</span><span data-lang="ko">검색 결과가 없습니다</span>
     </p>
   </nav>
   </div>
@@ -131,6 +135,15 @@ const homeHref = base + '/';
 <script>
   const input = document.getElementById('pc-search') as HTMLInputElement | null;
   const noResults = document.getElementById('pc-noresults');
+  const syncSearchLanguage = () => {
+    if (!input) return;
+    input.placeholder = document.documentElement.lang === 'ko'
+      ? input.dataset.placeholderKo || '검색'
+      : input.dataset.placeholderEn || 'Search';
+    if (input.value) input.dispatchEvent(new Event('input'));
+  };
+  document.addEventListener('pc-language-change', syncSearchLanguage);
+  syncSearchLanguage();
 
   // Mobile: collapse/expand the sidebar (full sidebar is always shown on lg+)
   const navToggle = document.getElementById('pc-nav-toggle');
@@ -183,7 +196,9 @@ const homeHref = base + '/';
       const countEl = document.getElementById('pc-search-count');
       if (countEl) {
         countEl.classList.toggle('hidden', !q || !anyVisible);
-        countEl.textContent = q && anyVisible ? `${shown}개 일치 · ${shown} matches` : '';
+        countEl.textContent = q && anyVisible
+          ? document.documentElement.lang === 'ko' ? `${shown}개 일치` : `${shown} matches`
+          : '';
       }
     });
     // Esc clears

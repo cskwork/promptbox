@@ -22,14 +22,14 @@ const categoryCount = grouped.filter((g) => g.entries.length > 0).length;
 const currentHref = base + '/';
 ---
 
-<BaseLayout title="promptbox — AI 코딩 에이전트 도구 모음" currentHref={currentHref}>
+<BaseLayout title="promptbox — tools for AI coding agents" titleKo="promptbox — AI 코딩 에이전트 도구 모음" descriptionKo="복사해서 바로 쓰는 AI 코딩 에이전트용 프롬프트·스킬·훅·설정 모음." currentHref={currentHref}>
   <Hero total={total} categoryCount={categoryCount} />
   <HowItWorks />
   <DeveloperPicks />
 
   <section id="catalog" class="scroll-mt-20 pt-4">
     <div class="mb-6 flex items-end justify-between border-b border-ink-200/70 pb-3 dark:border-ink-800/70">
-      <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50">카탈로그</h2>
+      <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50"><span data-lang="en">Catalog</span><span data-lang="ko">카탈로그</span></h2>
       <span class="font-mono text-[0.72rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">Catalog · {total} items</span>
     </div>
 
@@ -38,15 +38,14 @@ const currentHref = base + '/';
         <section id={group.key} class:list={['reveal scroll-mt-20', `cat-${group.key}`]}>
           <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-ink-200/60 pb-2 dark:border-ink-800/60">
             <span class="cat-tile h-9 w-9"><CategoryIcon icon={group.meta.icon} class="h-5 w-5" /></span>
-            <h3 class="text-xl font-semibold text-ink-900 dark:text-ink-50">{group.meta.label}</h3>
-            <span class="font-mono text-xs uppercase tracking-wider text-ink-500 dark:text-ink-400">{group.meta.label_en}</span>
+            <h3 class="text-xl font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span></h3>
             <span class="rounded-full bg-ink-100/80 px-2 py-0.5 font-mono text-[0.66rem] text-ink-500 dark:bg-ink-800/80 dark:text-ink-300">{group.entries.length}</span>
-            <p class="w-full text-sm text-ink-500 sm:w-auto sm:flex-1 sm:pl-1">{group.meta.blurb}</p>
+            <p class="w-full text-sm text-ink-500 sm:w-auto sm:flex-1 sm:pl-1"><span data-lang="en">{group.meta.blurb_en}</span><span data-lang="ko">{group.meta.blurb}</span></p>
           </div>
 
           {group.entries.length === 0 ? (
             <p class="rounded-xl border border-dashed border-ink-200 px-4 py-6 text-center text-sm italic text-ink-500 dark:border-ink-800 dark:text-ink-400">
-              아직 항목이 없습니다 · nothing here yet
+              <span data-lang="en">Nothing here yet</span><span data-lang="ko">아직 항목이 없습니다</span>
             </p>
           ) : (
             <div class="grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
@@ -54,6 +53,7 @@ const currentHref = base + '/';
                 <Card
                   href={`${base}/${group.key}/${entry.slug}/`}
                   title={entry.data.title}
+                  titleEn={entry.data.title_en}
                   summary={entry.data.summary}
                   summaryEn={entry.data.summary_en}
                   tags={entry.data.tags}

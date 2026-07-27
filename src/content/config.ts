@@ -2,8 +2,9 @@ import { defineCollection, z } from 'astro:content';
 
 const baseFields = {
   title: z.string(),
+  title_en: z.string().optional(),
   summary: z.string(),
-  summary_en: z.string().optional(), // EN one-liner; rendered as the caption beneath the KO summary
+  summary_en: z.string(),
   tags: z.array(z.string()).default([]),
   source: z.string().url().optional(),
   author: z.string().optional(),
@@ -17,6 +18,7 @@ const prompts = defineCollection({
   schema: z.object({
     ...baseFields,
     use_case: z.string().optional(),
+    use_case_en: z.string().optional(),
   }),
 });
 
@@ -73,6 +75,7 @@ const harnesses = defineCollection({
   schema: z.object({
     ...baseFields,
     base_agent: z.string().optional(),
+    base_agent_en: z.string().optional(),
     languages: z.array(z.string()).default([]),
     platforms: z.array(z.string()).default([]),
     install: z.string().optional(),
