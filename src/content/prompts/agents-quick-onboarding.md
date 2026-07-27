@@ -1,7 +1,7 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
-summary: "스킬 62종과 공통 시스템 프롬프트, CLI 도구(code-review-graph·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(.claude·.codex·.gemini·.cursor·.kiro·opencode)에 자동으로 심링크·MCP 연결하는 복사-붙여넣기 프롬프트. 이미 있으면 최신으로 업데이트하고, 깨진 링크는 복구한다."
-summary_en: "One paste-and-go prompt that installs 62 skills, a shared system prompt, CLI tools (code-review-graph, officecli, herdr), and the ego lite agent browser (macOS) into a single ~/.agents/ dir, then wires it into every coding CLI you have — updating what exists and repairing what broke."
+summary: "스킬 55종과 공통 시스템 프롬프트, CLI 도구(codebase-memory-mcp·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(.claude·.codex·.gemini·.cursor·.kiro·opencode)에 자동으로 심링크·MCP 연결하는 복사-붙여넣기 프롬프트. 이미 있으면 최신으로 업데이트하고, 깨진 링크는 복구한다."
+summary_en: "One paste-and-go prompt that installs 55 skills, a shared system prompt, CLI tools (codebase-memory-mcp, officecli, herdr), and the ego lite agent browser (macOS) into a single ~/.agents/ dir, then wires it into every coding CLI you have — updating what exists and repairing what broke."
 tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent]
 author: cskwork
 order: 5
@@ -30,11 +30,11 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
 | hallmark | 스킬 | Nutlope/hallmark | AI 티 안 나는 UI 디자인·감사·리디자인 |
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
 | **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화). **macOS 전용**, Playwright 대체 |
-| **code-review-graph** (7종) | 스킬 + CLI + MCP | tirth8205/code-review-graph | 코드를 지식 그래프로 인덱싱, 영향 반경·리뷰 컨텍스트를 토큰 효율적으로 |
+| **codebase-memory-mcp** | CLI + MCP | DeusData/codebase-memory-mcp | 코드를 로컬 지식 그래프로 인덱싱, 구조 탐색·호출 추적·영향 분석을 토큰 효율적으로 |
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
 | **herdr** | 스킬 + CLI | ogulcancelik/herdr | 코딩 에이전트용 터미널 멀티플렉서 |
 
-> 스킬 총 62종. `~/.agents/skills/` 하나만 보면 6개 CLI 전부의 설치 상태를 알 수 있다.
+> 스킬 총 55종. `~/.agents/skills/` 하나만 보면 6개 CLI 전부의 설치 상태를 알 수 있다.
 
 ## 언제 쓰는가
 
@@ -61,13 +61,12 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
   날아갔다. 판정은 반드시 `SKILL.md`가 **읽히는지**로 해야 하고 `[ -d ... ]`는 쓰면 안 된다.
 - **상류 설치 스크립트가 `rm -rf`를 한다**: `mattpocock/skills/scripts/link-skills.sh`는 dev 전용이라
   기존 실디렉터리를 지운다. 설치기는 실행 전에 읽고, 파괴적이면 백업 방식으로 다시 구현한다.
-- **레포 단위 설치기가 전역인 척한다**: `code-review-graph install`은 dry-run으로 보니 작업 레포에
-  `.cursorrules`·`.windsurfrules`·`QODER.md` 등 9개 파일을 만들고 프로젝트 `CLAUDE.md`에 append하려 했다.
-  서드파티 설치기는 **반드시 `--dry-run` 먼저** 보고 파일 목록을 읽는다.
-- **MCP가 "로딩 중"에서 안 끝난다**: 설치기가 러너를 오탐해 `uvx`로 적어두면(pipx로 깔았는데도) 콜드
-  스타트마다 패키지를 받는다 — 74개 패키지·31.5MiB 다운로드로 9.6초, 느린 네트워크면 타임아웃. 에러가
-  아니라 **무한 로딩으로 보인다**. `command`는 실제 설치된 바이너리 절대경로로 박고, `initialize` →
-  `tools/list` 핸드셰이크를 직접 쳐서 시간과 툴 개수를 확인해야 한다.
+- **MCP 설치기가 에이전트 설정도 바꾼다**: `codebase-memory-mcp` 설치기는 감지한 코딩 에이전트의
+  MCP 설정·지침·스킬·훅까지 구성할 수 있다. 실행 전에 설치 스크립트를 읽고, 자동 설정이 불필요하면
+  `--skip-config`로 바이너리만 설치한 뒤 기존 설정 규칙에 맞춰 수동 등록한다.
+- **자동 인덱싱 범위가 너무 크다**: 상위 폴더나 생성물까지 백그라운드에서 읽으면 MCP 연결이
+  `Transport closed`로 끊길 수 있다. 설치 직후 `auto_index=false`를 확인하고, 프로젝트마다
+  `.cbmignore`를 만든 뒤 실제 레포 루트만 수동 인덱싱한다.
 - **MCP `cwd` 하드코딩**: 설치기가 실행된 디렉터리를 전역 설정에 박아버린다. 지워야 어느 프로젝트에서든
   올바른 그래프를 본다.
 - **사용자 소유 심링크가 같이 날아간다**: `~/.agents` 밖 개인 레포를 가리키는 링크는 복구 대상에서
@@ -169,7 +168,7 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Archify                             https://github.com/tt-a1i/archify
   Hallmark                            https://github.com/Nutlope/hallmark
   GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
-  Code Review Graph (skill + MCP)     https://github.com/tirth8205/code-review-graph
+  Codebase Memory MCP (CLI + MCP)     https://github.com/DeusData/codebase-memory-mcp
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
   ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
@@ -192,7 +191,10 @@ Install or update via the official package manager. USE THE SAME MECHANISM THE T
 INSTALLED WITH — switching from a curl installer to Homebrew (or pip to uv) leaves two binaries on
 PATH and the wrong one wins.
 
-  Code Review Graph   pipx install code-review-graph   (or uv tool install)
+  Codebase Memory MCP
+    macOS/Linux: curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
+    Windows: download and inspect install.ps1 from the repository, then run it in PowerShell
+    Then run: codebase-memory-mcp config set auto_index false
   OfficeCLI           brew install officecli
   Herdr               official installer, or 'herdr update'
 
@@ -226,6 +228,9 @@ ego lite is the browser both I and the agent drive. There is no Homebrew formula
 
 For any tool registering an MCP server:
 
+ 0. Make Codebase Memory MCP the default code-intelligence server in every detected agent harness.
+    If code-review-graph is also registered, remove only its MCP config entry after backing up the
+    config file. Do not uninstall its binary or delete its indexes unless I explicitly ask.
  1. Set 'command' to the ABSOLUTE PATH OF THE BINARY YOU ACTUALLY INSTALLED. Installers routinely
     guess the wrong runner (writing 'uvx' for a pipx install), which makes the client download the
     package on every cold start and time out during handshake. This presents as "loading forever",

@@ -26,7 +26,7 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'tdd' },
   { category: 'skills', slug: 'prototype' },
   { category: 'skills', slug: 'diagnose' },
-  { category: 'mcps', slug: 'code-review-graph' },
+  { category: 'mcps', slug: 'codebase-memory-mcp' },
   // super* end-to-end suite
   { category: 'skills', slug: 'supergoal' },
   { category: 'skills', slug: 'superpm' },
@@ -135,7 +135,7 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Archify                             https://github.com/tt-a1i/archify
   Hallmark                            https://github.com/Nutlope/hallmark
   GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
-  Code Review Graph (skill + MCP)     https://github.com/tirth8205/code-review-graph
+  Codebase Memory MCP (CLI + MCP)     https://github.com/DeusData/codebase-memory-mcp
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
   ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
@@ -158,7 +158,10 @@ Install or update via the official package manager. USE THE SAME MECHANISM THE T
 INSTALLED WITH — switching from a curl installer to Homebrew (or pip to uv) leaves two binaries on
 PATH and the wrong one wins.
 
-  Code Review Graph   pipx install code-review-graph   (or uv tool install)
+  Codebase Memory MCP
+    macOS/Linux: curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
+    Windows: download and inspect install.ps1 from the repository, then run it in PowerShell
+    Then run: codebase-memory-mcp config set auto_index false
   OfficeCLI           brew install officecli
   Herdr               official installer, or 'herdr update'
 
@@ -192,6 +195,9 @@ ego lite is the browser both I and the agent drive. There is no Homebrew formula
 
 For any tool registering an MCP server:
 
+ 0. Make Codebase Memory MCP the default code-intelligence server in every detected agent harness.
+    If code-review-graph is also registered, remove only its MCP config entry after backing up the
+    config file. Do not uninstall its binary or delete its indexes unless I explicitly ask.
  1. Set 'command' to the ABSOLUTE PATH OF THE BINARY YOU ACTUALLY INSTALLED. Installers routinely
     guess the wrong runner (writing 'uvx' for a pipx install), which makes the client download the
     package on every cold start and time out during handshake. This presents as "loading forever",
