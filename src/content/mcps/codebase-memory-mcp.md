@@ -1,7 +1,7 @@
 ---
 title: codebase-memory-mcp
-summary: 코드베이스를 로컬 지식 그래프로 인덱싱해 에이전트가 구조 질문을 빠르게 답하게 하는 MCP. .cbmignore를 먼저 만들고 자동 인덱싱 범위와 watcher를 제한한다.
-summary_en: Local codebase knowledge graph MCP for coding agents. Add .cbmignore first, then bound automatic indexing and disable continuous watching.
+summary: 코드베이스를 로컬 지식 그래프로 인덱싱해 에이전트가 구조 질문을 빠르게 답하게 하는 MCP. .cbmignore와 파일 제한을 먼저 두고 자동 인덱싱·변경 감시를 켠다.
+summary_en: Local codebase knowledge graph MCP for coding agents. Add .cbmignore and a file limit first, then enable automatic indexing and continuous updates.
 tags: [mcp, codebase, memory, knowledge-graph, indexing, claude-code, codex, local]
 source: https://github.com/DeusData/codebase-memory-mcp
 author: DeusData
@@ -43,18 +43,18 @@ iwr -Uri https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/ins
 ## 설치 직후 안전 기본값
 
 자동 인덱싱 안정성 개선과 `auto_watch` 설정이 포함된 v0.9.0 이상인지 먼저 확인한다. 에이전트를
-재시작하기 전에 아래 `.cbmignore`를 각 작업 레포에 만든 후, 최초 자동 인덱싱은 켜고 지속
-watcher(변경 감시)는 끈다.
+재시작하기 전에 아래 `.cbmignore`를 각 작업 레포에 만든 후, 최초 자동 인덱싱과 지속
+watcher(변경 감시)를 함께 켠다.
 
 ```bash
 codebase-memory-mcp --version
 codebase-memory-mcp config set auto_index_limit 50000
-codebase-memory-mcp config set auto_watch false
+codebase-memory-mcp config set auto_watch true
 codebase-memory-mcp config set auto_index true
 codebase-memory-mcp config list
 ```
 
-`auto_index = true`, `auto_index_limit = 50000`, `auto_watch = false`가 모두 보여야 한다.
+`auto_index = true`, `auto_index_limit = 50000`, `auto_watch = true`가 모두 보여야 한다.
 
 ## 프로젝트마다 먼저 `.cbmignore`
 
@@ -119,7 +119,7 @@ stdio MCP는 터미널에서 직접 실행하면 입력 대기 상태처럼 보�
 
 ## `Transport closed` RCA 체크리스트
 
-- v0.9.0 이상인지, `auto_index_limit = 50000`, `auto_watch = false`인지 확인
+- v0.9.0 이상인지, `auto_index_limit = 50000`, `auto_watch = true`인지 확인
 - `.cbmignore` 없이 부모 폴더나 생성물 폴더를 인덱싱했는지 확인
 - macOS라면 `~/Library/Logs/DiagnosticReports/codebase-memory-mcp-*.ips`에서 crash log 확인
 - `codebase-memory-mcp cli list_projects`와 `index_status`로 캐시가 정상인지 확인

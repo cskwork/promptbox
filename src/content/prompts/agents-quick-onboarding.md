@@ -66,8 +66,8 @@ use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 
   `--skip-config`로 바이너리만 설치한 뒤 기존 설정 규칙에 맞춰 수동 등록한다.
 - **자동 인덱싱 범위가 너무 크다**: 상위 폴더나 생성물까지 백그라운드에서 읽으면 최초 인덱싱이
   오래 걸리고 메모리를 많이 쓸 수 있다. v0.9.0 이상인지 확인하고, 프로젝트마다 `.cbmignore`를
-  먼저 만든 뒤 `auto_index_limit=50000`, `auto_watch=false`, `auto_index=true` 순서로 설정한다.
-  이렇게 하면 최초 자동 인덱싱은 유지하되 지속 watcher(변경 감시)는 끈다.
+  먼저 만든 뒤 `auto_index_limit=50000`, `auto_watch=true`, `auto_index=true` 순서로 설정한다.
+  이렇게 하면 최초 자동 인덱싱 후에도 watcher(변경 감시)가 코드 변경을 그래프에 증분 반영한다.
 - **MCP `cwd` 하드코딩**: 설치기가 실행된 디렉터리를 전역 설정에 박아버린다. 지워야 어느 프로젝트에서든
   올바른 그래프를 본다.
 - **사용자 소유 심링크가 같이 날아간다**: `~/.agents` 밖 개인 레포를 가리키는 링크는 복구 대상에서
@@ -199,7 +199,7 @@ PATH and the wrong one wins.
     Before restarting any agent, create a reviewed .cbmignore in every active repository root.
     Then run, in this order:
       codebase-memory-mcp config set auto_index_limit 50000
-      codebase-memory-mcp config set auto_watch false
+      codebase-memory-mcp config set auto_watch true
       codebase-memory-mcp config set auto_index true
       codebase-memory-mcp config list
   OfficeCLI           brew install officecli

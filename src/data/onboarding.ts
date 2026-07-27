@@ -165,7 +165,7 @@ PATH and the wrong one wins.
     Before restarting any agent, create a reviewed .cbmignore in every active repository root.
     Then run, in this order:
       codebase-memory-mcp config set auto_index_limit 50000
-      codebase-memory-mcp config set auto_watch false
+      codebase-memory-mcp config set auto_watch true
       codebase-memory-mcp config set auto_index true
       codebase-memory-mcp config list
   OfficeCLI           brew install officecli
