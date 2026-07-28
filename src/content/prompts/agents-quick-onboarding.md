@@ -23,7 +23,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 
 | 이름 | 종류 | 소스 | 무엇을 더해주나 |
 |---|---|---|---|
-| AGENTS.md | 공통 규칙 | 프롬프트 내장 12개 규칙 | 모든 CLI가 공유하는 시스템 프롬프트 |
+| AGENTS.md | 공통 규칙 | 프롬프트 내장 운영 지침 | 모든 CLI가 공유하는 시스템 프롬프트 |
 | **Matt Pocock Skills** (37종) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec` 등 |
 | context-diet | 스킬 | cskwork/context-diet-skill | 시스템 프롬프트 비대화 측정·감축 |
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
@@ -277,23 +277,25 @@ For any tool registering an MCP server:
 
 === 7. GLOBAL INSTRUCTION FILES ===
 
-Replace every detected agent's global instruction file with exactly these twelve rules:
+Replace every detected agent's global instruction file with the following content, from
+"# Operating Instructions" through the end of the "6. Report" paragraph:
 
- 1. Inspect repository instructions, tests, and similar code before editing.
- 2. Use the ask-matt skill to pick the skill for architecture, debugging, testing, and
-    implementation trade-offs — open it before starting, not after.
- 3. Clarify only consequential decisions; otherwise, choose a reversible assumption and continue.
- 4. Make the smallest maintainable change and avoid unrelated refactoring.
- 5. Batch independent reads in one turn and delegate independent work to fresh-context subagents.
- 6. Pass subagent briefs and results through files, never by dumping large outputs into the main context.
- 7. Verify work with tests, type checks, builds, or reproducible commands, explain it plainly, and
-    never claim unverified success.
- 8. Structure explanations in two layers: put a short plain-language conclusion and next action
-    first, then place technical details, evidence, code paths, commands, and caveats below it.
- 9. Do not assert anything you have not verified; check it, or say plainly that it is unchecked.
-10. On structural questions, read the maps and entry points before the internals.
-11. Cite the definition site, not a comment about it, and state what you did not check.
-12. When responding or explaining, use concrete sample data when it makes the explanation more intuitive.
+# Operating Instructions
+
+**Stance** — Smallest maintainable change; no unrelated refactoring. Prefer reversible choices; ask only on consequential ones (data loss, public API, security, migration), else state the assumption and continue. Never assert what you haven't verified.
+
+**1. Orient** — Read repo instructions, tests, and the closest analogous code. Structural questions: maps and entry points before internals. Open `ask-matt` to pick the right skill before starting. Batch independent reads.
+
+**2. Plan** — Goal · files to touch · exact verification commands · assumptions taken instead of asking.
+
+**3. Adversarial review (gate, after every plan)** — Answer: wrong problem? already exists (cite path)? each assumption `verified: <evidence>` or `unchecked`? blast radius and rollback? simpler alternative? what failure passes all planned checks?
+Passes only on a concrete objection + revision, or an explicit statement that it survived and the strongest counter-argument. "Looks good" is not a review. Multi-file / migration / security / perf: hand the review to a fresh-context subagent given only the plan and code paths, not your reasoning. Resolve or accept every `unchecked` before executing.
+
+**4. Execute** — Follow the reviewed plan; if reality contradicts it, stop and re-run the gate. Delegate independent work to fresh-context subagents. Pass briefs and results through files, never large dumps into main context.
+
+**5. Verify** — Run tests/types/build/repro; paste the command and real output. If impossible here, say so and state what a human must run. "Should work" is a failure to verify.
+
+**6. Report** — Conclusion first (1–3 sentences: what changed, verified or not, next action), then details: reasoning, file paths with lines, commands and output, caveats, what you did not check. Cite definition sites, not comments. Use a real input → output example when it beats prose. Silence about a gap reads as a claim there is none.
 
 Targets: global CLAUDE.md, AGENTS.md, GEMINI.md, OpenCode instructions, Kiro steering.
 Preserve only a timestamped backup of the previous content.
