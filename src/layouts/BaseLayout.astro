@@ -109,21 +109,13 @@ const items = lists.flatMap((entries, idx) => {
       document.addEventListener('click', async (e) => {
         const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.pc-copy');
         if (!btn) return;
-        // Two ways to name what gets copied:
-        //  - data-target="#sel": a fixed element anywhere on the page
-        //  - data-copy-next: the first <pre> that follows the button's block,
-        //    used by in-prose CTAs that must copy only the code block they
-        //    introduce (not the whole entry).
-        let el: HTMLElement | null = null;
-        if (btn.dataset.copyNext !== undefined) {
-          let node = (btn.closest('.copy-cta') ?? btn).nextElementSibling;
-          while (node && node.tagName !== 'PRE') node = node.nextElementSibling;
-          el = node as HTMLElement | null;
-        } else if (btn.dataset.target) {
-          el = document.querySelector(btn.dataset.target) as HTMLElement | null;
-        }
+        const targetSel = btn.dataset.target;
+        if (!targetSel) return;
+        const el = document.querySelector(targetSel) as HTMLElement | null;
         if (!el) return;
-        const text = (el as HTMLElement).innerText;
+        // innerText falls back to textContent when the element is not rendered,
+        // so a language-hidden mirror still copies correctly.
+        const text = el.innerText;
         const labelEl = btn.querySelector('.pc-copy-label');
         const copyIco = btn.querySelector('.pc-ico-copy');
         const checkIco = btn.querySelector('.pc-ico-check');
