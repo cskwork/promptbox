@@ -49,4 +49,4 @@ install: "npx skills add mattpocock/skills"
 - **컨텍스트 위생이 핵심**: 1~3단계는 **끊기지 않은 한 컨텍스트 창** 안에서 끝내야 한다. `to-tickets` 전에 compact·clear 하면 grilling·스펙·티켓이 서로 다른 사고 위에 쌓인다. 이후 `implement`는 티켓마다 새 컨텍스트로 시작한다.
 - **smart zone(~120k 토큰)** 을 넘기면서 밀어붙이지 않는다. 한계에 닿으면 `handoff`로 넘기고 새 스레드에서 잇는다.
 - `wayfinder`는 가장 비싼 흐름이다. 범위가 잡힌 기능에 쓰면 과잉이다 — 정말 길이 안 보일 때만.
-- `disable-model-invocation: true`라 **모델이 알아서 부르지 않는다**. 사용자가 명시적으로 불러야 한다.
+- upstream 기본값은 `disable-model-invocation: true`라 모델이 자동으로 부르지 않는다. promptbox의 한 방 온보딩은 전역 규칙과 모순되지 않도록 설치 후 이 값만 `false`로 정규화한다.

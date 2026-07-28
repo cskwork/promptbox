@@ -152,6 +152,15 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
 Derive each skill's canonical name from its SKILL.md frontmatter 'name:' field, not from the
 directory name, and fail loudly on a collision instead of silently overwriting.
 
+This setup's global rules require agents to open ask-matt automatically. After every clone/update,
+resolve the canonical ask-matt SKILL.md through its installed link and make it model-invokable:
+  - Back up the file before the first change.
+  - If frontmatter says 'disable-model-invocation: true', change only that value to false.
+  - If it is already false or the field is absent, leave it unchanged.
+  - Do not change this flag for any other skill.
+Treat this normalization as part of installation and repair, so reruns cannot restore the upstream
+user-invoked default and silently hide ask-matt from an agent's available-skills catalog.
+
 === 5. INSTALL STANDALONE TOOLS ===
 
 Install or update via the official package manager. USE THE SAME MECHANISM THE TOOL IS ALREADY
@@ -284,6 +293,8 @@ missing SKILL.md. Run it and report the counts.
 EMPTY DIRECTORIES AND BROKEN LINKS MUST BOTH BE ZERO.
 
 Also verify:
+  - The canonical ask-matt SKILL.md does not contain 'disable-model-invocation: true', and every
+    installed ask-matt link resolves to that same file.
   - Every CLI responds to --version / --help.
   - Every MCP server passes the handshake probe from step 6.3.
   - Instruction-file checksums are identical across all agent paths.
