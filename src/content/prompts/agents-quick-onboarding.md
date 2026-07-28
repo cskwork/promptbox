@@ -23,7 +23,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 
 | 이름 | 종류 | 소스 | 무엇을 더해주나 |
 |---|---|---|---|
-| AGENTS.md | 공통 규칙 | 프롬프트 내장 11개 규칙 | 모든 CLI가 공유하는 시스템 프롬프트 |
+| AGENTS.md | 공통 규칙 | 프롬프트 내장 12개 규칙 | 모든 CLI가 공유하는 시스템 프롬프트 |
 | **Matt Pocock Skills** (37종) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec` 등 |
 | context-diet | 스킬 | cskwork/context-diet-skill | 시스템 프롬프트 비대화 측정·감축 |
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
@@ -277,7 +277,7 @@ For any tool registering an MCP server:
 
 === 7. GLOBAL INSTRUCTION FILES ===
 
-Replace every detected agent's global instruction file with exactly these eleven rules:
+Replace every detected agent's global instruction file with exactly these twelve rules:
 
  1. Inspect repository instructions, tests, and similar code before editing.
  2. Use the ask-matt skill to pick the skill for architecture, debugging, testing, and
@@ -293,6 +293,7 @@ Replace every detected agent's global instruction file with exactly these eleven
  9. Do not assert anything you have not verified; check it, or say plainly that it is unchecked.
 10. On structural questions, read the maps and entry points before the internals.
 11. Cite the definition site, not a comment about it, and state what you did not check.
+12. When responding or explaining, use concrete sample data when it makes the explanation more intuitive.
 
 Targets: global CLAUDE.md, AGENTS.md, GEMINI.md, OpenCode instructions, Kiro steering.
 Preserve only a timestamped backup of the previous content.
