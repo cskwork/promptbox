@@ -78,7 +78,13 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
         <span data-lang="en">{meta.label_en}</span><span data-lang="ko">{meta.label}</span>
       </span>
       <div class="flex items-center gap-2">
-        <CopyButton target="#pc-rawtext" labelEn="Copy original" labelKo="원문 복사" size="md" />
+        <CopyButton
+          target="#pc-rawtext"
+          labelEn="Copy original"
+          labelKo="원문 복사"
+          size="md"
+          class="ring-2 ring-accent-500/25 ring-offset-2 ring-offset-white dark:ring-offset-ink-900"
+        />
         {d.source && (
           <a
             href={d.source}
@@ -149,7 +155,13 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
   <!-- Desktop sticky copy affordance: keeps the core "원문 복사" action in reach while
        reading a long entry. top-20 clears the 56px sticky Header; z below the nav. -->
   <div class="mb-3 hidden lg:sticky lg:top-20 lg:z-20 lg:flex lg:justify-end">
-    <CopyButton target="#pc-rawtext" labelEn="Copy original" labelKo="원문 복사" size="sm" variant="ghost" />
+    <CopyButton
+      target="#pc-rawtext"
+      labelEn="Copy original"
+      labelKo="원문 복사"
+      size="md"
+      class="shadow-[0_10px_30px_-12px_rgba(16,185,129,0.65)] ring-2 ring-accent-500/25 ring-offset-2 ring-offset-white dark:ring-offset-ink-900"
+    />
   </div>
 
   <section data-lang="en" class="rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">

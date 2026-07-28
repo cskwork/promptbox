@@ -200,6 +200,50 @@ html[lang='ko'] [data-lang='en'] {
            hover:bg-white/90 dark:hover:bg-ink-800/70 hover:border-accent-500/50;
   }
 
+  /* --- Copy CTA (in-prose glass panel) ----------------------------------- */
+  /* The site's one core action is "copy the raw text". Inside a long entry the
+     header button scrolls away, so an entry can drop this panel right where the
+     reader is told to paste. Same delegated .pc-copy handler, same #pc-rawtext
+     target — only the emphasis differs. */
+  .copy-cta {
+    @apply relative my-6 overflow-hidden rounded-2xl p-4 sm:p-5
+           bg-white/70 dark:bg-ink-900/50
+           backdrop-blur-[14px] backdrop-saturate-150
+           border border-accent-500/35 dark:border-accent-400/25
+           shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_18px_44px_-24px_rgba(16,185,129,0.55)]
+           dark:shadow-[0_1px_0_rgba(255,255,255,0.06)_inset,0_18px_44px_-24px_rgba(16,185,129,0.4)];
+  }
+  /* Soft emerald bloom behind the glass — the only decorative layer, so it stays
+     pointer-events-none and never sits above the button. */
+  .copy-cta::before {
+    content: '';
+    position: absolute;
+    inset: -40% -10% auto -10%;
+    height: 160%;
+    background: radial-gradient(60% 50% at 20% 0%, rgba(16, 185, 129, 0.22), transparent 70%);
+    pointer-events: none;
+  }
+  .copy-cta > * {
+    @apply relative;
+  }
+  .copy-cta__row {
+    @apply flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between;
+  }
+  .copy-cta__title {
+    @apply text-[0.95rem] font-semibold text-ink-900 dark:text-ink-50;
+  }
+  .copy-cta__sub {
+    @apply mt-1 text-[0.8rem] leading-relaxed text-ink-600 dark:text-ink-300;
+  }
+  .copy-cta__btn {
+    @apply w-full shrink-0 px-5 py-2.5 text-[0.95rem] sm:w-auto
+           ring-2 ring-accent-500/25 ring-offset-2 ring-offset-white
+           dark:ring-offset-ink-900;
+  }
+  .copy-cta__btn svg {
+    @apply h-4 w-4;
+  }
+
   /* --- Category chip (label + dot) -------------------------------------- */
   .cat-chip {
     @apply inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5
