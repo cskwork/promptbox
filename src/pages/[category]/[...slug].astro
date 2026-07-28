@@ -54,6 +54,16 @@ if (d.platforms?.length) rows.push({ labelEn: 'Platforms', labelKo: '플랫폼',
 if (d.deps?.length) rows.push({ labelEn: 'Requires', labelKo: '의존성', chips: d.deps });
 
 const hasUsage = Boolean(d.install) || rows.length > 0;
+
+// A prompt entry exists to hand over one block of text, and that block is
+// language-neutral (already English). The Korean article is language-gated, so
+// in EN mode the payload would vanish with the notes — pull the largest fenced
+// block out of the raw body and surface it there. Scoped to `prompts`: every
+// other category's body is documentation, where "copy the whole entry" is still
+// the right action.
+const fences = [...rawText.matchAll(/^```[^\n]*\n([\s\S]*?)^```/gm)].map((m: any) => m[1] as string);
+const mainBlock = fences.sort((a: string, b: string) => b.length - a.length)[0] ?? '';
+const hasMainBlock = category === 'prompts' && mainBlock.trim().length > 200;
 ---
 
 <BaseLayout
@@ -78,13 +88,15 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
         <span data-lang="en">{meta.label_en}</span><span data-lang="ko">{meta.label}</span>
       </span>
       <div class="flex items-center gap-2">
-        <CopyButton
-          target="#pc-rawtext"
-          labelEn="Copy original"
-          labelKo="원문 복사"
-          size="md"
-          class="ring-2 ring-accent-500/25 ring-offset-2 ring-offset-white dark:ring-offset-ink-900"
-        />
+        {!hasMainBlock && (
+          <CopyButton
+            target="#pc-rawtext"
+            labelEn="Copy original"
+            labelKo="원문 복사"
+            size="md"
+            class="ring-2 ring-accent-500/25 ring-offset-2 ring-offset-white dark:ring-offset-ink-900"
+          />
+        )}
         {d.source && (
           <a
             href={d.source}
@@ -152,23 +164,55 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
     </section>
   )}
 
-  <!-- Desktop sticky copy affordance: keeps the core "원문 복사" action in reach while
-       reading a long entry. top-20 clears the 56px sticky Header; z below the nav. -->
-  <div class="mb-3 hidden lg:sticky lg:top-20 lg:z-20 lg:flex lg:justify-end">
-    <CopyButton
-      target="#pc-rawtext"
-      labelEn="Copy original"
-      labelKo="원문 복사"
-      size="md"
-      class="shadow-[0_10px_30px_-12px_rgba(16,185,129,0.65)] ring-2 ring-accent-500/25 ring-offset-2 ring-offset-white dark:ring-offset-ink-900"
-    />
-  </div>
+  <!-- Desktop sticky copy affordance: keeps the core copy action in reach while
+       reading a long entry. top-20 clears the 56px sticky Header; z below the nav.
+       Entries that carry a payload block get their copy button in-body instead,
+       so this only covers prose-only entries. -->
+  {!hasMainBlock && (
+    <div class="mb-3 hidden lg:sticky lg:top-20 lg:z-20 lg:flex lg:justify-end">
+      <CopyButton
+        target="#pc-rawtext"
+        labelEn="Copy original"
+        labelKo="원문 복사"
+        size="md"
+        class="shadow-[0_10px_30px_-12px_rgba(16,185,129,0.65)] ring-2 ring-accent-500/25 ring-offset-2 ring-offset-white dark:ring-offset-ink-900"
+      />
+    </div>
+  )}
 
   <section data-lang="en" class="rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
     <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50">About this item</h2>
     <p class="mt-2 leading-relaxed text-ink-600 dark:text-ink-300">{d.summary_en}</p>
-    <p class="mt-3 text-sm leading-relaxed text-ink-500 dark:text-ink-400">Use “Copy original” above to copy the complete, unchanged entry. Switch to Korean to read the full curator notes.</p>
+    <p class="mt-3 text-sm leading-relaxed text-ink-500 dark:text-ink-400">
+      {hasMainBlock
+        ? 'The prompt below is the whole payload — copy it and paste it into your agent. Switch to Korean to read the full curator notes.'
+        : 'Use “Copy original” above to copy the complete, unchanged entry. Switch to Korean to read the full curator notes.'}
+    </p>
+
+    {hasMainBlock && (
+      <div class="copy-cta">
+        <div class="copy-cta__row">
+          <div>
+            <div class="copy-cta__title">Copy the full prompt</div>
+            <div class="copy-cta__sub">Copies the block below verbatim — no dragging needed.</div>
+          </div>
+          <CopyButton target="#pc-mainblock" labelEn="Copy prompt" labelKo="프롬프트 복사" size="md" class="copy-cta__btn" />
+        </div>
+      </div>
+    )}
   </section>
+
+  {/* The payload itself, shown in EN mode where the Korean article is hidden.
+      It doubles as the copy source for both languages: the KO in-body CTA also
+      targets #pc-mainblock and reads it fine while it sits display:none. */}
+  {hasMainBlock && (
+    <pre
+      id="pc-mainblock"
+      data-lang="en"
+      class="mt-3 overflow-x-auto whitespace-pre-wrap break-words rounded-2xl border border-ink-800/70 bg-ink-950 p-5 font-mono text-[0.8rem] leading-relaxed text-ink-100"
+      set:text={mainBlock}
+    ></pre>
+  )}
   <article data-lang="ko" class="prose-pc rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
     <Content />
   </article>
@@ -190,6 +234,8 @@ const hasUsage = Boolean(d.install) || rows.length > 0;
     </nav>
   )}
 
-  <!-- Hidden raw-text mirror for the "원문 복사" button -->
-  <pre id="pc-rawtext" class="sr-only" set:text={rawText}></pre>
+  <!-- Hidden raw-text mirror for the "원문 복사" button. Prompt entries copy the
+       payload block instead, so this mirror would only duplicate the page for
+       screen readers there. -->
+  {!hasMainBlock && <pre id="pc-rawtext" class="sr-only" set:text={rawText}></pre>}
 </BaseLayout>

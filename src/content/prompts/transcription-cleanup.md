@@ -32,6 +32,20 @@ use_case_en: Clean up speech-to-text output from tools such as Whisper or Deepgr
 
 ## 원문 (copy-paste용)
 
+<div class="copy-cta">
+  <div class="copy-cta__row">
+    <div>
+      <div class="copy-cta__title"><span data-lang="en">Copy the full prompt</span><span data-lang="ko">프롬프트 전문 복사</span></div>
+      <div class="copy-cta__sub"><span data-lang="en">Copies the block below verbatim — no dragging needed.</span><span data-lang="ko">아래 코드블록을 통째로 클립보드에 담습니다. 드래그할 필요 없습니다.</span></div>
+    </div>
+    <button type="button" class="btn btn-primary pc-copy copy-cta__btn" data-target="#pc-mainblock" aria-label="Copy the full prompt" data-aria-en="Copy the full prompt" data-aria-ko="프롬프트 전문 복사">
+      <svg class="pc-ico-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2" ry="2" /><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" /></svg>
+      <svg class="pc-ico-check hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12" /></svg>
+      <span class="pc-copy-label"><span data-lang="en">Copy prompt</span><span data-lang="ko">프롬프트 복사</span></span>
+    </button>
+  </div>
+</div>
+
 ````text
 Clean this transcript:
 1. Fix spelling, capitalization, and punctuation errors
