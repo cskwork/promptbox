@@ -1,7 +1,7 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
 title_en: One-shot coding agent setup
-summary: "스킬 55종과 공통 시스템 프롬프트, CLI 도구(codebase-memory-mcp·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
+summary: "스킬 56종과 공통 시스템 프롬프트, CLI 도구(codebase-memory-mcp·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
 summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work."
 tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi]
 author: cskwork
@@ -31,6 +31,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | archify | 스킬 | tt-a1i/archify | 아키텍처·시퀀스·데이터플로 다이어그램을 단일 HTML로 |
 | hallmark | 스킬 | Nutlope/hallmark | AI 티 안 나는 UI 디자인·감사·리디자인 |
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
+| clean-code | 스킬 | cskwork/clean-code | 동작을 바꾸지 않고 레거시 코드 리팩터링 — 특성화 테스트로 현재 동작을 먼저 고정하고 작은 배치로 편집 |
 | **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화). **macOS 전용**, Playwright 대체 |
 | **codebase-memory-mcp** | CLI + MCP | DeusData/codebase-memory-mcp | 코드를 로컬 지식 그래프로 인덱싱, 구조 탐색·호출 추적·영향 분석을 토큰 효율적으로 |
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
@@ -185,6 +186,7 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Archify                             https://github.com/tt-a1i/archify
   Hallmark                            https://github.com/Nutlope/hallmark
   GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
+  Clean Code                          https://github.com/cskwork/clean-code
   Codebase Memory MCP (CLI + MCP)     https://github.com/DeusData/codebase-memory-mcp
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
