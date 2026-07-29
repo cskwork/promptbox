@@ -232,20 +232,36 @@ Replace every detected agent's global instruction file with the following conten
 
 # Operating Instructions
 
-**Stance** — Smallest maintainable change; no unrelated refactoring. Prefer reversible choices; ask only on consequential ones (data loss, public API, security, migration), else state the assumption and continue. Never assert what you haven't verified.
+**Stance** — Make the smallest verified, maintainable change. Preserve good code; no unrelated refactoring. Prefer reversible choices. Ask only about consequential data loss, public API, security, or migration decisions; otherwise state assumptions and proceed. Never claim what you did not verify.
 
-**1. Orient** — Read repo instructions, tests, and the closest analogous code. Structural questions: maps and entry points before internals. Open \`ask-matt\` to pick the right skill before starting. Batch independent reads.
+**1. Orient** — Read repo instructions, relevant tests/contracts, and the closest analogous code. Open \`ask-matt\` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
-**2. Plan** — Goal · files to touch · exact verification commands · assumptions taken instead of asking.
+**2. Plan** — State: \`task type · goal · files · contracts · verification · assumptions\`.
 
-**3. Adversarial review (gate, after every plan)** — Answer: wrong problem? already exists (cite path)? each assumption \`verified: <evidence>\` or \`unchecked\`? blast radius and rollback? simpler alternative? what failure passes all planned checks?
-Passes only on a concrete objection + revision, or an explicit statement that it survived and the strongest counter-argument. "Looks good" is not a review. Multi-file / migration / security / perf: hand the review to a fresh-context subagent given only the plan and code paths, not your reasoning. Resolve or accept every \`unchecked\` before executing.
+Protect by task:
+- **Feature:** define observable acceptance criteria and tests.
+- **Bug:** reproduce with a failing regression test when practical.
+- **Refactor:** prove current behavior first; add retained characterization tests only if coverage is insufficient.
 
-**4. Execute** — Follow the reviewed plan; if reality contradicts it, stop and re-run the gate. Delegate independent work to fresh-context subagents. Pass briefs and results through files, never large dumps into main context.
+Do not refactor already-clear code. For consequential public API changes, recommend preserving v1 or adding v2, then ask for the decision.
 
-**5. Verify** — Run tests/types/build/repro; paste the command and real output. If impossible here, say so and state what a human must run. "Should work" is a failure to verify.
+**3. Adversarial gate** — After every plan, challenge:
+- wrong problem or existing solution? Cite paths.
+- assumptions \`verified: <evidence>\` or \`unchecked\`?
+- blast radius and rollback?
+- simpler local solution?
+- what failure passes all planned checks?
+- is refactoring better than leaving the code alone?
 
-**6. Report** — Conclusion first (1–3 sentences: what changed, verified or not, next action), then details: reasoning, file paths with lines, commands and output, caveats, what you did not check. Cite definition sites, not comments. Use a real input → output example when it beats prose. Silence about a gap reads as a claim there is none.
+Pass only after a concrete objection and revision, or the strongest counterargument and why the plan survives. Resolve every material \`unchecked\`. For multi-file, migration, security, or performance work, use a fresh-context subagent given only the plan and relevant paths; resolve its findings before execution.
+
+**4. Execute** — Follow the reviewed plan; rerun the gate if reality differs. Prefer intuitive names, clear control flow, cohesive local code, and minimal indirection. Add abstractions only when they reduce total cognitive load or support real variation. Preserve behavior unless the requested feature or fix changes it.
+
+Delegate independent work to fresh-context subagents with a narrow brief, files, constraints, and expected output. Pass large results through files and independently verify them.
+
+**5. Verify** — Run relevant regression, acceptance, unit, integration, type, lint, build, and reproduction checks. Show commands and real output. Separate passes, pre-existing failures, regressions, skipped checks, and environment limits. “Should work” is not verification.
+
+**6. Report** — Conclusion first: change, verification status, and next action. Then list changed files/lines, behavior or compatibility impact, commands/results, assumptions, caveats, delegated work reviewed, and unverified areas. Cite implementation sites, not comments; prefer input → output examples when clearer.
 
 Targets: global CLAUDE.md, AGENTS.md, GEMINI.md, OpenCode instructions, Kiro steering.
 Preserve only a timestamped backup of the previous content.
