@@ -1,9 +1,9 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
 title_en: One-shot coding agent setup
-summary: "스킬 55종과 공통 시스템 프롬프트, CLI 도구(codebase-memory-mcp·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(.claude·.codex·.gemini·.cursor·.kiro·opencode)에 자동으로 심링크·MCP 연결하는 복사-붙여넣기 프롬프트. 이미 있으면 최신으로 업데이트하고, 깨진 링크는 복구한다."
-summary_en: "One paste-and-go prompt that installs 55 skills, a shared system prompt, CLI tools (codebase-memory-mcp, officecli, herdr), and the ego lite agent browser (macOS) into a single ~/.agents/ dir, then wires it into every coding CLI you have — updating what exists and repairing what broke."
-tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent]
+summary: "스킬 55종과 공통 시스템 프롬프트, CLI 도구(codebase-memory-mcp·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
+summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work."
+tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi]
 author: cskwork
 order: 5
 use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 한곳에서 관리하고 싶을 때. 에이전트 채팅창에 그대로 붙여넣으면 끝. 이미 설치된 환경이 깨졌을 때 복구용으로도 그대로 쓴다."
@@ -36,12 +36,12 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
 | **herdr** | 스킬 + CLI | ogulcancelik/herdr | 코딩 에이전트용 터미널 멀티플렉서 |
 
-> 스킬 총 55종. `~/.agents/skills/` 하나만 보면 6개 CLI 전부의 설치 상태를 알 수 있다.
+> 설치된 CLI 수를 고정하지 않는다. 각 도구가 `~/.agents/skills`를 직접 읽는지 먼저 확인하고, 필요한 어댑터만 만든다.
 
 ## 언제 쓰는가
 
 - 새 노트북·서버를 세팅하면서 자주 쓰는 스킬을 한 번에 깔고 싶을 때
-- Claude Code·Codex·Gemini CLI·Cursor·Kiro·OpenCode를 섞어 쓰는데, 규칙과 스킬을
+- Claude Code·Codex·Jcode·Pi·Gemini CLI·Cursor·Kiro·OpenCode를 섞어 쓰는데, 규칙과 스킬을
   도구마다 따로 복사하기 싫을 때 — `~/.agents/` 하나만 고치면 전부 따라온다
 - **환경이 깨졌을 때** — 에이전트가 "그 스킬 없다"고 하면 그대로 다시 돌린다
 
@@ -142,7 +142,7 @@ binary path once and use it everywhere.
 Detect OS, architecture, Git, Node.js, Python 3.10+, and available package managers. For each
 interpreter record the ABSOLUTE PATH THAT ACTUALLY WORKS IN A NON-INTERACTIVE SHELL.
 
-Identify installed agents: Claude Code, Codex, Kiro, Antigravity/agy, Gemini CLI, OpenCode, Cursor.
+Identify installed agents: Claude Code, Codex, Jcode, Pi, Kiro, Antigravity/agy, Gemini CLI, OpenCode, Cursor.
 For each, record its global instruction file path and its global skills directory path — and
 whether each is currently a real file/directory, a symlink, or absent.
 
@@ -297,7 +297,8 @@ Passes only on a concrete objection + revision, or an explicit statement that it
 
 **6. Report** — Conclusion first (1–3 sentences: what changed, verified or not, next action), then details: reasoning, file paths with lines, commands and output, caveats, what you did not check. Cite definition sites, not comments. Use a real input → output example when it beats prose. Silence about a gap reads as a claim there is none.
 
-Targets: global CLAUDE.md, AGENTS.md, GEMINI.md, OpenCode instructions, Kiro steering.
+Targets include Claude `~/.claude/CLAUDE.md`, Codex `~/.codex/AGENTS.md`, Jcode `~/AGENTS.md`,
+Pi `~/.pi/agent/AGENTS.md`, Gemini `~/.gemini/GEMINI.md`, OpenCode instructions, and Kiro steering.
 Preserve only a timestamped backup of the previous content.
 
 Prefer ONE canonical file (~/.agents/AGENTS.md) with each agent's path symlinked to it, so a single
@@ -328,7 +329,12 @@ skill.bak-<date>. If prior runs left such duplicates, ARCHIVE them to
 ~/.agents/skills-bak/<timestamp>/ — do not delete, and do not leave them in place where they load
 as separate skills and bloat every agent's context.
 
-Then link each agent's global skills directory to ~/.agents/skills:
+Only create a per-agent skills-directory adapter when the installed harness requires one. Current Jcode
+and Pi versions load `~/.agents/skills` natively. For them, verify that behavior and preserve existing
+`~/.jcode/skills`, `~/.pi/skills`, and `~/.pi/agent/skills` directories in place; they may contain
+user-owned or tool-managed skills that are not in the canonical hub.
+
+For agents that require an adapter, link the documented global skills directory to ~/.agents/skills:
   macOS/Linux: directory symlink (ln -s handles both files and directories).
   Windows, a FILE:      New-Item -ItemType SymbolicLink; if denied, fall back to HardLink (same drive).
   Windows, a DIRECTORY: New-Item -ItemType SymbolicLink; if denied, fall back to Junction.
@@ -350,7 +356,8 @@ Also verify:
     installed ask-matt link resolves to that same file.
   - Every CLI responds to --version / --help.
   - Every MCP server passes the handshake probe from step 6.3.
-  - Instruction-file checksums are identical across all agent paths.
+  - Instruction-file checksums are identical across all documented agent paths, including Jcode's
+    `~/AGENTS.md` and Pi's `~/.pi/agent/AGENTS.md`.
   - No autonomous loop was started, no Context Diet restriction was activated, no paid service was
     authenticated, and no credits were spent.
   - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
