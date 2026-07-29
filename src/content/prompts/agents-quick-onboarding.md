@@ -82,7 +82,8 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 - **브라우저는 에이전트가 끝까지 못 깐다 (ego lite)**: DMG 설치까지는 스크립트로 되지만, `ego-browser`
   명령을 `~/.local/bin`에 등록하는 건 앱 **첫 실행 GUI 온보딩**이다. 사람이 끝내기 전에는 "설치됨"이
   아니고, Chrome 데이터 이관 여부는 에이전트가 대신 답하면 안 된다. 그래서 프롬프트는 5b에서 멈추고
-  기다린다. macOS 전용이라 다른 OS에서는 그냥 건너뛴다.
+  기다린다. macOS 전용이라 Windows·Linux에서는 `SKIPPED-UNSUPPORTED`로 기록하며, Playwright·Puppeteer·
+  Selenium·headless Chromium을 대체재로 설치하지 않는다.
 - **이전 설정의 형제 파일이 남는다**: 지시문 정본을 바꿔도 `~/.kiro/steering/`에 남은 옛 파일이 같이
   로드된다. 디렉터리를 훑어 잔재를 정리해야 한다.
 - **심링크 권한 + 파일/폴더 구분 (Windows 핵심 함정)**: 심볼릭 링크는 개발자 모드나 관리자 권한이 필요하다.
@@ -192,14 +193,18 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Herdr                               https://github.com/ogulcancelik/herdr
   ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
     macOS ONLY. This is the browser layer for this kit — see step 5b for the app install.
-    Skill-only route: npx skills add citrolabs/ego-lite
+    On non-macOS, skip both the app and the ego-browser skill and report SKIPPED-UNSUPPORTED.
+    Skill-only route (macOS only): npx skills add citrolabs/ego-lite
     Installing the ego lite app also registers the skill into every agent skills directory, so run
     step 5b FIRST and then reconcile: if <skills-dir>/ego-browser already exists and points at
     ~/.local/share/ego/ego-skills, treat it as INSTALLED and do not clone a second copy.
     DO NOT install Playwright, Puppeteer, Selenium, or any headless-Chromium stack for browser
-    testing. ego lite replaces them and reuses my real logged-in session. If a previous run of this
-    setup installed the SuperQA skill or a playwright/chromium download, leave the existing files
-    alone but report them as SUPERSEDED and tell me the exact uninstall command — do not run it.
+    testing ON ANY OS. This prohibition applies especially to Windows: ego lite cannot be installed
+    there, and that does not authorize a fallback. On Windows, leave browser automation uninstalled
+    and report SKIPPED-UNSUPPORTED. On macOS, ego lite replaces those stacks and reuses my real
+    logged-in session. If a previous run of this setup installed the SuperQA skill or a
+    playwright/chromium download, leave the existing files alone but report them as SUPERSEDED and
+    tell me the exact uninstall command — do not run it.
 
 Derive each skill's canonical name from its SKILL.md frontmatter 'name:' field, not from the
 directory name, and fail loudly on a collision instead of silently overwriting.
@@ -239,7 +244,9 @@ work around it. Report the exact command for me to run after I exit.
 
 ego lite is the browser both I and the agent drive. There is no Homebrew formula; it is a DMG.
 
- 1. Skip this whole step on non-macOS and say so. Do not improvise a Linux/Windows install.
+ 1. Skip this whole step on non-macOS and say so. On Windows, record ego lite and browser automation
+    as SKIPPED-UNSUPPORTED. Do not improvise a Linux/Windows ego lite install, and do not substitute
+    Playwright, Puppeteer, Selenium, or any headless-Chromium stack.
  2. If /Applications/'ego lite.app' or ~/Applications/'ego lite.app' already exists, do not
     reinstall — log UNCHANGED and go to 5b.5.
  3. Otherwise run the skill's own installer, which downloads the arch-correct DMG, installs the app,
@@ -379,9 +386,11 @@ Also verify:
   - No autonomous loop was started, no Context Diet restriction was activated, no paid service was
     authenticated, and no credits were spent.
   - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
-  - ego-browser resolves on PATH and answers the heredoc probe from 5b.5 — or is reported as
-    PENDING-USER because GUI onboarding is unfinished. No site was visited, no login was performed,
-    and no Chrome data was migrated on my behalf. No Playwright/Puppeteer/Chromium download ran.
+  - On macOS, ego-browser resolves on PATH and answers the heredoc probe from 5b.5, or is reported as
+    PENDING-USER because GUI onboarding is unfinished. On non-macOS, it is reported as
+    SKIPPED-UNSUPPORTED with no browser-automation fallback installed. No site was visited, no login
+    was performed, and no Chrome data was migrated on my behalf. No Playwright, Puppeteer, Selenium,
+    or headless-Chromium download ran.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 
