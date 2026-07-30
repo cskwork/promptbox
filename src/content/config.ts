@@ -102,7 +102,17 @@ const apps = defineCollection({
   }),
 });
 
-export const collections = { prompts, skills, configs, mcps, plugins, hooks, harnesses, tools, apps };
+// Optional full-body translations. These support language parity without
+// turning translations into navigable top-level categories.
+const translations = defineCollection({
+  type: 'content',
+  schema: z.object({
+    language: z.enum(['en']),
+    target: z.string(),
+  }),
+});
+
+export const collections = { prompts, skills, configs, mcps, plugins, hooks, harnesses, tools, apps, translations };
 
 /**
  * Canonical display order (home + sidebar both follow this).
