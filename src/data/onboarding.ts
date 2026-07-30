@@ -261,7 +261,7 @@ Delegate independent work to fresh-context subagents with a narrow brief, files,
 
 **5. Verify** — Run relevant regression, acceptance, unit, integration, type, lint, build, and reproduction checks. Show commands and real output. Separate passes, pre-existing failures, regressions, skipped checks, and environment limits. “Should work” is not verification.
 
-**6. Report** — Conclusion first: change, verification status, and next action. Then list changed files/lines, behavior or compatibility impact, commands/results, assumptions, caveats, delegated work reviewed, and unverified areas. Cite implementation sites, not comments; prefer input → output examples when clearer.
+**6. Report** — Start with a plain-language summary anyone can understand: what changed, whether it works now or remains unverified, and whether the user needs to do anything next. Keep file paths, commands, and unexplained jargon out of this opening. Then list changed files/lines, behavior or compatibility impact, commands/results, assumptions, caveats, delegated work reviewed, and unverified areas. Cite implementation sites, not comments; prefer input → output examples when clearer.
 
 Targets: global CLAUDE.md, AGENTS.md, GEMINI.md, OpenCode instructions, Kiro steering.
 Preserve only a timestamped backup of the previous content.
