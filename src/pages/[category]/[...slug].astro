@@ -26,6 +26,11 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const currentHref = `${base}/${category}/${entry.slug}/`;
 const rawText = entry.body || '';
 const d = entry.data;
+const englishEntry = (await getCollection(
+  'translations',
+  (translation) => translation.data.language === 'en' && translation.data.target === `${category}/${entry.slug}`,
+))[0];
+const EnglishContent = englishEntry ? (await englishEntry.render()).Content : null;
 
 // prev / next within the category (for footer navigation)
 const siblings = (await getCollection(category, (e: any) => !e.data.hidden)).sort(
@@ -180,14 +185,20 @@ const hasMainBlock = category === 'prompts' && mainBlock.trim().length > 200;
     </div>
   )}
 
-  <section data-lang="en" class="rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
-    <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50">About this item</h2>
-    <p class="mt-2 leading-relaxed text-ink-600 dark:text-ink-300">{d.summary_en}</p>
-    <p class="mt-3 text-sm leading-relaxed text-ink-500 dark:text-ink-400">
-      {hasMainBlock
-        ? 'The prompt below is the whole payload — copy it and paste it into your agent. Switch to Korean to read the full curator notes.'
-        : 'Use “Copy original” above to copy the complete, unchanged entry. Switch to Korean to read the full curator notes.'}
-    </p>
+  <section data-lang="en" class="prose-pc rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_1px_0_rgba(255,255,255,0.5)_inset,0_8px_24px_-16px_rgba(15,20,40,0.2)] dark:border-white/10 dark:bg-ink-900/80 lg:p-8">
+    {EnglishContent ? (
+      <EnglishContent />
+    ) : (
+      <>
+        <h2>About this item</h2>
+        <p>{d.summary_en}</p>
+        <p>
+          {hasMainBlock
+            ? 'The prompt below is the whole payload. Copy it and paste it into your agent. Switch to Korean to read the full curator notes.'
+            : 'Use “Copy original” above to copy the complete, unchanged entry. Switch to Korean to read the full curator notes.'}
+        </p>
+      </>
+    )}
 
     {hasMainBlock && (
       <div class="copy-cta">
