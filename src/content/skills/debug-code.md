@@ -66,7 +66,7 @@ Never convert confidence into invented percentages. Separate **trigger**, **root
 7. **Make the smallest maintainable change.** No unrelated refactoring, dependency changes, API redesign, schema migration, or speculative hardening.
 8. **Preserve legitimate legacy behavior.** Existing behavior is evidence, not automatically correct; characterize unaffected contracts before changing shared code.
 9. **Change one variable per probe.** Record negative results; they narrow the search space.
-10. **Do not say "fixed" early.** Distinguish diagnosis, local verification, rollout readiness, and production verification.
+10. **Do not say “fixed” early.** Distinguish diagnosis, local verification, rollout readiness, and production verification.
 
 ## Workflow
 
@@ -128,7 +128,7 @@ Prefer the first feasible loop that exercises the actual symptom:
 10. automated `git bisect` check;
 11. structured human-in-the-loop probe using logs, metrics, or read-only SQL.
 
-A useful loop must assert the **exact symptom**, not merely "did not crash." Tighten it until it is as deterministic, fast, and unattended as practical. For flaky bugs, raise and measure the reproduction rate rather than pretending one passing run is meaningful.
+A useful loop must assert the **exact symptom**, not merely “did not crash.” Tighten it until it is as deterministic, fast, and unattended as practical. For flaky bugs, raise and measure the reproduction rate rather than pretending one passing run is meaningful.
 
 In restricted-evidence mode, build an **evidence loop** instead of stopping:
 
@@ -147,7 +147,7 @@ Keep a compact ledger throughout:
 |---|---|---|---|---|
 | E1 | Exact observed fact | observed / inferred / unknown / ruled out | command, file, log, metric, query, user report | what it supports or rejects |
 
-Prefer primary evidence. Treat user reports as valid symptom evidence but not automatically as causal evidence. Treat missing logs as "not observed," not "did not happen."
+Prefer primary evidence. Treat user reports as valid symptom evidence but not automatically as causal evidence. Treat missing logs as “not observed,” not “did not happen.”
 
 ### 5. Rank falsifiable hypotheses
 
@@ -161,7 +161,7 @@ Generate 3–5 hypotheses before editing code. For each use:
 
 Rank by explanatory power, evidence fit, probe cost, and production risk—not familiarity. Share the ranking when useful, but continue unless user input is required for a consequential action.
 
-Test the highest-value discriminator first. Prefer probes at component boundaries. Use a debugger or profiler when available; otherwise add narrowly targeted instrumentation with a unique marker such as `[DEBUG-d3f7]`. Never "log everything and grep."
+Test the highest-value discriminator first. Prefer probes at component boundaries. Use a debugger or profiler when available; otherwise add narrowly targeted instrumentation with a unique marker such as `[DEBUG-d3f7]`. Never “log everything and grep.”
 
 For performance regressions, establish a baseline and use timing, profiling, traces, query plans, lock/wait evidence, or bisection before changing code.
 
@@ -175,7 +175,7 @@ A root-cause statement must explain:
 
 Challenge easy misattributions:
 
-- Production data may trigger a code defect; "bad data" is not the root cause when the contract requires safe handling.
+- Production data may trigger a code defect; “bad data” is not the root cause when the contract requires safe handling.
 - A deployment may expose a latent defect rather than introduce it.
 - Resource saturation may be the effect of retry storms, lock contention, leaks, or unbounded work.
 - An exception shown to the user may be a wrapper that hides the first failure.
@@ -193,7 +193,7 @@ If these are unavailable, report **strongly supported** or **provisional**, plus
 ### 7. Implement the fix
 
 1. Convert the minimal reproduction into a failing regression test at the real behavioral seam. If no correct seam exists, create the smallest honest harness and document the testability gap.
-2. Watch the test fail for the user's symptom—not a nearby setup error.
+2. Watch the test fail for the user’s symptom—not a nearby setup error.
 3. Apply the smallest root-cause fix. Reuse existing patterns, standard-library features, platform guarantees, or database constraints where they are already the correct ownership boundary.
 4. Check every relevant caller and sibling path. Add characterization coverage for unaffected legacy behavior when shared code changes.
 5. Watch the regression test pass, then rerun the original, non-minimized loop.
@@ -423,7 +423,7 @@ Why this is safe and cheaper alternatives considered:
 - Parameterize values. Never concatenate untrusted input.
 - Avoid broad joins, unbounded scans, wildcard-leading searches, and functions on indexed filter columns unless a reviewed plan proves safety.
 - Use plain `EXPLAIN` only when a plan is needed. `EXPLAIN ANALYZE` executes the statement and requires explicit DBA approval and production-risk review.
-- Apply a short statement timeout using the organization's approved mechanism.
+- Apply a short statement timeout using the organization’s approved mechanism.
 - The DBA/operator must review the exact query and may reject or rewrite it.
 - Return only the count or sanitized fields needed for the hypothesis.
 
@@ -460,7 +460,7 @@ LIMIT 100;
 ROLLBACK;
 ```
 
-Use the operator's approved query-timeout mechanism for the deployed MySQL version and client.
+Use the operator’s approved query-timeout mechanism for the deployed MySQL version and client.
 
 ## 9. Temporary production instrumentation
 
@@ -534,7 +534,7 @@ The first boundary where actual behavior diverges from the invariant is usually 
 
 ## Legacy-code traps
 
-- "Dead" branches may preserve old clients, records, migrations, or operational repair paths.
+- “Dead” branches may preserve old clients, records, migrations, or operational repair paths.
 - Existing tests may characterize required behavior or accidentally encode the defect; determine which before editing.
 - Hidden coupling often lives in globals, static caches, implicit transactions, framework hooks, callbacks, triggers, schedulers, and environment defaults.
 - Similar functions may differ for a historical reason. Compare callers and data contracts before consolidating.
@@ -585,23 +585,23 @@ Use these cases to sanity-check skill discovery after installation.
 
 ## Should trigger
 
-1. "Production returns 500 only for one tenant. Here is the stack trace; find the root cause."
-2. "Users sometimes get duplicate orders after the queue retries. Debug the legacy consumer."
-3. "This export is fast locally but times out in production. We have Grafana and can run read-only PostgreSQL queries."
-4. "Saving stopped working after yesterday's deploy. I only have the repository and can request logs."
-5. "Find the likely production defect in this legacy payment path; we cannot access the production database."
-6. "Here is an error message from a user. Trace the codebase and create a regression test before fixing it."
-7. "A nightly job silently skips some records near month-end. Investigate."
-8. "The API occasionally returns stale state immediately after an update. Diagnose the production-only behavior."
+1. “Production returns 500 only for one tenant. Here is the stack trace; find the root cause.”
+2. “Users sometimes get duplicate orders after the queue retries. Debug the legacy consumer.”
+3. “This export is fast locally but times out in production. We have Grafana and can run read-only PostgreSQL queries.”
+4. “Saving stopped working after yesterday’s deploy. I only have the repository and can request logs.”
+5. “Find the likely production defect in this legacy payment path; we cannot access the production database.”
+6. “Here is an error message from a user. Trace the codebase and create a regression test before fixing it.”
+7. “A nightly job silently skips some records near month-end. Investigate.”
+8. “The API occasionally returns stale state immediately after an update. Diagnose the production-only behavior.”
 
 ## Should not trigger
 
-1. "Refactor this class to make it cleaner."
-2. "Review this pull request for style and maintainability."
-3. "Explain PostgreSQL transaction isolation."
-4. "Build a new reporting endpoint."
-5. "Perform a general security audit of the whole repository."
-6. "Optimize this function even though there is no measured regression."
-7. "Write unit tests for this utility."
-8. "Summarize this incident report."
+1. “Refactor this class to make it cleaner.”
+2. “Review this pull request for style and maintainability.”
+3. “Explain PostgreSQL transaction isolation.”
+4. “Build a new reporting endpoint.”
+5. “Perform a general security audit of the whole repository.”
+6. “Optimize this function even though there is no measured regression.”
+7. “Write unit tests for this utility.”
+8. “Summarize this incident report.”
 ````
