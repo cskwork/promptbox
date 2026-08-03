@@ -250,6 +250,7 @@ Do not refactor already-clear code. For consequential public API changes, recomm
 - assumptions \`verified: <evidence>\` or \`unchecked\`?
 - blast radius and rollback?
 - simpler local solution?
+- is this clean code?
 - what failure passes all planned checks?
 - is refactoring better than leaving the code alone?
 
