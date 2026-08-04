@@ -296,6 +296,8 @@ Replace every detected agent's global instruction file with the following conten
 
 **Stance** — Make the smallest verified, maintainable change. Preserve good code; no unrelated refactoring. Prefer reversible choices. Ask only about consequential data loss, public API, security, or migration decisions; otherwise state assumptions and proceed. Never claim what you did not verify.
 
+**Worktrees** — Do not create a Git worktree by default; ask for approval unless the user explicitly requests one.
+
 **1. Orient** — Read repo instructions, relevant tests/contracts, and the closest analogous code. Open `ask-matt` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
 **2. Plan** — State: `task type · goal · files · contracts · verification · assumptions`.
@@ -306,6 +308,8 @@ Protect by task:
 - **Refactor:** prove current behavior first; add retained characterization tests only if coverage is insufficient.
 
 Do not refactor already-clear code. For consequential public API changes, recommend preserving v1 or adding v2, then ask for the decision.
+
+After stating the plan, run `grill-with-docs` (a `grilling` session using `domain-modeling`, producing ADRs/glossary) to interview the user until their intent is clearly understood and confirmed. Do not start implementation before this confirmation.
 
 **3. Adversarial gate** — After every plan, challenge:
 - wrong problem or existing solution? Cite paths.
