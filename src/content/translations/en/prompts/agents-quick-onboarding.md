@@ -26,7 +26,6 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 | clean-code | Skill | cskwork/clean-code | Refactors legacy code without changing behavior by locking in characterization tests first and editing in small batches |
 | debug-code | Skill | cskwork/promptbox (skills/debug-code) | Evidence-first debugging that finds the earliest broken invariant and applies the smallest safe patch, including production-only, intermittent, performance, and legacy bugs |
 | **ego-browser** | Skill + browser app | citrolabs/ego-lite | An agent browser that can reuse your login state for QA and web automation. macOS only; use Playwright when needed on Windows or Linux |
-| **codebase-memory-mcp** | CLI + MCP | DeusData/codebase-memory-mcp | Indexes code into a local knowledge graph for structure exploration, call tracing, and token-efficient impact analysis |
 | **officecli** (11) | Skills + CLI | iOfficeAI/OfficeCLI | Creates and analyzes DOCX, XLSX, and PPTX files, with layers for financial models, pitch decks, and academic papers |
 | **herdr** | Skill + CLI | ogulcancelik/herdr | A terminal multiplexer built for coding agents |
 
@@ -53,8 +52,7 @@ Every item below comes from a failure that occurred in a real setup. The prompt 
 
 - **A directory existing does not mean the skill is installed.** An interrupted installer can leave correctly named but empty directories. Agents then report that the skill is missing even though `ls` shows the directory. Installation must be proven by a readable, non-empty `SKILL.md`, never by `[ -d ... ]` alone.
 - **Upstream installers may run `rm -rf`.** For example, a development-oriented link script can delete an existing real directory before replacing it. The prompt reads installer scripts first and reimplements destructive linking with backup semantics.
-- **An MCP installer may also rewrite agent configuration.** `codebase-memory-mcp` can configure MCP files, instructions, skills, and hooks for detected agents. The prompt inspects the installer, uses binary-only installation when appropriate, and then registers the server according to the existing configuration rules.
-- **Automatic indexing can cover far too much.** Indexing a parent directory or generated output can consume significant time and memory. The prompt requires a reviewed `.cbmignore`, checks for version 0.9.0 or newer, and sets the index limit and watcher configuration in a safe order.
+- **An MCP installer may also rewrite agent configuration.** An MCP install script can configure MCP files, instructions, skills, and hooks for detected agents. The prompt inspects the installer, uses binary-only installation when appropriate, and then registers the server according to the existing configuration rules.
 - **A global MCP config may accidentally hardcode `cwd`.** Installers sometimes pin the server to the directory where setup ran. Removing that value is required for the server to work correctly across projects.
 - **User-owned symlinks can be lost during reconciliation.** Links to personal repositories outside `~/.agents` must be inventoried and preserved verbatim instead of being silently retargeted.
 - **Version-manager shims may fail in a non-interactive shell.** A `node` shim can break while `/opt/homebrew/bin/node` works. The prompt resolves and stores the absolute path of an interpreter that actually runs in the environment used by the agent.
