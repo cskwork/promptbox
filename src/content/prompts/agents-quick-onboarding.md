@@ -1,7 +1,7 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
 title_en: One-shot coding agent setup
-summary: "스킬 57종과 공통 시스템 프롬프트, CLI 도구(codebase-memory-mcp·officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
+summary: "스킬 57종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
 summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work."
 tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi]
 author: cskwork
@@ -34,7 +34,6 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | clean-code | 스킬 | cskwork/clean-code | 동작을 바꾸지 않고 레거시 코드 리팩터링 — 특성화 테스트로 현재 동작을 먼저 고정하고 작은 배치로 편집 |
 | debug-code | 스킬 | cskwork/promptbox (skills/debug-code) | 증거 기반 디버깅 — 가장 먼저 깨진 invariant(불변 조건)를 찾고 최소 안전 패치. 프로덕션 전용·간헐적·성능·레거시 버그에 강함 |
 | **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화). **macOS 전용**이며, Windows·Linux에서는 필요 시 Playwright 사용 |
-| **codebase-memory-mcp** | CLI + MCP | DeusData/codebase-memory-mcp | 코드를 로컬 지식 그래프로 인덱싱, 구조 탐색·호출 추적·영향 분석을 토큰 효율적으로 |
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
 | **herdr** | 스킬 + CLI | ogulcancelik/herdr | 코딩 에이전트용 터미널 멀티플렉서 |
 
@@ -65,15 +64,11 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   날아갔다. 판정은 반드시 `SKILL.md`가 **읽히는지**로 해야 하고 `[ -d ... ]`는 쓰면 안 된다.
 - **상류 설치 스크립트가 `rm -rf`를 한다**: `mattpocock/skills/scripts/link-skills.sh`는 dev 전용이라
   기존 실디렉터리를 지운다. 설치기는 실행 전에 읽고, 파괴적이면 백업 방식으로 다시 구현한다.
-- **MCP 설치기가 에이전트 설정도 바꾼다**: `codebase-memory-mcp` 설치기는 감지한 코딩 에이전트의
+- **MCP 설치기가 에이전트 설정도 바꾼다**: MCP 설치 스크립트는 감지한 코딩 에이전트의
   MCP 설정·지침·스킬·훅까지 구성할 수 있다. 실행 전에 설치 스크립트를 읽고, 자동 설정이 불필요하면
-  `--skip-config`로 바이너리만 설치한 뒤 기존 설정 규칙에 맞춰 수동 등록한다.
-- **자동 인덱싱 범위가 너무 크다**: 상위 폴더나 생성물까지 백그라운드에서 읽으면 최초 인덱싱이
-  오래 걸리고 메모리를 많이 쓸 수 있다. v0.9.0 이상인지 확인하고, 프로젝트마다 `.cbmignore`를
-  먼저 만든 뒤 `auto_index_limit=50000`, `auto_watch=true`, `auto_index=true` 순서로 설정한다.
-  이렇게 하면 최초 자동 인덱싱 후에도 watcher(변경 감시)가 코드 변경을 그래프에 증분 반영한다.
+  바이너리만 설치한 뒤 기존 설정 규칙에 맞춰 수동 등록한다.
 - **MCP `cwd` 하드코딩**: 설치기가 실행된 디렉터리를 전역 설정에 박아버린다. 지워야 어느 프로젝트에서든
-  올바른 그래프를 본다.
+  올바르게 동작한다.
 - **사용자 소유 심링크가 같이 날아간다**: `~/.agents` 밖 개인 레포를 가리키는 링크는 복구 대상에서
   누락되기 쉽다. 그래서 손대기 전 인벤토리가 필수다.
 - **버전 매니저가 비대화형 셸에서 안 깨어난다**: `node`가 nvm shim으로 잡혀 `command not found: _load_nvm`이
@@ -195,7 +190,6 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       files (production-access.md, bug-patterns.md) embedded in the promptbox
                                       .md body; materialise them into ~/.agents/skills/debug-code/ with the
                                       SKILL.md frontmatter (name: debug-code) and a references/ subfolder.
-  Codebase Memory MCP (CLI + MCP)     https://github.com/DeusData/codebase-memory-mcp
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
   ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
@@ -227,16 +221,6 @@ Install or update via the official package manager. USE THE SAME MECHANISM THE T
 INSTALLED WITH — switching from a curl installer to Homebrew (or pip to uv) leaves two binaries on
 PATH and the wrong one wins.
 
-  Codebase Memory MCP
-    macOS/Linux: curl -fsSL https://raw.githubusercontent.com/DeusData/codebase-memory-mcp/main/install.sh | bash
-    Windows: download and inspect install.ps1 from the repository, then run it in PowerShell
-    Require v0.9.0 or newer before enabling automatic indexing.
-    Before restarting any agent, create a reviewed .cbmignore in every active repository root.
-    Then run, in this order:
-      codebase-memory-mcp config set auto_index_limit 50000
-      codebase-memory-mcp config set auto_watch true
-      codebase-memory-mcp config set auto_index true
-      codebase-memory-mcp config list
   OfficeCLI           brew install officecli
   Herdr               official installer, or 'herdr update'
 
@@ -272,9 +256,6 @@ ego lite is the browser both I and the agent drive. There is no Homebrew formula
 
 For any tool registering an MCP server:
 
- 0. Make Codebase Memory MCP the default code-intelligence server in every detected agent harness.
-    If code-review-graph is also registered, remove only its MCP config entry after backing up the
-    config file. Do not uninstall its binary or delete its indexes unless I explicitly ask.
  1. Set 'command' to the ABSOLUTE PATH OF THE BINARY YOU ACTUALLY INSTALLED. Installers routinely
     guess the wrong runner (writing 'uvx' for a pipx install), which makes the client download the
     package on every cold start and time out during handshake. This presents as "loading forever",
@@ -284,8 +265,6 @@ For any tool registering an MCP server:
  3. VALIDATE WITH A REAL HANDSHAKE BEFORE DECLARING SUCCESS: drive the server over stdio with
     initialize -> notifications/initialized -> tools/list, and report the measured time and tool
     count. A server that starts is not the same as a server that answers.
- 4. If the tool supports a multi-repo registry, register each built graph so the tools work from a
-    parent directory as well as from inside each repo.
 
 === 7. GLOBAL INSTRUCTION FILES ===
 
