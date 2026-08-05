@@ -43,7 +43,7 @@ hidden: true
 | Everything Claude Code (ECC) | `ecc` | `/plan`, `/tdd`, `/verify` 표준 슬래시 |
 | Oh My Claude Code (OMCC) | `omcc` | 네임스페이스 `/oh-my-claudecode:*` + 매직 키워드 |
 | Superpowers (obra) | `superpowers` | 스킬 기반 `/brainstorming`, `/writing-plans` |
-| Matt Pocock skills | `mattpocock` | `/diagnose`, `/tdd`, `/to-prd`, `/to-issues`, `/triage` |
+| Matt Pocock skills | `mattpocock` | `/diagnosing-bugs`, `/tdd`, `/to-spec`, `/to-tickets`, `/triage` |
 | Vanilla Claude Code | `minimal` | 내장 `/plan`, `/code-review` |
 | Custom | `custom` | 사용자가 직접 선택 |
 

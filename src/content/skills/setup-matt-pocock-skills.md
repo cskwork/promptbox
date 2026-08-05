@@ -14,7 +14,7 @@ hidden: true
 
 ## 한 줄
 
-`to-issues`, `to-prd`, `triage`, `diagnose`, `tdd`, `improve-codebase-architecture` 같은 다른 스킬을 쓰기 전에 **이 스킬을 먼저 한 번 실행** — 이슈를 어디서 관리하는지, 분류 라벨 5개의 실제 이름, 프로젝트 문서 위치를 사용자와 합의한 뒤 `CLAUDE.md`(또는 `AGENTS.md`)와 `docs/agents/*.md`에 기록한다. 그래야 다른 스킬들이 매번 묻지 않고 이 프로젝트 규칙대로 동작한다.
+`to-tickets`, `to-spec`, `triage`, `diagnosing-bugs`, `tdd`, `improve-codebase-architecture` 같은 다른 스킬을 쓰기 전에 **이 스킬을 먼저 한 번 실행** — 이슈를 어디서 관리하는지, 분류 라벨 5개의 실제 이름, 프로젝트 문서 위치를 사용자와 합의한 뒤 `CLAUDE.md`(또는 `AGENTS.md`)와 `docs/agents/*.md`에 기록한다. 그래야 다른 스킬들이 매번 묻지 않고 이 프로젝트 규칙대로 동작한다.
 
 *EN: Run this once so the other engineering skills know where your issues, labels, and docs live.*
 

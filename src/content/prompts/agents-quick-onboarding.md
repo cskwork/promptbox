@@ -24,7 +24,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | 이름 | 종류 | 소스 | 무엇을 더해주나 |
 |---|---|---|---|
 | AGENTS.md | 공통 규칙 | 프롬프트 내장 운영 지침 | 모든 CLI가 공유하는 시스템 프롬프트 |
-| **Matt Pocock Skills** (37종) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec` 등 |
+| **Matt Pocock Skills** (정식 29종 + 베타 6종) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec`, `to-tickets`, `wayfinder`, `wizard` 등 |
 | context-diet | 스킬 | cskwork/context-diet-skill | 시스템 프롬프트 비대화 측정·감축 |
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
 | call-agent | 스킬 | cskwork/call-agent | codex·agy·kiro·claude·notebooklm로 위임 라우팅 |
@@ -294,22 +294,21 @@ Replace every detected agent's global instruction file with the following conten
 
 # Operating Instructions
 
-**Stance** — Make the smallest verified, maintainable change. Make maintainable code; no unrelated refactoring. Prefer reversible choices. Ask only about consequential data loss, public API, security, or migration decisions; otherwise state assumptions and proceed. Never claim what you did not verify.
+**Stance** — Domain data first: get the domain model and real data shapes right before code or tests — tests verify the model, they never define it. Make the smallest verified, maintainable change. Make maintainable code; no unrelated refactoring. Prefer reversible choices. Ask only about consequential data loss, public API, security, or migration decisions; otherwise state assumptions and proceed. Never claim what you did not verify. Do not create a Git worktree by default.
 
-**Worktrees** — Do not create a Git worktree by default.
+**1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Open `ask-matt` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
-**1. Orient** — Read repo instructions, relevant tests/contracts, and the closest analogous code. Open `ask-matt` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
-
-**2. Delegate** — As an orchestrator use subagents for each plan, review, execute, verify tasks . As soon as the question is framed, fan out fresh-context subagents. Each gets a narrow brief: goal, candidate paths, constraints, expected output.
+**2. Delegate** — As an orchestrator use subagents for plan, review, execute, and verify tasks. As soon as the question is framed, fan out fresh-context subagents. Each gets a narrow brief: goal, candidate paths, constraints, expected output.
 Skip delegation only when you already know the exact file and symbol, or the change is a single trivial edit.
 
 **3. Plan** — State: `task type · goal · files · contracts · verification · assumptions`.
 
-After stating the plan, `grilling` session using `domain-modeling`, producing ADRs/glossary) to interview the user until their intent is clearly understood and confirmed. Do not start implementation before this confirmation.
+After stating the plan, run a `grilling` session (using `domain-modeling`, producing ADRs/glossary) to interview the user until their intent is clearly understood and confirmed. Do not start implementation before this confirmation. Skip the grilling for trivial or unambiguous changes — state assumptions and proceed.
 
 **4. Adversarial review** — After every plan, challenge:
-- current plan matches domain logic  
-- fixes the relevant issues and matches user request?
+- does the plan match the domain logic?
+- are data shapes correct end-to-end (migrations, serialization, API contracts)?
+- does it fix the relevant issues and match the user request?
 - is this clean code?
 
 Pass only after a concrete objection and revision, or the strongest counterargument and why the plan survives.
