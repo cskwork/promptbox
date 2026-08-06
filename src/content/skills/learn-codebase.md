@@ -7,6 +7,7 @@ source: https://github.com/cskwork/learn-codebase
 author: cskwork
 license: MIT
 order: 30
+hidden: true
 trigger: "AI shipped this PR / there's a 40-page spec and 100 files / onboard junior to one feature / did implementation match spec / scared to change behavior X"
 install: "git clone https://github.com/cskwork/learn-codebase ~/.claude/skills/learn-codebase"
 ---

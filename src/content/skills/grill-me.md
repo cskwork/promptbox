@@ -7,6 +7,7 @@ source: https://github.com/mattpocock/skills/tree/main/skills/productivity/grill
 author: mattpocock
 license: mattpocock/skills 참조
 order: 25
+hidden: true
 trigger: "내 계획 검토해줘 / grill me / stress-test this plan / design review / 디자인 결정 점검"
 install: "npx skills add https://github.com/mattpocock/skills --skill grill-me"
 ---
