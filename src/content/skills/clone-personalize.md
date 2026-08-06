@@ -7,6 +7,7 @@ source: https://github.com/cskwork/clone-personalize
 author: cskwork
 license: 원본 레포 참조
 order: 10
+hidden: true
 trigger: "clone X and make it use my CLIs / personalize this AI app / OAuth-replace this app / GitHub URL + CLI substitution"
 install: "git clone https://github.com/cskwork/clone-personalize ~/.claude/skills/clone-personalize"
 ---
