@@ -1,9 +1,9 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
 title_en: One-shot coding agent setup
-summary: "스킬 57종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
+summary: "스킬 57종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr·rtk)와 에이전트용 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
 summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work."
-tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi]
+tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi, rtk, token-savings]
 author: cskwork
 order: 5
 use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 한곳에서 관리하고 싶을 때. 에이전트 채팅창에 그대로 붙여넣으면 끝. 이미 설치된 환경이 깨졌을 때 복구용으로도 그대로 쓴다."
@@ -36,6 +36,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화). **macOS 전용**이며, Windows·Linux에서는 필요 시 Playwright 사용 |
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
 | **herdr** | 스킬 + CLI | ogulcancelik/herdr | 코딩 에이전트용 터미널 멀티플렉서 |
+| **rtk** | CLI + 훅 | rtk-ai/rtk | 셸 명령 출력을 압축해 컨텍스트로 들어가는 토큰을 줄인다(git·pytest·docker 등 100종+). MCP가 아니라 `PreToolUse` 훅으로 붙는다 |
 
 > 설치된 CLI 수를 고정하지 않는다. 각 도구가 `~/.agents/skills`를 직접 읽는지 먼저 확인하고, 필요한 어댑터만 만든다.
 
@@ -52,8 +53,10 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 2. `~/.agents/`를 단일 출처로 만든다 — `AGENTS.md`(공통 규칙) + `skills/`(심링크) + `sources/`(클론).
 3. 상류 레포를 클론하고, 각 스킬을 `~/.agents/skills/<name>`으로 심링크한다. **이미 있으면 업데이트, 깨졌으면 복구.**
 4. 설치된 CLI를 감지해 각 도구의 규칙 파일·스킬 폴더를 `~/.agents/`로 심링크한다.
-5. CLI 바이너리와 MCP 서버를 설치하고, **실제 핸드셰이크로 응답을 확인**한다.
-6. 읽기 전용 감사 스크립트를 남긴다 — 나중에 깨졌는지 확인하는 용도.
+5. CLI 바이너리와 MCP 서버를 설치하고, **실제 핸드셰이크로 응답을 확인**한다. `rtk`도 여기서 깔고
+   `rtk init -g`로 각 에이전트에 훅을 붙인다.
+6. 코드베이스 인덱서 MCP(codebase-memory-mcp 등)를 **찾아서 목록만 보여주고, 사용자가 승인하면** 제거한다.
+7. 읽기 전용 감사 스크립트를 남긴다 — 나중에 깨졌는지 확인하는 용도.
 
 ## 함정
 
@@ -87,6 +90,11 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   안 통한다. macOS·Linux는 `ln -s` 하나로 둘 다 된다.
 - **검증 스크립트가 상태를 바꾸면 안 된다**: 인자를 무시하는 스크립트에 `--dry-run`을 넘기면 점검이 아니라
   실행이 된다. 감사는 반드시 별도의 읽기 전용 스크립트로 한다.
+- **rtk와 코드 인덱서 MCP는 목적이 겹친다**: rtk는 셸 출력을 압축해 토큰을 줄이는데, 코드베이스
+  인덱서 MCP(codebase-memory-mcp 등)는 반대로 상시 도구 스키마와 인덱스 응답으로 컨텍스트를 채운다.
+  그래서 프롬프트는 인덱서 MCP를 **찾아서 목록만 보여주고 제거는 사용자 승인을 받은 뒤** 실행한다.
+  승인 없이는 아무것도 지우지 않고 `PENDING-USER`로 남긴다. 제거는 설정에서 항목을 떼어내기 전
+  타임스탬프 백업을 먼저 뜬다.
 
 아래 프롬프트를 에이전트 채팅창에 그대로 붙여넣으세요.
 
@@ -223,6 +231,22 @@ PATH and the wrong one wins.
 
   OfficeCLI           brew install officecli
   Herdr               official installer, or 'herdr update'
+  rtk                 https://github.com/rtk-ai/rtk — CLI proxy that compresses shell command
+                      output (git, pytest, docker, kubectl, cargo, eslint, 100+ commands) before it
+                      reaches the model's context.
+                        macOS/Linux:  brew install rtk
+                                      or  curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+                        Windows:      download the x86_64-msvc release binary, or cargo install --git https://github.com/rtk-ai/rtk
+                      Do NOT 'cargo install rtk' from crates.io — an unrelated crate owns that name.
+                      Ensure ripgrep is on PATH; some rtk filters shell out to it.
+                      Wire it into every detected agent with:  rtk init -g
+                      This writes hooks (Claude Code PreToolUse, Gemini CLI BeforeTool, OpenCode/Pi
+                      plugins, Windsurf/Cline rules), NOT an MCP server. Treat those hook files like
+                      any other agent config: back up before it writes, and if 'rtk init -g' would
+                      overwrite an existing hook you did not create, back that hook up first and
+                      report the diff.
+                      Verify:  rtk --version   and   rtk gain
+                      Restart each agent afterwards, or the hook is not loaded.
 
 If a tool cannot update because the current session is running inside it (Herdr does this), do not
 work around it. Report the exact command for me to run after I exit.
@@ -265,6 +289,33 @@ For any tool registering an MCP server:
  3. VALIDATE WITH A REAL HANDSHAKE BEFORE DECLARING SUCCESS: drive the server over stdio with
     initialize -> notifications/initialized -> tools/list, and report the measured time and tool
     count. A server that starts is not the same as a server that answers.
+
+=== 6b. CODEBASE-INDEXER MCP SERVERS — FIND, THEN ASK BEFORE REMOVING ===
+
+This kit's token strategy is rtk (compress shell output on the way in). Codebase-indexer MCP
+servers pull the opposite way: they keep a large tool schema resident in every context window and
+return long index payloads. Running both is redundant, so this step retires the indexers — but
+REMOVAL IS NOT AUTOMATIC.
+
+ 1. Scan every detected agent's MCP config for codebase-indexing / code-graph / semantic-code-search
+    servers. Match on purpose, not just on name. Known examples: codebase-memory-mcp, serena,
+    claude-context, code-index-mcp, codegraph, sourcegraph/cody MCP, repomix-style whole-repo
+    indexers. If a server's description says it indexes, embeds, or graphs a repository for search,
+    it belongs on the list.
+ 2. Report the list: server name, which agent config file, and the exact lines. Also report any
+    SessionStart hook or instruction-file paragraph that tells agents to prefer those tools
+    (e.g. a "Code Discovery Protocol" block) — leaving that behind after removing the server makes
+    every session start with instructions for tools that no longer exist.
+ 3. STOP AND ASK ME. Do not remove, disable, comment out, or rename anything until I say yes.
+    Ask once, listing everything, and let me approve all / some / none. If I am not present or do
+    not answer, change nothing and mark each entry PENDING-USER-CONSENT.
+ 4. Only for the entries I approve: back up each config file into the timestamped backup directory
+    FIRST, then remove just those server entries and the hook/instruction text that references them.
+    Leave every other server untouched. Do not delete the tool's own cache, index database, or
+    installed binary unless I explicitly ask — removing the registration is enough and is
+    reversible.
+ 5. Report the exact rollback command (restore file from ~/.agents/setup-backups/<timestamp>/), and
+    verify each edited config still parses as valid JSON/TOML before finishing.
 
 === 7. GLOBAL INSTRUCTION FILES ===
 
