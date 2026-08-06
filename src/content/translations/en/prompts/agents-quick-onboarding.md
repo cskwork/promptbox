@@ -28,6 +28,7 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 | **ego-browser** | Skill + browser app | citrolabs/ego-lite | An agent browser that can reuse your login state for QA and web automation. macOS only; use Playwright when needed on Windows or Linux |
 | **officecli** (11) | Skills + CLI | iOfficeAI/OfficeCLI | Creates and analyzes DOCX, XLSX, and PPTX files, with layers for financial models, pitch decks, and academic papers |
 | **herdr** | Skill + CLI | ogulcancelik/herdr | A terminal multiplexer built for coding agents |
+| **rtk** | CLI + hooks | rtk-ai/rtk | Compresses shell command output (git, pytest, docker, and 100+ others) before it reaches the model's context. It attaches through a `PreToolUse` hook, not an MCP server |
 
 > The prompt does not assume a fixed number of installed CLIs. It first checks whether each tool reads `~/.agents/skills` directly, then creates only the adapters that are actually needed.
 
@@ -43,8 +44,9 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 2. Makes `~/.agents/` the single source of truth for shared `AGENTS.md` rules, linked skills, cloned sources, setup scripts, documentation, and the install manifest.
 3. Clones upstream repositories and links each complete skill directory into `~/.agents/skills/<name>`. Existing items are updated, while incomplete or broken items are repaired.
 4. Detects installed coding CLIs and connects only their documented global instruction and skill paths to the shared hub.
-5. Installs the required CLI tools and MCP servers, then validates MCP integrations with a real protocol handshake rather than merely checking that a process starts.
-6. Leaves behind a read-only audit script and an idempotent repair script for future failures.
+5. Installs the required CLI tools and MCP servers, then validates MCP integrations with a real protocol handshake rather than merely checking that a process starts. `rtk` is installed here too, and `rtk init -g` wires its hook into each detected agent.
+6. Finds codebase-indexer MCP servers such as codebase-memory-mcp, lists them for you, and removes them **only after you approve**.
+7. Leaves behind a read-only audit script and an idempotent repair script for future failures.
 
 ## Gotchas the prompt handles
 
@@ -61,5 +63,6 @@ Every item below comes from a failure that occurred in a real setup. The prompt 
 - **Old sibling instruction files can remain active.** Replacing the canonical instruction file is not enough if another file in a directory such as Kiro steering still injects the previous rules. The prompt inventories and archives those stale siblings.
 - **Windows uses different fallback link types for files and directories.** Without Developer Mode or administrator privileges, files can use hard links while skill directories require junctions. A directory cannot be hard-linked with `mklink /H`.
 - **A verification script must not mutate the system.** Passing an unsupported `--dry-run` flag to a script can silently execute the real operation. The prompt creates a separate read-only audit script instead of trusting an unverified dry-run mode.
+- **rtk and codebase-indexer MCP servers pull against each other.** rtk shrinks what enters the context, while an indexer MCP keeps a large tool schema resident and returns long index payloads. The prompt therefore finds the indexers, shows you the list, and waits for your consent before removing anything. Without approval it changes nothing and marks each entry `PENDING-USER-CONSENT`. Approved removals are backed up first, and only the registration is removed — caches, index databases, and binaries stay put.
 
 The full prompt below is copied verbatim. Use **Copy prompt** to place the entire payload on the clipboard without selecting it manually.
