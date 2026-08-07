@@ -106,7 +106,7 @@ Configure `companyAnnouncements` in `~/.claude/settings.json` with workflow chea
 | Everything Claude Code (ECC) | Standard slash: `/plan`, `/tdd`, `/verify` | orchestrate, TDD, multi-model, eval | `ecc` |
 | Oh My Claude Code (OMCC) | Namespaced: `/oh-my-claudecode:autopilot` + magic keywords: `autopilot:`, `ralph:`, `ulw` | autopilot, team, ralph, ultrawork | `omcc` |
 | Superpowers (obra) | Skill-based: `/brainstorming`, `/writing-plans`, `/executing-plans` | brainstorm, plan, TDD, review, worktrees | `superpowers` |
-| Matt Pocock's skills | Engineering slash: `/diagnose`, `/tdd`, `/to-prd`, `/to-issues`, `/triage` | setup, plan, bug, feature, triage, architecture | `mattpocock` |
+| Matt Pocock's skills | Engineering slash: `/diagnose`, `/tdd`, `/to-spec`, `/to-tickets`, `/triage` | setup, plan, bug, feature, triage, architecture | `mattpocock` |
 | Vanilla Claude Code | Built-in only: `/plan`, `/code-review` | plan, review | `minimal` |
 | Custom | User-selected | Any combination | `custom` |
 
@@ -174,7 +174,7 @@ Meta:       /writing-skills, /using-superpowers
 Disciplined engineering workflows. Install: `npx skills add https://github.com/mattpocock/skills`, then `/setup-matt-pocock-skills` once per repo (one-time scaffolding — kept out of the persistent cheatsheet so it doesn't add noise after the first run).
 
 ```
-Plan:       /grill-with-docs -> /to-prd -> /to-issues
+Plan:       /grill-with-docs -> /to-spec -> /to-tickets
 Bug:        /diagnose (6-phase: feedback loop -> reproduce -> hypothesise -> instrument -> fix+regression -> cleanup)
 Feature:    /tdd (vertical tracer bullets) | /prototype (LOGIC or UI)
 Triage:     /triage — sort new issues into needs-info / ready-for-agent / ready-for-human / wontfix; run when issues pile up or before handing one to an agent

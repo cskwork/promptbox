@@ -65,6 +65,25 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 - **디렉터리가 있다고 설치된 게 아니다 (이번 최대 함정)**: 중간에 죽은 설치기는 **이름만 맞는 빈 폴더**를
   남긴다. 에이전트는 "스킬 없음"이라 하는데 `ls`에는 보이는 상태가 된다. 실제로 심링크 43개가 이렇게
   날아갔다. 판정은 반드시 `SKILL.md`가 **읽히는지**로 해야 하고 `[ -d ... ]`는 쓰면 안 된다.
+- **`git pull` 한 번에 스킬이 조용히 사라진다 (재설치보다 위험)**: 상류 레포가 루트에 있던 `SKILL.md`를
+  표준 레이아웃인 `skills/<이름>/`으로 옮기면, 링크는 멀쩡하고 폴더도 그대로라 `ls`로는 아무 이상이
+  없는데 스킬만 증발한다. 2026-08-07 실행에서 `context-diet`·`clean-code`·`herdr` 세 개가 한 번의
+  갱신으로 이렇게 죽었다. **pull 뒤에는 반드시 링크 너머의 `SKILL.md`를 다시 확인하고**, 없으면 소스
+  안에서 찾아 재타겟해야 한다. 위의 "빈 폴더" 함정과 증상이 같지만 원인은 *성공한* 업데이트다.
+- **rtk가 공용 지시문 파일을 건드린다**: `rtk init -g`는 `~/.claude/CLAUDE.md`에 `@RTK.md` 한 줄을
+  덧붙인다. 그런데 7단계에서 그 경로는 **정본 `~/.agents/AGENTS.md`로 가는 심링크**라, Claude 전용
+  한 줄이 Codex·Jcode·Pi·Gemini·OpenCode·Kiro가 함께 읽는 파일에 박힌다. 그 에이전트들에는 `RTK.md`가
+  없어 매 세션이 깨진 include로 시작한다. rtk는 7단계 **전에** 돌리고, 끝난 뒤 정본이 규정된 내용
+  그대로인지 다시 확인한다. 훅은 `settings.json`에 있으므로 그 줄을 지워도 rtk는 정상 동작한다.
+- **폴더 이름이 달라도 스킬 이름은 겹칠 수 있다**: 판정 기준은 폴더명이 아니라 `SKILL.md`의 `name:`이다.
+  `debug-code`와 `debug-code-skill`처럼 이름이 다른 두 폴더가 같은 `name: debug-code`를 선언하면 둘 중
+  하나만 로드되고, 어느 쪽이 이길지는 알 수 없다. 지우지 말고 한쪽을 `skills-bak`으로 아카이브한다.
+- **검증 스크립트가 거짓말을 한다 (zsh 카운터)**: zsh/bash에서 `local n=0` 뒤에 `n+=1`은 덧셈이 아니라
+  **문자열 이어붙이기**다. 그래서 "엔트리 1111111111111111111개" 같은 수치가 나오는데 나머지 줄은
+  멀쩡해 보인다. 카운터는 `local -i n=0`으로 선언한다.
+- **감사 실패 조건을 넓게 잡으면 신호가 죽는다**: 스킬 폴더에는 스킬이 아닌 것(개인 메모, 도구가 관리하는
+  번들)도 산다. 이걸 손상으로 세면 매번 "DAMAGE FOUND"가 뜨고, 두세 번 지나면 아무도 안 본다. 실패
+  판정은 **빈 폴더와 깨진 링크 0** 두 가지로만 하고 나머지는 사람이 읽을 경고로 남긴다.
 - **상류 설치 스크립트가 `rm -rf`를 한다**: `mattpocock/skills/scripts/link-skills.sh`는 dev 전용이라
   기존 실디렉터리를 지운다. 설치기는 실행 전에 읽고, 파괴적이면 백업 방식으로 다시 구현한다.
 - **MCP 설치기가 에이전트 설정도 바꾼다**: MCP 설치 스크립트는 감지한 코딩 에이전트의
@@ -95,6 +114,10 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   그래서 프롬프트는 인덱서 MCP를 **찾아서 목록만 보여주고 제거는 사용자 승인을 받은 뒤** 실행한다.
   승인 없이는 아무것도 지우지 않고 `PENDING-USER`로 남긴다. 제거는 설정에서 항목을 떼어내기 전
   타임스탬프 백업을 먼저 뜬다.
+  다만 **이름만 보고 찾으면 오탐이 난다**. `~/.claude/settings.json`의 `"mcp__serena"`는 서버 등록이
+  아니라 context-diet가 그 서버를 **차단**해 둔 규칙이라, 지우면 사용자가 꺼둔 걸 다시 켜는 셈이 된다.
+  주석 처리된 블록과 `enabled: false` 항목도 등록이 아니다. `mcpServers`/`[mcp_servers.*]` 아래
+  살아있는 등록인지 확인한 것만 목록에 올린다.
 
 아래 프롬프트를 에이전트 채팅창에 그대로 붙여넣으세요.
 
@@ -195,9 +218,12 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Debug Code                          https://github.com/cskwork/promptbox
                                       Clone the promptbox repo, then link src/content/skills/debug-code
                                       as a skill directory. The skill ships its SKILL.md and two reference
-                                      files (production-access.md, bug-patterns.md) embedded in the promptbox
-                                      .md body; materialise them into ~/.agents/skills/debug-code/ with the
-                                      SKILL.md frontmatter (name: debug-code) and a references/ subfolder.
+                                      files embedded in the promptbox .md body; materialise them into
+                                      ~/.agents/skills/debug-code/ with the SKILL.md frontmatter
+                                      (name: debug-code) and a references/ subfolder. Take the reference
+                                      FILENAMES from the links inside SKILL.md, not from this prompt —
+                                      they are currently production-probes.md and production-bug-patterns.md,
+                                      and inventing names here silently breaks every link in the skill.
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
   ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
@@ -212,7 +238,20 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
     exists, inspect and reuse or update it rather than marking it SUPERSEDED or suggesting uninstall.
 
 Derive each skill's canonical name from its SKILL.md frontmatter 'name:' field, not from the
-directory name, and fail loudly on a collision instead of silently overwriting.
+directory name, and fail loudly on a collision instead of silently overwriting. Two directories with
+different names can still declare the same 'name:' (a hand-installed standalone copy alongside the
+one this prompt materialises). Only one of them will ever load, and which one is arbitrary. Report
+both with their paths, keep the copy this prompt installs, and ARCHIVE the other to
+~/.agents/skills-bak/<timestamp>/ — archive, never delete.
+
+AFTER EVERY CLONE OR PULL, RE-VERIFY THE LINK — DO NOT ASSUME AN UPDATE IS SAFE. Upstream
+repositories relocate SKILL.md as they adopt the standard skills/<name>/ layout. When that happens
+the symlink still resolves, the directory still exists, and `ls` looks perfectly healthy — but
+SKILL.md is gone and the skill has silently disappeared from every agent. This is the same
+"directory is not evidence" failure as an interrupted installer, except a successful `git pull`
+causes it. For each linked skill, after updating its source, confirm <link>/SKILL.md is readable and
+non-empty; if it is not, search the source repo (skills/<name>/, then any SKILL.md within a few
+levels, excluding .git) and retarget the link to the directory that actually holds it.
 
 This setup's global rules require agents to open ask-matt automatically. After every clone/update,
 resolve the canonical ask-matt SKILL.md through its installed link and make it model-invokable:
@@ -245,6 +284,16 @@ PATH and the wrong one wins.
                       any other agent config: back up before it writes, and if 'rtk init -g' would
                       overwrite an existing hook you did not create, back that hook up first and
                       report the diff.
+                      IT ALSO EDITS THE GLOBAL INSTRUCTION FILE. 'rtk init -g' writes ~/.claude/RTK.md
+                      and appends an '@RTK.md' line to ~/.claude/CLAUDE.md. Under step 7 that path is
+                      a symlink to the single canonical ~/.agents/AGENTS.md, so this one line lands in
+                      the file EVERY agent reads — and Jcode, Pi, Gemini, OpenCode, and Kiro have no
+                      RTK.md next to their instruction file, so they each start every session with a
+                      dangling include. Therefore: run this step BEFORE step 7, and after it re-verify
+                      that the canonical file still contains exactly the step 7 content. If '@RTK.md'
+                      (or any other agent-specific include) was appended, back the file up and remove
+                      that line — the PreToolUse hook in settings.json is what makes rtk work; the
+                      instruction-file include is not required for it.
                       Verify:  rtk --version   and   rtk gain
                       Restart each agent afterwards, or the hook is not loaded.
 
@@ -302,6 +351,14 @@ REMOVAL IS NOT AUTOMATIC.
     claude-context, code-index-mcp, codegraph, sourcegraph/cody MCP, repomix-style whole-repo
     indexers. If a server's description says it indexes, embeds, or graphs a repository for search,
     it belongs on the list.
+    A NAME IS NOT A REGISTRATION. Grepping for these names hits things that are not servers, and
+    "removing" them breaks unrelated configuration. Before listing an entry, confirm it is a live
+    registration under an mcpServers / mcp / [mcp_servers.*] key. Specifically exclude: strings in a
+    permissions.deny or allow list (e.g. "mcp__serena" in ~/.claude/settings.json is context-diet
+    BLOCKING that server, not enabling it — deleting the line re-enables what the user chose to turn
+    off), commented-out config blocks, and entries already marked disabled/enabled:false. Also note
+    that MCP servers can be registered per-project rather than globally (~/.claude.json stores them
+    under projects.<path>.mcpServers); report the project path so I can tell global from local.
  2. Report the list: server name, which agent config file, and the exact lines. Also report any
     SessionStart hook or instruction-file paragraph that tells agents to prefer those tools
     (e.g. a "Code Discovery Protocol" block) — leaving that behind after removing the server makes
@@ -378,10 +435,12 @@ For each target, branch on the current state and log which branch ran:
   empty directory             rmdir, then link       log REPAIRED
   absent                      link                   log INSTALLED
 
-Never create duplicate repositories, nested copies, or alternate names such as skill-2 or
-skill.bak-<date>. If prior runs left such duplicates, ARCHIVE them to
-~/.agents/skills-bak/<timestamp>/ — do not delete, and do not leave them in place where they load
-as separate skills and bloat every agent's context.
+Never create duplicate repositories, nested copies, or alternate names such as skill-2,
+skill.bak-<date>, or skill.backup-<YYYYMMDD-HHMMSS>. If prior runs left such duplicates, ARCHIVE
+them to ~/.agents/skills-bak/<timestamp>/ — do not delete, and do not leave them in place where they
+load as separate skills and bloat every agent's context. Match the whole family of suffixes, not the
+two examples above: a dated backup directory still carries a valid SKILL.md, so the harness happily
+loads four near-identical copies of the same skill and none of them looks broken.
 
 Only create a per-agent skills-directory adapter when the installed harness requires one. Current Jcode
 and Pi versions load `~/.agents/skills` natively. For them, verify that behavior and preserve existing
@@ -398,12 +457,32 @@ For agents that require an adapter, link the documented global skills directory 
   Never replace an unrelated user-owned directory, and never create a link that resolves inside
   itself. Before linking X -> Y, confirm Y does not resolve under X.
 
+If an adapter path is ALREADY a real directory holding a full copy of the hub (a previous run that
+fell back to copying), converting it to a link is a repair, not a rewrite — but prove it is safe
+first. List the entries present in the copy but absent from the hub. If anything survives that is
+not an archive leftover, STOP and report it: those are skills that exist only there and linking
+would hide them. If the only extras are duplicates you are archiving anyway, move the whole copy
+into the timestamped backup directory (mv, never rm -rf), create the link, then confirm SKILL.md is
+readable through the new link for a few known skills before calling it repaired.
+
 === 9. VERIFICATION ===
 
 Produce a SEPARATE, READ-ONLY audit script (~/.agents/work/audit-skills.sh) that mutates nothing and
 classifies every entry: symlink-with-SKILL.md, realdir-with-SKILL.md, broken link, empty directory,
-missing SKILL.md. Run it and report the counts.
+missing SKILL.md. Run it and report the counts. Have it also list any two entries whose SKILL.md
+declares the same frontmatter 'name:'.
 EMPTY DIRECTORIES AND BROKEN LINKS MUST BOTH BE ZERO.
+
+Gate the exit status on those two counts only. A skills directory legitimately contains folders that
+are not skills — user notes, a tool-managed bundle — and they have no SKILL.md by design. If they
+count as damage, every run ends in DAMAGE FOUND, and after the second or third time nobody reads the
+result, which is how real breakage gets missed. Report missing-SKILL.md as a WARN list for a human
+to read, and never auto-delete those directories.
+
+If you write the audit in zsh or bash, declare counters with `local -i n=0`. A plain `local n=0`
+followed by `n+=1` performs STRING CONCATENATION, so the script reports counts like
+"1111111111111111111" or a garbage negative number while every other line looks correct — a
+verification script that lies is worse than none.
 
 Also verify:
   - The canonical ask-matt SKILL.md does not contain 'disable-model-invocation: true', and every
