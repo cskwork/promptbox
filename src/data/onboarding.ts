@@ -35,7 +35,7 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'superhacker' },
   { category: 'tools', slug: 'ego-lite' },
   // build your own
-  { category: 'skills', slug: 'writing-great-skills' },
+  { category: 'skills', slug: 'writing-for-agents' },
   // design + docs + media
   { category: 'skills', slug: 'hallmark' },
   { category: 'skills', slug: 'archify' },

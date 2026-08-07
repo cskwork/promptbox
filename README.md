@@ -14,7 +14,7 @@ AI 코딩 에이전트용 프롬프트·스킬·플러그인·MCP 설정·CLI �
 
 대표 포함 항목:
 
-- 스킬: `grill-with-docs`, `improve-codebase-architecture`, `triage`, `writing-great-skills`, `ssh-llm-connect`, `call-agent`, `handoff`, `supergoal`, `superpm`, `superdesign`, `superoffice`, `superhacker`
+- 스킬: `grill-with-docs`, `improve-codebase-architecture`, `triage`, `writing-for-agents`, `ssh-llm-connect`, `call-agent`, `handoff`, `supergoal`, `superpm`, `superdesign`, `superoffice`, `superhacker`
 - 도구/MCP: `rtk`, `playwright-cli`, `codebase-memory-mcp`
 - 선택 도구: `supertonic-tts`, `figma-cli`
 
