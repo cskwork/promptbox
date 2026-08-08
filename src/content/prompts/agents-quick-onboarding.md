@@ -385,7 +385,7 @@ Replace every detected agent's global instruction file with the following conten
 
 **1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Open `ask-matt` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
-**2. Delegate** — As an orchestrator use subagents for plan, review, execute, and verify tasks. As soon as the question is framed, fan out fresh-context subagents. Each gets a narrow brief: goal, candidate paths, constraints, expected output. Use Luna with max reasoning or Opus with medium reasoning for subagents, depending on the harness.
+**2. Delegate** — As an orchestrator use subagents for plan, review, execute, and verify tasks. As soon as the question is framed, fan out fresh-context subagents. Each gets a narrow brief: goal, candidate paths, constraints, expected output. Use gpt-5.6-luna with max reasoning or opus-5 with medium reasoning for subagents, depending on the harness.
 Skip delegation only when you already know the exact file and symbol, or the change is a single trivial edit.
 
 **3. Plan** — State: `task type · goal · files · contracts · verification · assumptions`.
