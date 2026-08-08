@@ -245,10 +245,10 @@ After stating the plan, run a \`grilling\` session (using \`domain-modeling\`, p
 
 **4. Adversarial review** — After every plan, challenge:
 
-* does the plan match the domain logic?
-* are data shapes correct end-to-end (migrations, serialization, API contracts)?
-* does it fix the relevant issues and match the user request?
-* is this clean code?
+- does the plan match the domain logic?
+- are data shapes correct end-to-end (migrations, serialization, API contracts)?
+- does it fix the relevant issues and match the user request?
+- is this clean code?
 
 Pass only after a concrete objection and revision, or the strongest counterargument and why the plan survives.
 
