@@ -385,7 +385,7 @@ Replace every detected agent's global instruction file with the following conten
 
 **1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Open `ask-matt` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
-**2. Delegate** — As an orchestrator use subagents for plan, review, execute, and verify tasks. As soon as the question is framed, fan out fresh-context subagents. Each gets a narrow brief: goal, candidate paths, constraints, expected output.
+**2. Delegate** — As an orchestrator use subagents for plan, review, execute, and verify tasks. As soon as the question is framed, fan out fresh-context subagents. Each gets a narrow brief: goal, candidate paths, constraints, expected output. Use Luna with max reasoning or Opus with medium reasoning for subagents, depending on the harness.
 Skip delegation only when you already know the exact file and symbol, or the change is a single trivial edit.
 
 **3. Plan** — State: `task type · goal · files · contracts · verification · assumptions`.
@@ -393,10 +393,11 @@ Skip delegation only when you already know the exact file and symbol, or the cha
 After stating the plan, run a `grilling` session (using `domain-modeling`, producing ADRs/glossary) to interview the user until their intent is clearly understood and confirmed. Do not start implementation before this confirmation. Skip the grilling for trivial or unambiguous changes — state assumptions and proceed.
 
 **4. Adversarial review** — After every plan, challenge:
-- does the plan match the domain logic?
-- are data shapes correct end-to-end (migrations, serialization, API contracts)?
-- does it fix the relevant issues and match the user request?
-- is this clean code?
+
+* does the plan match the domain logic?
+* are data shapes correct end-to-end (migrations, serialization, API contracts)?
+* does it fix the relevant issues and match the user request?
+* is this clean code?
 
 Pass only after a concrete objection and revision, or the strongest counterargument and why the plan survives.
 
