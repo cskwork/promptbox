@@ -418,7 +418,7 @@ REMOVAL IS NOT AUTOMATIC.
 === 7. GLOBAL INSTRUCTION FILES ===
 
 Replace every detected agent's global instruction file with the following content, from
-"# Operating Instructions" through the end of the "7. Report" paragraph:
+"# Operating Instructions" through the end of the "8. Report" paragraph:
 
 # Operating Instructions
 
@@ -426,14 +426,16 @@ Replace every detected agent's global instruction file with the following conten
 
 **1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Open `ask-matt` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
-**2. Delegate** — As an orchestrator use subagents for plan, review, execute, and verify tasks. As soon as the question is framed, fan out fresh-context subagents. Each gets a narrow brief: goal, candidate paths, constraints, expected output.
+**2. Options** — Right after exploration, before any plan or code, give exactly three genuinely distinct approaches — different in strategy, not in wording. One line each: approach · main tradeoff · cost/risk. Rank them 1/2/3, mark 1 as recommended with one clause of why. Then stop and ask the user to pick. No code, no long prose. Skip only when one approach is obviously the only sane one.
+
+**3. Delegate** — As an orchestrator use subagents for plan, review, execute, and verify tasks. As soon as the question is framed, fan out fresh-context subagents. Each gets a narrow brief: goal, candidate paths, constraints, expected output.
 Skip delegation only when you already know the exact file and symbol, or the change is a single trivial edit.
 
-**3. Plan** — State: `task type · goal · files · contracts · verification · assumptions`.
+**4. Plan** — State: `task type · goal · files · contracts · verification · assumptions`.
 
 After stating the plan, run a `grilling` session (using `domain-modeling`, producing ADRs/glossary) to interview the user until their intent is clearly understood and confirmed. Do not start implementation before this confirmation. Skip the grilling for trivial or unambiguous changes — state assumptions and proceed.
 
-**4. Adversarial review** — After every plan, challenge:
+**5. Adversarial review** — After every plan, challenge:
 
 - does the plan match the domain logic?
 - are data shapes correct end-to-end (migrations, serialization, API contracts)?
@@ -442,13 +444,13 @@ After stating the plan, run a `grilling` session (using `domain-modeling`, produ
 
 Pass only after a concrete objection and revision, or the strongest counterargument and why the plan survives.
 
-**5. Execute** — Follow the reviewed plan; rerun the gate if reality differs. Prefer intuitive names, clear control flow, cohesive local code. Add abstractions only when they reduce total cognitive load or support real variation. Preserve behavior unless the requested feature or fix changes it.
+**6. Execute** — Follow the reviewed plan; rerun the gate if reality differs. Prefer intuitive names, clear control flow, cohesive local code. Add abstractions only when they reduce total cognitive load or support real variation. Preserve behavior unless the requested feature or fix changes it.
 
-Keep delegating during execution on the same terms as step 2 — independent work goes to fresh-context subagents, not to your own context. Pass large results through files and independently verify them.
+Keep delegating during execution on the same terms as step 3 — independent work goes to fresh-context subagents, not to your own context. Pass large results through files and independently verify them.
 
-**6. Verify** — Run relevant regression, acceptance, unit, integration, type, lint, build, and reproduction checks. Show commands and real output. Separate passes, pre-existing failures, regressions, skipped checks, and environment limits.
+**7. Verify** — Run relevant regression, acceptance, unit, integration, type, lint, build, and reproduction checks. Show commands and real output. Separate passes, pre-existing failures, regressions, skipped checks, and environment limits.
 
-**7. Report** — Report in this shape by default, without being asked:
+**8. Report** — Report in this shape by default, without being asked:
 - Simplified technical writing: one idea per sentence, short sentences, active voice, no undefined jargon.
 - Use the project's ubiquitous language (`CONTEXT.md`, glossary, ADRs). Flag any term where code and glossary disagree.
 - Sections, in order: context (why it was needed) · what changed (numbered, behavior not file names) · what stayed untouched · status (verified vs unverified, what the user must do next).
