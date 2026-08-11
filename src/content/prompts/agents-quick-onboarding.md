@@ -24,7 +24,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | 이름 | 종류 | 소스 | 무엇을 더해주나 |
 |---|---|---|---|
 | AGENTS.md | 공통 규칙 | 프롬프트 내장 운영 지침 | 모든 CLI가 공유하는 시스템 프롬프트 |
-| **Matt Pocock Skills** (정식 29종 + 베타 6종) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec`, `to-tickets`, `wayfinder`, `wizard` 등 |
+| **Matt Pocock Skills** (저장소 전체 35종 — 정식 29 + in-progress 6, 골라 받지 않고 전부) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec`, `to-tickets`, `wayfinder`, `wizard` 등 |
 | context-diet | 스킬 | cskwork/context-diet-skill | 시스템 프롬프트 비대화 측정·감축 |
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
 | call-agent | 스킬 | cskwork/call-agent | codex·agy·kiro·claude·notebooklm로 위임 라우팅 |
@@ -33,6 +33,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
 | clean-code | 스킬 | cskwork/clean-code | 동작을 바꾸지 않고 레거시 코드 리팩터링 — 특성화 테스트로 현재 동작을 먼저 고정하고 작은 배치로 편집 |
 | debug-code | 스킬 | cskwork/promptbox (skills/debug-code) | 증거 기반 디버깅 — 가장 먼저 깨진 invariant(불변 조건)를 찾고 최소 안전 패치. 프로덕션 전용·간헐적·성능·레거시 버그에 강함 |
+| skill-curator | 스킬 | cskwork/skill-curator | 설치된 스킬 라이브러리를 점검·중복 제거·아카이브·복원. 이 프롬프트가 깔아놓은 스킬 더미를 이후에 관리하는 쪽 — 지우지 않고 아카이브하며, `--apply` 없이는 항상 드라이런(dry run, 실제로 안 바꾸고 결과만 보여주기). python3 3.9+ 필요 |
 | **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화). **macOS 전용**이며, Windows·Linux에서는 필요 시 Playwright 사용 |
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
 | **herdr** | 스킬 + CLI | ogulcancelik/herdr | 코딩 에이전트용 터미널 멀티플렉서 |
@@ -70,6 +71,19 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   없는데 스킬만 증발한다. 2026-08-07 실행에서 `context-diet`·`clean-code`·`herdr` 세 개가 한 번의
   갱신으로 이렇게 죽었다. **pull 뒤에는 반드시 링크 너머의 `SKILL.md`를 다시 확인하고**, 없으면 소스
   안에서 찾아 재타겟해야 한다. 위의 "빈 폴더" 함정과 증상이 같지만 원인은 *성공한* 업데이트다.
+- **상류에 새로 생긴 스킬은 티가 안 나게 빠진다**: 깨진 링크도, 빈 폴더도 아니라서 감사 스크립트가
+  전부 통과시킨다. `git pull`은 소스만 최신으로 만들 뿐, 링크를 새로 만들어주지는 않기 때문이다.
+  Matt Pocock 저장소는 계속 스킬이 추가되고(실제로 `wait-what`·`writing-for-agents`가 이렇게 누락돼
+  있었다), 설치 목록을 프롬프트에 박아두면 그 시점에서 굳는다. pull 뒤에는 반드시 소스의 `SKILL.md`
+  전체를 다시 열거해 링크 집합과 차집합(diff)을 내고, 새로 생긴 것만 추가해야 한다.
+- **설치 스크립트가 만든 백업이 스킬로 로드된다 (skill-curator)**: `install.sh`는 파괴적이지 않다 —
+  기존 폴더를 지우는 대신 `skill-curator.bak.<타임스탬프>`로 옮긴다. 문제는 그 폴더가 **스킬 폴더 안에**
+  남고 `SKILL.md`도 멀쩡해서, 하네스가 거의 똑같은 스킬을 하나 더 읽는다는 점이다. 게다가 심링크가 아니라
+  복사본을 깔기 때문에 `~/.agents`가 더 이상 단일 출처가 아니게 된다. 그래서 이 프롬프트는 install.sh를
+  쓰지 않고 클론 후 직접 심링크한다.
+- **일부러 자동 호출을 꺼둔 스킬이 있다**: `skill-curator`의 `disable-model-invocation: true`는 고장이
+  아니라 설계다. 스킬 라이브러리를 실제로 바꾸는 도구라 사용자가 직접 부를 때만 동작해야 한다. `ask-matt`에
+  적용하는 플래그 정규화를 여기까지 넓히면 안 된다.
 - **rtk가 공용 지시문 파일을 건드린다**: `rtk init -g`는 `~/.claude/CLAUDE.md`에 `@RTK.md` 한 줄을
   덧붙인다. 그런데 7단계에서 그 경로는 **정본 `~/.agents/AGENTS.md`로 가는 심링크**라, Claude 전용
   한 줄이 Codex·Jcode·Pi·Gemini·OpenCode·Kiro가 함께 읽는 파일에 박힌다. 그 에이전트들에는 `RTK.md`가
@@ -208,6 +222,17 @@ Clone or update once into ~/.agents/sources/<owner>/<repo>. Prefer each reposito
 Skills installer ONLY IF it is non-interactive and non-destructive; otherwise clone and link yourself.
 
   Matt Pocock Skills, incl. ask-matt  https://github.com/mattpocock/skills
+                                      INSTALL EVERY SKILL IN THIS REPO — do not hand-pick. After the
+                                      clone/pull, enumerate every directory containing a SKILL.md under
+                                      skills/ (today: skills/engineering, skills/misc, skills/productivity
+                                      and skills/in-progress — 35 skills) and link all of them, including
+                                      the in-progress ones and any category added later. Do not hardcode
+                                      a skill list: upstream adds skills continuously, and a link set
+                                      created by an earlier run goes stale without any broken link or
+                                      empty directory to reveal it (wait-what and writing-for-agents
+                                      landed this way and were simply absent). On every rerun, diff the
+                                      enumerated upstream set against the existing links and install the
+                                      difference — an install that is merely intact is not up to date.
   Context Diet                        https://github.com/cskwork/context-diet-skill
   Autoresearch                        https://github.com/uditgoenka/autoresearch
   Call Agent                          https://github.com/cskwork/call-agent
@@ -224,6 +249,22 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       FILENAMES from the links inside SKILL.md, not from this prompt —
                                       they are currently production-probes.md and production-bug-patterns.md,
                                       and inventing names here silently breaks every link in the skill.
+  Skill Curator                       https://github.com/cskwork/skill-curator
+                                      Inventories, validates, deduplicates, archives, and restores the
+                                      skill library this prompt builds — the maintenance counterpart to
+                                      the step 9 audit. Clone the repo and link skills/skill-curator like
+                                      any other skill. Do NOT use its install.sh for a hub install: it
+                                      COPIES the package instead of linking, so the hub stops being the
+                                      single source, and when a copy already exists it renames it to
+                                      skill-curator.bak.<timestamp> INSIDE the skills root — a dated
+                                      directory carrying a valid SKILL.md, which every harness then loads
+                                      as a second, near-identical skill. That is exactly the duplicate
+                                      family step 8 archives.
+                                      Its frontmatter sets 'disable-model-invocation: true' BY DESIGN: it
+                                      mutates a skill library and must stay user-invoked. Leave that flag
+                                      alone — the normalization above applies to ask-matt only.
+                                      Requires python3 3.9+. Verify with the engine, not the directory:
+                                        python3 ~/.agents/skills/skill-curator/scripts/curator.py --help
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
   ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
@@ -488,6 +529,10 @@ verification script that lies is worse than none.
 Also verify:
   - The canonical ask-matt SKILL.md does not contain 'disable-model-invocation: true', and every
     installed ask-matt link resolves to that same file.
+  - Every directory holding a SKILL.md under the Matt Pocock source (all categories, in-progress
+    included) has a corresponding link in ~/.agents/skills. Report the upstream count, the linked
+    count, and any name present upstream but missing locally. These two numbers must be equal; a
+    smaller local count is a stale install, not a healthy one.
   - Every CLI responds to --version / --help.
   - Every MCP server passes the handshake probe from step 6.3.
   - Instruction-file checksums are identical across all documented agent paths, including Jcode's
