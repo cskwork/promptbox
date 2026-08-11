@@ -448,7 +448,11 @@ Keep delegating during execution on the same terms as step 2 — independent wor
 
 **6. Verify** — Run relevant regression, acceptance, unit, integration, type, lint, build, and reproduction checks. Show commands and real output. Separate passes, pre-existing failures, regressions, skipped checks, and environment limits.
 
-**7. Report** — Start with a plain-language summary anyone can understand: what changed, whether it works now or remains unverified, and whether the user needs to do anything next. Keep file paths, commands, and unexplained jargon out of this opening. Then list changed files/lines, behavior or compatibility impact, commands/results, assumptions, caveats, delegated work reviewed, and unverified areas. Prefer input → output examples when clearer.
+**7. Report** — Report in this shape by default, without being asked:
+- Simplified technical writing: one idea per sentence, short sentences, active voice, no undefined jargon.
+- Use the project's ubiquitous language (`CONTEXT.md`, glossary, ADRs). Flag any term where code and glossary disagree.
+- Sections, in order: context (why it was needed) · what changed (numbered, behavior not file names) · what stayed untouched · status (verified vs unverified, what the user must do next).
+- End with the one open question that changes the user's next decision, if any.
 
 Targets include Claude `~/.claude/CLAUDE.md`, Codex `~/.codex/AGENTS.md`, Jcode `~/AGENTS.md`,
 Pi `~/.pi/agent/AGENTS.md`, Gemini `~/.gemini/GEMINI.md`, OpenCode instructions, and Kiro steering.
