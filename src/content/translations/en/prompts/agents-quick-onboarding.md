@@ -16,6 +16,7 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 | Name | Type | Source | What it adds |
 |---|---|---|---|
 | AGENTS.md | Shared rules | Operating instructions embedded in the prompt | One system prompt shared by every CLI |
+| rules/rules.md | Domain rules | Written by you on this machine | Domain and safety rules that differ per environment. Keeps the instruction file identical everywhere while the rules vary. Never overwritten |
 | **Matt Pocock Skills** (37) | Skills | mattpocock/skills | `ask-matt` for design, debugging, and trade-offs, plus `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec`, and more |
 | context-diet | Skill | cskwork/context-diet-skill | Measures and reduces system-prompt bloat |
 | autoresearch | Skill | uditgoenka/autoresearch | Autonomous research loops |

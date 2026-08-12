@@ -24,6 +24,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | 이름 | 종류 | 소스 | 무엇을 더해주나 |
 |---|---|---|---|
 | AGENTS.md | 공통 규칙 | 프롬프트 내장 운영 지침 | 모든 CLI가 공유하는 시스템 프롬프트 |
+| rules/rules.md | 도메인 규칙 | 이 머신에서 직접 작성 | 환경마다 다른 도메인·안전 규칙. 지시문은 모든 머신에서 동일하게 두고 이 파일만 갈린다. 덮어쓰지 않는다 |
 | **Matt Pocock Skills** (저장소 전체 35종 — 정식 29 + in-progress 6, 골라 받지 않고 전부) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec`, `to-tickets`, `wayfinder`, `wizard` 등 |
 | context-diet | 스킬 | cskwork/context-diet-skill | 시스템 프롬프트 비대화 측정·감축 |
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
@@ -424,6 +425,8 @@ Replace every detected agent's global instruction file with the following conten
 
 **Stance** — Domain data first: get the domain model and real data shapes right before code or tests — tests verify the model, they never define it. Make the smallest verified, maintainable change. Make maintainable code; no unrelated refactoring. Prefer reversible choices. Ask only about consequential data loss, public API, security, or migration decisions; otherwise state assumptions and proceed. Never claim what you did not verify. Always merge worktree after done ask user if unsure target branch.
 
+**Domain rules** — Always read `~/.agents/rules/rules.md` (Windows: `%USERPROFILE%\.agents\rules\rules.md`).
+
 **1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Open `ask-matt` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
 **2. Options** — Right after exploration, before any plan or code, give exactly three genuinely distinct approaches — different in strategy, not in wording. One line each: approach · main tradeoff · cost/risk. Rank them 1/2/3, mark 1 as recommended with one clause of why. Then stop and ask the user to pick. No code, no long prose. Skip only when one approach is obviously the only sane one.
@@ -469,6 +472,18 @@ extra file in Kiro's steering directory). One of them silently re-injects the ol
 the new ones. Back up, then remove.
 
 If an agent has no documented global instruction file, skip it and say so. Do not invent a config path.
+
+=== 7b. DOMAIN RULES FILE ===
+
+Create ~/.agents/rules/rules.md if absent. NEVER overwrite it — it holds rules this prompt does not
+know about. On a rerun, leave existing content alone and only append what is missing. Do not delete
+a rule to "clean up": a rule you cannot source is still a rule the user relies on.
+
+Keep it to rules only — one line each, no rationale, no workflow prose. The workflow lives in the
+instruction file; this file is the environment's domain and safety rules, grouped by area.
+
+This is the seam that keeps the instruction file byte-identical across machines while the rules
+differ per environment. Do not inline these rules into the instruction file.
 
 === 8. LINKING ===
 
@@ -543,6 +558,8 @@ Also verify:
   - Every MCP server passes the handshake probe from step 6.3.
   - Instruction-file checksums are identical across all documented agent paths, including Jcode's
     `~/AGENTS.md` and Pi's `~/.pi/agent/AGENTS.md`.
+  - The instruction file carries the `~/.agents/rules/rules.md` line, that file is readable and
+    non-empty, and every rule it held before this run is still there.
   - No autonomous loop was started, no Context Diet restriction was activated, no paid service was
     authenticated, and no credits were spent.
   - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
