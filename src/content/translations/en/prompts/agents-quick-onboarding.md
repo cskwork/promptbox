@@ -25,6 +25,7 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 | hallmark | Skill | Nutlope/hallmark | Designs, audits, and redesigns interfaces without the generic AI look |
 | gpt-image-2 | Skill | agentspace-so/agent-skills | Generates images through a ChatGPT subscription without separate image API billing |
 | clean-code | Skill | cskwork/clean-code | Refactors legacy code without changing behavior by locking in characterization tests first and editing in small batches |
+| verify | Skill | cskwork/verify-skill | Five gates that refuse to call a green build verified: build, static checks, clean-code review, scenario API QA, report. Each gate leaves a re-runnable receipt, and a gate that could not run is BLOCKED rather than PASS. Ships a token module and payload variants (happy, boundary, negative). Needs curl and jq |
 | debug-code | Skill | cskwork/promptbox (skills/debug-code) | Evidence-first debugging that finds the earliest broken invariant and applies the smallest safe patch, including production-only, intermittent, performance, and legacy bugs |
 | **ego-browser** | Skill + browser app | citrolabs/ego-lite | An agent browser that can reuse your login state for QA and web automation. macOS only; use Playwright when needed on Windows or Linux |
 | **officecli** (11) | Skills + CLI | iOfficeAI/OfficeCLI | Creates and analyzes DOCX, XLSX, and PPTX files, with layers for financial models, pitch decks, and academic papers |
