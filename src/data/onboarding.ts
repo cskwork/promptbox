@@ -26,6 +26,7 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'tdd' },
   { category: 'skills', slug: 'prototype' },
   { category: 'skills', slug: 'diagnose' },
+  { category: 'skills', slug: 'verify' },
   { category: 'mcps', slug: 'codebase-memory-mcp' },
   // super* end-to-end suite
   { category: 'skills', slug: 'supergoal' },
@@ -147,6 +148,12 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Hallmark                            https://github.com/Nutlope/hallmark
   GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
   Clean Code                          https://github.com/cskwork/clean-code
+  Verify                              https://github.com/cskwork/verify-skill
+                                      Clone and link as ~/.agents/skills/verify. SKILL.md sits at the
+                                      repo ROOT, not under a skills/ subdirectory, so link the repo
+                                      directory itself. After linking, run scripts/selftest.sh — it
+                                      stands up a throwaway server and checks the harness in about 20
+                                      seconds; 22/22 means the install works. Needs curl and jq.
   Debug Code                          https://github.com/cskwork/promptbox
                                       Clone the promptbox repo, then link src/content/skills/debug-code
                                       as a skill directory. The skill ships its SKILL.md and two reference

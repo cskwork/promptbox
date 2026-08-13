@@ -33,6 +33,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | hallmark | 스킬 | Nutlope/hallmark | AI 티 안 나는 UI 디자인·감사·리디자인 |
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
 | clean-code | 스킬 | cskwork/clean-code | 동작을 바꾸지 않고 레거시 코드 리팩터링 — 특성화 테스트로 현재 동작을 먼저 고정하고 작은 배치로 편집 |
+| verify | 스킬 | cskwork/verify-skill | 초록 빌드를 검증으로 인정하지 않는 5게이트 검증 — 빌드·정적검사·클린코드·시나리오 API QA·보고. 게이트마다 재실행 가능한 증거(receipt)를 남기고, 실행하지 못한 게이트는 PASS가 아니라 BLOCKED. 토큰 발급 모듈과 payload 변형(happy·boundary·negative)이 딸려 있다. curl·jq 필요 |
 | debug-code | 스킬 | cskwork/promptbox (skills/debug-code) | 증거 기반 디버깅 — 가장 먼저 깨진 invariant(불변 조건)를 찾고 최소 안전 패치. 프로덕션 전용·간헐적·성능·레거시 버그에 강함 |
 | skill-curator | 스킬 | cskwork/skill-curator | 설치된 스킬 라이브러리를 점검·중복 제거·아카이브·복원. 이 프롬프트가 깔아놓은 스킬 더미를 이후에 관리하는 쪽 — 지우지 않고 아카이브하며, `--apply` 없이는 항상 드라이런(dry run, 실제로 안 바꾸고 결과만 보여주기). python3 3.9+ 필요 |
 | **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화). **macOS 전용**이며, Windows·Linux에서는 필요 시 Playwright 사용 |
@@ -241,6 +242,12 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Hallmark                            https://github.com/Nutlope/hallmark
   GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
   Clean Code                          https://github.com/cskwork/clean-code
+  Verify                              https://github.com/cskwork/verify-skill
+                                      Clone and link as ~/.agents/skills/verify. SKILL.md sits at the
+                                      repo ROOT, not under a skills/ subdirectory, so link the repo
+                                      directory itself. After linking, run scripts/selftest.sh — it
+                                      stands up a throwaway server and checks the harness in about 20
+                                      seconds; 22/22 means the install works. Needs curl and jq.
   Debug Code                          https://github.com/cskwork/promptbox
                                       Clone the promptbox repo, then link src/content/skills/debug-code
                                       as a skill directory. The skill ships its SKILL.md and two reference
