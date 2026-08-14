@@ -1,8 +1,8 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
 title_en: One-shot coding agent setup
-summary: "스킬 56종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr·rtk)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다. 브라우저는 설치 대상이 아니다 — 에이전트 자동화는 Playwright로 하고, 일상 브라우저로는 Aside를 사람이 직접 설치한다."
-summary_en: "One paste-and-go prompt that installs shared skills, instructions, and CLI tools into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work. It installs no browser: Playwright covers agent-driven automation, and Aside is the browser you install yourself."
+summary: "스킬 57종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr·rtk)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다. macOS에서는 aside-browser 스킬과 Aside CLI까지 기본 설치하지만, 브라우저 앱 설치와 로그인은 사람 몫으로 남긴다."
+summary_en: "One paste-and-go prompt that installs shared skills, instructions, and CLI tools into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work. On macOS it also installs the aside-browser skill and the Aside CLI by default — but leaves installing and signing into the browser app to you."
 tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi, rtk, token-savings]
 author: cskwork
 order: 5
@@ -34,6 +34,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
 | clean-code | 스킬 | cskwork/clean-code | 동작을 바꾸지 않고 레거시 코드 리팩터링 — 특성화 테스트로 현재 동작을 먼저 고정하고 작은 배치로 편집 |
 | verify | 스킬 | cskwork/verify-skill | 초록 빌드를 검증으로 인정하지 않는 5게이트 검증 — 빌드·정적검사·클린코드·시나리오 API QA·보고. 게이트마다 재실행 가능한 증거(receipt)를 남기고, 실행하지 못한 게이트는 PASS가 아니라 BLOCKED. 토큰 발급 모듈과 payload 변형(happy·boundary·negative)이 딸려 있다. curl·jq 필요 |
+| **aside-browser** | 스킬 + CLI | cskwork/promptbox (skills/aside-browser) | 내가 이미 로그인해 둔 사이트의 웹 작업을 Aside 브라우저에 넘긴다(MCP 또는 `aside "..."`). 공개 API가 없는 사내 대시보드·관리자 페이지가 대상. **macOS 전용이며 macOS에서는 기본 설치**, 그 외 OS는 건너뛰고 Playwright를 쓴다. 스킬과 CLI는 자동 설치되지만 앱 설치·로그인은 사람 몫이라 그전까지는 동작하지 않는다 |
 | debug-code | 스킬 | cskwork/promptbox (skills/debug-code) | 증거 기반 디버깅 — 가장 먼저 깨진 invariant(불변 조건)를 찾고 최소 안전 패치. 프로덕션 전용·간헐적·성능·레거시 버그에 강함 |
 | skill-curator | 스킬 | cskwork/skill-curator | 설치된 스킬 라이브러리를 점검·중복 제거·아카이브·복원. 이 프롬프트가 깔아놓은 스킬 더미를 이후에 관리하는 쪽 — 지우지 않고 아카이브하며, `--apply` 없이는 항상 드라이런(dry run, 실제로 안 바꾸고 결과만 보여주기). python3 3.9+ 필요 |
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
@@ -112,11 +113,14 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   나는데 `/opt/homebrew/bin/node`는 멀쩡하다. 인터프리터는 절대경로로 고정한다.
 - **자기 안에서 도는 도구는 자기를 업데이트 못 한다**: herdr 세션 안에서 `herdr update`를 하면 다운로드만
   되고 교체가 막힌다. 우회하지 말고 사용자에게 명령을 넘긴다.
-- **브라우저는 이 프롬프트가 깔지 않는다**: DMG 앱은 첫 실행 GUI 온보딩이 남고, Chrome 데이터 이관
-  같은 프라이버시 질문에 에이전트가 대신 답해서는 안 된다. 그래서 브라우저 설치는 아예 범위 밖으로
-  뺐다. 에이전트가 직접 모는 웹 자동화는 **Playwright**로 하고(모든 플랫폼), 일상 브라우저로
-  [Aside](https://aside.com/)를 쓸지는 사람이 직접 받아 정한다 — **현재 macOS 전용**이고 자체
-  에이전트를 내장한 독립 앱이라 코딩 CLI가 조종할 수 있는 대상이 아니다.
+- **브라우저 앱은 에이전트가 끝까지 못 깐다 (aside-browser)**: 스킬과 `aside` CLI는 macOS에서 기본
+  설치되지만, [Aside](https://aside.com/) 앱 자체는 DMG이고 첫 실행이 GUI 온보딩이다. Chrome 데이터
+  이관·자격증명 금고 잠금 해제 같은 프라이버시 질문에 에이전트가 대신 답해서는 안 되므로 앱 설치는
+  범위 밖으로 뺐다. 그래서 설치 직후 상태는 "스킬 있음 · CLI 있음 · 계정 없음"이고, 이건 실패가
+  아니라 `PENDING-USER`다. 사람이 앱을 깔고 로그인해야 비로소 동작한다. **현재 macOS 전용**이라
+  Windows·Linux에서는 `SKIPPED-UNSUPPORTED`로 기록하고 **Playwright**를 쓴다. CI·headless(화면 없이
+  실행)·결정적 회귀 테스트는 macOS에서도 Playwright 쪽이다 — Aside 실행은 재현 가능한 게이트가 아니라
+  일회성 결과 증거다.
 - **이전 설정의 형제 파일이 남는다**: 지시문 정본을 바꿔도 `~/.kiro/steering/`에 남은 옛 파일이 같이
   로드된다. 디렉터리를 훑어 잔재를 정리해야 한다.
 - **심링크 권한 + 파일/폴더 구분 (Windows 핵심 함정)**: 심볼릭 링크는 개발자 모드나 관리자 권한이 필요하다.
@@ -274,8 +278,21 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                         python3 ~/.agents/skills/skill-curator/scripts/curator.py --help
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
-  (no browser is installed by this prompt — see step 5b)
-    Playwright is the browser-automation route on every platform, but it is NOT installed here.
+  aside-browser (hand browser work to Aside)  https://github.com/cskwork/promptbox
+    macOS ONLY, and INSTALLED BY DEFAULT there. On Windows and Linux, skip it and report
+    SKIPPED-UNSUPPORTED. Same materialisation route as Debug Code: clone the promptbox repo and
+    write the SKILL.md embedded in src/content/skills/aside-browser.md out to
+    ~/.agents/skills/aside-browser/SKILL.md (name: aside-browser). It has no reference files.
+    Install the CLI it drives, which is a documented one-liner and needs no GUI:
+      curl -fsSL https://releases.aside.com/install.sh | bash
+    Then verify the CLI resolves and report the account state WITHOUT running any browser task:
+      command -v aside
+      aside account list      ('*' marks the active account)
+    A signed-out or absent account is NOT a failure of this run — the Aside app is a DMG the user
+    installs and signs into themselves (step 5b). Report the skill as INSTALLED and the account as
+    PENDING-USER. Do not install the app, do not open its onboarding, do not run 'aside "..."',
+    do not start 'aside mcp', and do not visit any site or log into anything.
+    Playwright remains the browser-automation route on every platform and is NOT installed here.
     If Playwright or SuperQA already exists, inspect and reuse or update it rather than marking it
     SUPERSEDED or suggesting uninstall. Report it by its own name.
 
@@ -342,19 +359,22 @@ PATH and the wrong one wins.
 If a tool cannot update because the current session is running inside it (Herdr does this), do not
 work around it. Report the exact command for me to run after I exit.
 
-=== 5b. BROWSERS ARE OUT OF SCOPE ===
+=== 5b. THE BROWSER APP ITSELF IS MINE TO INSTALL ===
 
-Install no browser. A desktop browser is a DMG whose first run is a GUI step with privacy questions
-(import my Chrome data? unlock a credential vault?) that only I may answer, so it does not belong in
-an unattended setup.
+The aside-browser SKILL and the 'aside' CLI are installed for me in step 5 on macOS. The Aside
+browser APP is not, and you must not install it. It is a DMG whose first run is a GUI step asking
+privacy-sensitive questions — import my Chrome data? unlock a credential vault? — that only I may
+answer.
 
- 1. Do not download, install, or launch any browser app. Do not open any site or log into anything.
- 2. Browser automation, if a skill needs it, goes through Playwright on every platform. Do not
-    install it here either — report whether it is present and let me decide.
- 3. If I ask for a browser recommendation, name Aside (https://aside.com/) and say plainly that it
-    is macOS-only right now, that it is a standalone app with its own built-in agent rather than
-    something this CLI can drive, and that I install it myself.
- 4. Report this whole section as OUT-OF-SCOPE, not as SKIPPED or FAILED.
+ 1. Do not download, install, or launch the app. Do not click through any onboarding.
+ 2. Do not run a browser task while setting up: no 'aside "..."', no 'aside repl', no 'aside mcp'
+    server left running. Do not open any site or log into anything. 'command -v aside' and
+    'aside account list' are the only calls allowed, and both are read-only.
+ 3. Tell me, in one line, what is left for me: download Aside from https://aside.com/download,
+    sign in, and then 'aside account list' will show an active account. Note that it is macOS-only
+    today. Until I do that, the skill and CLI are installed but inert — say so plainly rather than
+    reporting the browser as working.
+ 4. Report this section as PENDING-USER on macOS, SKIPPED-UNSUPPORTED elsewhere. Never as FAILED.
 
 === 6. MCP INTEGRATION ===
 
@@ -552,9 +572,13 @@ Also verify:
   - No autonomous loop was started, no Context Diet restriction was activated, no paid service was
     authenticated, and no credits were spent.
   - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
-  - No browser app was downloaded, installed, or launched. No site was visited, no login was
-    performed, and no Chrome data was migrated on my behalf. If Playwright was already present, its
-    package and browser versions are reported; it was not installed by this run.
+  - On macOS, ~/.agents/skills/aside-browser/SKILL.md exists and 'command -v aside' resolves, with
+    the account reported as active or PENDING-USER from a read-only 'aside account list'. On other
+    platforms both are reported as SKIPPED-UNSUPPORTED.
+  - No browser app was downloaded, installed, or launched, no browser task was run, no 'aside mcp'
+    server was left running. No site was visited, no login was performed, and no Chrome data was
+    migrated on my behalf. If Playwright was already present, its package and browser versions are
+    reported; it was not installed by this run.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 
