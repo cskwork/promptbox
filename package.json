@@ -9,7 +9,9 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check:mirrors": "node scripts/check-mirrors.mjs"
+    "check:mirrors": "node scripts/check-mirrors.mjs",
+    "check:prompt": "node scripts/check-install-prompt.mjs",
+    "check": "npm run check:mirrors && npm run check:prompt"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.3",
