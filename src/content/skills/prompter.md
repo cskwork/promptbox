@@ -4,6 +4,7 @@ summary: "에이전트가 질문하면 내 과거 결정 패턴으로 답장 초
 summary_en: "Drafts your most likely reply to an agent's question from rules learned on your own machine — and never sends it without an explicit y/yes."
 tags: [skill, prompt, personalization, privacy, local-first, claude-code, codex, confirmation-gate]
 source: https://github.com/cskwork/prompter
+mirror_of: https://raw.githubusercontent.com/cskwork/prompter/main/SKILL.md
 author: cskwork
 license: MIT
 order: 60

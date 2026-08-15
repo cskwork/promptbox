@@ -8,7 +8,8 @@
     "start": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check:mirrors": "node scripts/check-mirrors.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^4.0.3",
