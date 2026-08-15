@@ -1,8 +1,8 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
 title_en: One-shot coding agent setup
-summary: "스킬 57종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr·rtk)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다. macOS에서는 aside-browser 스킬과 Aside CLI까지 기본 설치하지만, 브라우저 앱 설치와 로그인은 사람 몫으로 남긴다."
-summary_en: "One paste-and-go prompt that installs shared skills, instructions, and CLI tools into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work. On macOS it also installs the aside-browser skill and the Aside CLI by default — but leaves installing and signing into the browser app to you."
+summary: "스킬 58종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr·rtk)와 에이전트용 기본 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다. macOS에서는 aside-browser 스킬과 Aside CLI도 함께 깔지만 기본 브라우저는 ego lite다 — Aside 앱 설치와 로그인은 사람 몫으로 남긴다."
+summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser — the kit's default on macOS — into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work. On macOS it also installs the aside-browser skill and the Aside CLI; installing and signing into the Aside app stays yours."
 tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi, rtk, token-savings]
 author: cskwork
 order: 5
@@ -34,6 +34,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
 | clean-code | 스킬 | cskwork/clean-code | 동작을 바꾸지 않고 레거시 코드 리팩터링 — 특성화 테스트로 현재 동작을 먼저 고정하고 작은 배치로 편집 |
 | verify | 스킬 | cskwork/verify-skill | 초록 빌드를 검증으로 인정하지 않는 5게이트 검증 — 빌드·정적검사·클린코드·시나리오 API QA·보고. 게이트마다 재실행 가능한 증거(receipt)를 남기고, 실행하지 못한 게이트는 PASS가 아니라 BLOCKED. 토큰 발급 모듈과 payload 변형(happy·boundary·negative)이 딸려 있다. curl·jq 필요 |
+| **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화)로 이 키트의 **macOS 기본 브라우저**. **macOS 전용**이며, Windows·Linux에서는 필요 시 Playwright 사용 |
 | **aside-browser** | 스킬 + CLI | cskwork/promptbox (skills/aside-browser) | 브라우저 자동화(QA·요소 조작·스냅샷·스크린샷)와, 내가 이미 로그인해 둔 계정·앱(Slack·X·LinkedIn)·방문 기록을 가로지르는 작업을 Aside에 넘긴다. 통째로 위임은 `aside exec`, 증거·결정적 조작은 Playwright 호환 `aside repl`. **macOS 전용이며 macOS에서는 기본 설치**, 그 외 OS는 건너뛰고 Playwright를 쓴다. 스킬과 CLI는 자동 설치되지만 앱 설치·로그인은 사람 몫이라 그전까지는 동작하지 않는다 |
 | debug-code | 스킬 | cskwork/promptbox (skills/debug-code) | 증거 기반 디버깅 — 가장 먼저 깨진 invariant(불변 조건)를 찾고 최소 안전 패치. 프로덕션 전용·간헐적·성능·레거시 버그에 강함 |
 | skill-curator | 스킬 | cskwork/skill-curator | 설치된 스킬 라이브러리를 점검·중복 제거·아카이브·복원. 이 프롬프트가 깔아놓은 스킬 더미를 이후에 관리하는 쪽 — 지우지 않고 아카이브하며, `--apply` 없이는 항상 드라이런(dry run, 실제로 안 바꾸고 결과만 보여주기). python3 3.9+ 필요 |
@@ -113,6 +114,11 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   나는데 `/opt/homebrew/bin/node`는 멀쩡하다. 인터프리터는 절대경로로 고정한다.
 - **자기 안에서 도는 도구는 자기를 업데이트 못 한다**: herdr 세션 안에서 `herdr update`를 하면 다운로드만
   되고 교체가 막힌다. 우회하지 말고 사용자에게 명령을 넘긴다.
+- **브라우저는 에이전트가 끝까지 못 깐다 (ego lite)**: DMG 설치까지는 스크립트로 되지만, `ego-browser`
+  명령을 `~/.local/bin`에 등록하는 건 앱 **첫 실행 GUI 온보딩**이다. 사람이 끝내기 전에는 "설치됨"이
+  아니고, Chrome 데이터 이관 여부는 에이전트가 대신 답하면 안 된다. 그래서 프롬프트는 5b에서 멈추고
+  기다린다. macOS 전용이라 Windows·Linux에서는 ego lite만 `SKIPPED-UNSUPPORTED`로 기록한다.
+  브라우저 자동화가 필요하면 해당 플랫폼에서 Playwright를 설치해도 된다.
 - **브라우저 앱은 에이전트가 끝까지 못 깐다 (aside-browser)**: 스킬과 `aside` CLI는 macOS에서 기본
   설치되지만, [Aside](https://aside.com/) 앱 자체는 DMG이고 첫 실행이 GUI 온보딩이다. Chrome 데이터
   이관·자격증명 금고 잠금 해제 같은 프라이버시 질문에 에이전트가 대신 답해서는 안 되므로 앱 설치는
@@ -278,10 +284,21 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                         python3 ~/.agents/skills/skill-curator/scripts/curator.py --help
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
+  ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
+    macOS ONLY. This is the browser layer for this kit — see step 5b for the app install.
+    On non-macOS, skip both the app and the ego-browser skill and report SKIPPED-UNSUPPORTED.
+    Skill-only route (macOS only): npx skills add citrolabs/ego-lite
+    Installing the ego lite app also registers the skill into every agent skills directory, so run
+    step 5b FIRST and then reconcile: if <skills-dir>/ego-browser already exists and points at
+    ~/.local/share/ego/ego-skills, treat it as INSTALLED and do not clone a second copy.
+    On non-macOS, Playwright MAY be installed as the browser-automation fallback when needed. It is
+    separate from ego lite and must be reported by its own name. If Playwright or SuperQA already
+    exists, inspect and reuse or update it rather than marking it SUPERSEDED or suggesting uninstall.
   aside-browser (browser automation + logged-in accounts)  https://github.com/cskwork/promptbox
-    macOS ONLY, and INSTALLED BY DEFAULT there. On Windows and Linux, skip it and report
-    SKIPPED-UNSUPPORTED. Same materialisation route as Debug Code: clone the promptbox repo and
-    write the SKILL.md embedded in src/content/skills/aside-browser.md out to
+    macOS ONLY, also installed by default there — an additional route, not the browser layer; ego
+    lite stays the default browser. On Windows and Linux, skip it and report SKIPPED-UNSUPPORTED.
+    Same materialisation route as Debug Code: clone the promptbox repo and write the SKILL.md
+    embedded in src/content/skills/aside-browser.md out to
     ~/.agents/skills/aside-browser/SKILL.md (name: aside-browser). It has no reference files.
     Install the CLI it drives, which is a documented one-liner and needs no GUI:
       curl -fsSL https://releases.aside.com/install.sh | bash
@@ -289,7 +306,7 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
       command -v aside
       aside account list      ('*' marks the active account)
     A signed-out or absent account is NOT a failure of this run — the Aside app is a DMG the user
-    installs and signs into themselves (step 5b). Report the skill as INSTALLED and the account as
+    installs and signs into themselves. Report the skill as INSTALLED and the account as
     PENDING-USER. Do not install the app, do not open its onboarding, do not run 'aside exec' or
     'aside repl', and do not visit any site or log into anything.
     Playwright remains the browser-automation route on every platform and is NOT installed here.
@@ -359,22 +376,34 @@ PATH and the wrong one wins.
 If a tool cannot update because the current session is running inside it (Herdr does this), do not
 work around it. Report the exact command for me to run after I exit.
 
-=== 5b. THE BROWSER APP ITSELF IS MINE TO INSTALL ===
+=== 5b. INSTALL THE ego lite BROWSER (macOS only) ===
 
-The aside-browser SKILL and the 'aside' CLI are installed for me in step 5 on macOS. The Aside
-browser APP is not, and you must not install it. It is a DMG whose first run is a GUI step asking
-privacy-sensitive questions — import my Chrome data? unlock a credential vault? — that only I may
-answer.
+ego lite is the browser both I and the agent drive. There is no Homebrew formula; it is a DMG.
 
- 1. Do not download, install, or launch the app. Do not click through any onboarding.
- 2. Do not run a browser task while setting up: no 'aside exec', no 'aside repl'. Do not open any
-    site or log into anything. 'command -v aside' and 'aside account list' are the only calls
-    allowed, and both are read-only.
- 3. Tell me, in one line, what is left for me: download Aside from https://aside.com/download,
-    sign in, and then 'aside account list' will show an active account. Note that it is macOS-only
-    today. Until I do that, the skill and CLI are installed but inert — say so plainly rather than
-    reporting the browser as working.
- 4. Report this section as PENDING-USER on macOS, SKIPPED-UNSUPPORTED elsewhere. Never as FAILED.
+ 1. Skip this ego lite step on non-macOS and say so. On Windows and Linux, record only ego lite and
+    its skill as SKIPPED-UNSUPPORTED. Do not improvise an ego lite install. Playwright may be installed
+    separately as the browser-automation fallback when needed.
+ 2. If /Applications/'ego lite.app' or ~/Applications/'ego lite.app' already exists, do not
+    reinstall — log UNCHANGED and go to 5b.5.
+ 3. Otherwise run the skill's own installer, which downloads the arch-correct DMG, installs the app,
+    clears the quarantine attribute, and opens it:
+      sh ~/.agents/skills/ego-browser/scripts/install.sh
+    (read ego-browser/references/install.md before running it)
+ 4. STOP AND WAIT. First-run onboarding is a GUI step only I can complete: it asks whether to import
+    Chrome data and it is what registers the 'ego-browser' command under ~/.local/bin. Do not click
+    through it, do not answer the Chrome-migration question for me, and do not report this step as
+    done before I confirm. If I am not present, mark it PENDING-USER and continue with the rest.
+ 5. Verify, without launching any browsing task:
+      command -v ego-browser            (if missing: export PATH="$HOME/.local/bin:$PATH" and retry)
+      ego-browser nodejs <<'EOF'
+      cliLog('ego-browser ready')
+      EOF
+    Printing 'ego-browser ready' is the only acceptable proof. An app that exists is not proof.
+ 6. Do not open any site, log into anything, or run any task in my session while verifying.
+
+The Aside APP driven by the aside-browser skill from step 4 is a different matter: never download,
+install, launch, or click through it. Report its account state from the read-only 'command -v aside'
+and 'aside account list' checks in step 4, as active or PENDING-USER. Aside is macOS-only today.
 
 === 6. MCP INTEGRATION ===
 
@@ -572,13 +601,15 @@ Also verify:
   - No autonomous loop was started, no Context Diet restriction was activated, no paid service was
     authenticated, and no credits were spent.
   - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
-  - On macOS, ~/.agents/skills/aside-browser/SKILL.md exists and 'command -v aside' resolves, with
-    the account reported as active or PENDING-USER from a read-only 'aside account list'. On other
-    platforms both are reported as SKIPPED-UNSUPPORTED.
-  - No browser app was downloaded, installed, or launched, and no browser task was run ('aside exec'
-    and 'aside repl' were never called). No site was visited, no login was performed, and no Chrome
-    data was migrated on my behalf. If Playwright was already present, its package and browser
-    versions are reported; it was not installed by this run.
+  - On macOS, ego-browser resolves on PATH and answers the heredoc probe from 5b.5, or is reported
+    as PENDING-USER because GUI onboarding is unfinished. Also on macOS,
+    ~/.agents/skills/aside-browser/SKILL.md exists and 'command -v aside' resolves, with the
+    account reported as active or PENDING-USER from a read-only 'aside account list'. On other
+    platforms, ego lite and aside-browser are reported as SKIPPED-UNSUPPORTED; Playwright is
+    allowed as a separate fallback and, if installed, its package and browser versions are
+    reported. The Aside app was not downloaded, installed, or launched, and no browser task was
+    run ('aside exec' and 'aside repl' were never called). No site was visited, no login was
+    performed, and no Chrome data was migrated on my behalf.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 
