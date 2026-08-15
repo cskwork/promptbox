@@ -97,7 +97,7 @@ binary path once and use it everywhere.
 Detect OS, architecture, Git, Node.js, Python 3.10+, and available package managers. For each
 interpreter record the ABSOLUTE PATH THAT ACTUALLY WORKS IN A NON-INTERACTIVE SHELL.
 
-Identify installed agents: Claude Code, Codex, Jcode, Pi, Kiro, Antigravity/agy, Gemini CLI, OpenCode, Cursor.
+Identify installed agents: Claude Code, Codex, Jcode, Pi, Hermes, Kiro, Antigravity/agy, Gemini CLI, OpenCode, Cursor.
 For each, record its global instruction file path and its global skills directory path — and
 whether each is currently a real file/directory, a symlink, or absent.
 
@@ -435,6 +435,24 @@ Only create a per-agent skills-directory adapter when the installed harness requ
 and Pi versions load \`~/.agents/skills\` natively. For them, verify that behavior and preserve existing
 \`~/.jcode/skills\`, \`~/.pi/skills\`, and \`~/.pi/agent/skills\` directories in place; they may contain
 user-owned or tool-managed skills that are not in the canonical hub.
+
+PER-SKILL LINKS FOR HARNESSES WITH A POPULATED SKILLS DIRECTORY. Do not take "loads ~/.agents/skills
+natively" on trust — verify it by listing a skill from the running harness. Observed reality on a real
+machine: \`~/.claude/skills\`, \`~/.codex/skills\` and \`~/.config/opencode/skills\` were each a
+directory symlink to \`~/.agents/skills\` (so one link covers all three), while \`~/.hermes/skills\`
+held 185 real entries and \`~/.pi/skills\` held per-skill relative symlinks. Newly hubbed skills were
+absent from both until linked individually.
+
+NEVER convert a populated skills directory into a symlink to the hub. Doing so hides every skill that
+harness installed for itself — 185 of them, in the case above. Link PER SKILL and leave the rest alone:
+
+  Hermes:  ln -sfn ~/.agents/skills/<name> ~/.hermes/skills/<name>
+  Pi:      ln -sfn ../../.agents/skills/<name> ~/.pi/skills/<name>    (match its existing relative style)
+
+THE LINK NAME IS THE SKILL'S name:, NOT THE REPO NAME. \`cskwork/canvas-ui-skill\` must be linked as
+\`canvas-ui-design\`. A mismatch loads nothing and reports nothing — it fails silently.
+
+Verify each link the same way as everything else: \`<skills-dir>/<name>/SKILL.md\` readable and non-empty.
 
 For agents that require an adapter, link the documented global skills directory to ~/.agents/skills:
   macOS/Linux: directory symlink (ln -s handles both files and directories).
