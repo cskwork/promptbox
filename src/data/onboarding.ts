@@ -207,8 +207,8 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
     macOS ONLY, also installed by default there — an additional route, not the browser layer; ego
     lite stays the default browser. On Windows and Linux, skip it and report SKIPPED-UNSUPPORTED.
     Same materialisation route as Debug Code: clone the promptbox repo and write the SKILL.md
-    embedded in src/content/skills/aside-browser.md out to ~/.agents/skills/aside-browser/SKILL.md
-    (name: aside-browser). It has no reference files.
+    embedded in src/content/skills/aside-browser.md out to
+    ~/.agents/skills/aside-browser/SKILL.md (name: aside-browser). It has no reference files.
     Install the CLI it drives, which is a documented one-liner and needs no GUI:
       curl -fsSL https://releases.aside.com/install.sh | bash
     Then verify the CLI resolves and report the account state WITHOUT running any browser task:
@@ -218,6 +218,9 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
     installs and signs into themselves. Report the skill as INSTALLED and the account as
     PENDING-USER. Do not install the app, do not open its onboarding, do not run 'aside exec' or
     'aside repl', and do not visit any site or log into anything.
+    Playwright remains the browser-automation route on every platform and is NOT installed here.
+    If Playwright or SuperQA already exists, inspect and reuse or update it rather than marking it
+    SUPERSEDED or suggesting uninstall. Report it by its own name.
 
 Derive each skill's canonical name from its SKILL.md frontmatter 'name:' field, not from the
 directory name, and fail loudly on a collision instead of silently overwriting. Two directories with
@@ -307,6 +310,10 @@ ego lite is the browser both I and the agent drive. There is no Homebrew formula
     Printing 'ego-browser ready' is the only acceptable proof. An app that exists is not proof.
  6. Do not open any site, log into anything, or run any task in my session while verifying.
 
+The Aside APP driven by the aside-browser skill from step 4 is a different matter: never download,
+install, launch, or click through it. Report its account state from the read-only 'command -v aside'
+and 'aside account list' checks in step 4, as active or PENDING-USER. Aside is macOS-only today.
+
 === 6. MCP INTEGRATION ===
 
 For any tool registering an MCP server:
@@ -365,6 +372,8 @@ Replace every detected agent's global instruction file with the following conten
 
 **Stance** — Domain data first: get the domain model and real data shapes right before code or tests — tests verify the model, they never define it. Make the smallest verified, maintainable change. Make maintainable code; no unrelated refactoring. Prefer reversible choices. Ask only about consequential data loss, public API, security, or migration decisions; otherwise state assumptions and proceed. Never claim what you did not verify. Always merge worktree after done ask user if unsure target branch.
 
+**Domain rules** — Always read \`~/.agents/rules/rules.md\` (Windows: \`%USERPROFILE%\\.agents\\rules\\rules.md\`).
+
 **1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Open \`ask-matt\` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
 **2. Options** — Right after exploration, before any plan or code, give exactly three genuinely distinct approaches — different in strategy, not in wording. One line each: approach · main tradeoff · cost/risk. Rank them 1/2/3, mark 1 as recommended with one clause of why. Then stop and ask the user to pick. No code, no long prose. Skip only when one approach is obviously the only sane one.
@@ -410,6 +419,18 @@ extra file in Kiro's steering directory). One of them silently re-injects the ol
 the new ones. Back up, then remove.
 
 If an agent has no documented global instruction file, skip it and say so. Do not invent a config path.
+
+=== 7b. DOMAIN RULES FILE ===
+
+Create ~/.agents/rules/rules.md if absent. NEVER overwrite it — it holds rules this prompt does not
+know about. On a rerun, leave existing content alone and only append what is missing. Do not delete
+a rule to "clean up": a rule you cannot source is still a rule the user relies on.
+
+Keep it to rules only — one line each, no rationale, no workflow prose. The workflow lives in the
+instruction file; this file is the environment's domain and safety rules, grouped by area.
+
+This is the seam that keeps the instruction file byte-identical across machines while the rules
+differ per environment. Do not inline these rules into the instruction file.
 
 === 8. LINKING ===
 
@@ -502,16 +523,20 @@ Also verify:
   - Every MCP server passes the handshake probe from step 6.3.
   - Instruction-file checksums are identical across all documented agent paths, including Jcode's
     \`~/AGENTS.md\` and Pi's \`~/.pi/agent/AGENTS.md\`.
+  - The instruction file carries the \`~/.agents/rules/rules.md\` line, that file is readable and
+    non-empty, and every rule it held before this run is still there.
   - No autonomous loop was started, no Context Diet restriction was activated, no paid service was
     authenticated, and no credits were spent.
-  - On macOS, ego-browser resolves on PATH and answers the heredoc probe from 5b.5, or is reported as
-    PENDING-USER because GUI onboarding is unfinished. Also on macOS, ~/.agents/skills/aside-browser/
-    SKILL.md exists and 'command -v aside' resolves, with the account reported as active or
-    PENDING-USER from a read-only 'aside account list'. On non-macOS, ego lite and aside-browser are
-    reported as SKIPPED-UNSUPPORTED; Playwright is allowed as a separate fallback and, if installed,
-    its package and browser versions are reported. The Aside app was not downloaded, installed, or
-    launched, and no browser task was run ('aside exec' and 'aside repl' were never called). No site
-    was visited, no login was performed, and no Chrome data was migrated on my behalf.
+  - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
+  - On macOS, ego-browser resolves on PATH and answers the heredoc probe from 5b.5, or is reported
+    as PENDING-USER because GUI onboarding is unfinished. Also on macOS,
+    ~/.agents/skills/aside-browser/SKILL.md exists and 'command -v aside' resolves, with the
+    account reported as active or PENDING-USER from a read-only 'aside account list'. On other
+    platforms, ego lite and aside-browser are reported as SKIPPED-UNSUPPORTED; Playwright is
+    allowed as a separate fallback and, if installed, its package and browser versions are
+    reported. The Aside app was not downloaded, installed, or launched, and no browser task was
+    run ('aside exec' and 'aside repl' were never called). No site was visited, no login was
+    performed, and no Chrome data was migrated on my behalf.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 
