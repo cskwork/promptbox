@@ -251,6 +251,14 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Hallmark                            https://github.com/Nutlope/hallmark
   GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
   Clean Code                          https://github.com/cskwork/clean-code
+  Prompter                            https://github.com/cskwork/prompter
+                                      SKILL.md sits at the repo ROOT, so link the repo directory itself
+                                      as ~/.agents/skills/prompter. Learns your reply patterns locally
+                                      and gates every proposal behind an explicit y/yes.
+  Canvas UI Design                    https://github.com/cskwork/canvas-ui-skill
+                                      SKILL.md at the repo ROOT; link as ~/.agents/skills/canvas-ui-design
+                                      (the directory name must match the skill's name:, which is
+                                      canvas-ui-design, not the repo name).
   Verify                              https://github.com/cskwork/verify-skill
                                       Clone and link as ~/.agents/skills/verify. SKILL.md sits at the
                                       repo ROOT, not under a skills/ subdirectory, so link the repo
