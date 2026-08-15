@@ -30,6 +30,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Entries that embed an upstream file verbatim must not drift from it.
+      - name: Check mirrored payloads are current
+        run: npm run check:mirrors
+
       - name: Compute base path
         id: base
         run: |

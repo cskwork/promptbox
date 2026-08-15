@@ -11,6 +11,9 @@ const baseFields = {
   license: z.string().optional(),
   order: z.number().default(100),
   hidden: z.boolean().default(false),
+  // Raw URL of the upstream file this entry's fenced payload copies verbatim.
+  // `npm run check:mirrors` fails when the copy drifts from it.
+  mirror_of: z.string().url().optional(),
 };
 
 const prompts = defineCollection({
