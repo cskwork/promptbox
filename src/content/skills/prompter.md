@@ -34,7 +34,7 @@ install: "npx skills@latest add ./prompter"
 ## 함정
 
 - **저장되는 건 규칙뿐이다.** 대화 원문·코드·토큰·절대 경로·프로젝트명은 durable(영구 저장) 프로필에 남지 않는다. 임시 증거 파일은 성공·실패와 무관하게 삭제된다.
-- **`state.json`은 PC마다 다르다.** 여러 대에서 프로필을 공유할 때 이 파일까지 동기화하면 증분 스캔이 오염된다. `profile.json` + `PROFILE.md`만 프라이빗 저장소로 옮긴다.
+- **`state.json`은 PC마다 다르다.** 여러 대에서 쓰려면 `profile.json` + `PROFILE.md`만 **프라이빗** 저장소로 동기화한다(`sync --mode pull/push`). `state.json`까지 옮기면 증분 스캔이 오염된다. 두 PC가 갈라지면 자동 병합 없이 멈춘다 — 규칙을 조용히 잃는 것보다 낫다.
 - **권한을 추론하지 않는다.** 삭제·배포·결제·자격증명·법률/의료/금융 결정은 학습된 성향으로 승인되지 않는다. 초안은 만들 수 있지만 게이트는 그대로 남는다.
 - **"ok", "go", 이모지, 침묵은 동의가 아니다.** 오직 `y`/`yes`만 통과한다.
 
@@ -122,6 +122,8 @@ python3 scripts/prompter.py scan --mode init --output "$TMPDIR/prompter-evidence
 python3 scripts/prompter.py scan --mode update --state ~/.prompter/state.json --output "$TMPDIR/prompter-evidence.json"
 python3 scripts/prompter.py install-profile --input "$TMPDIR/prompter-profile.json" --lock ~/.prompter/profile.lock --token '<token>'
 python3 scripts/prompter.py commit-state --evidence "$TMPDIR/prompter-evidence.json" --state ~/.prompter/state.json
+python3 scripts/prompter.py sync --mode pull   # optional; exit 3 = conflict, stop the route
+python3 scripts/prompter.py sync --mode push   # optional; exit 4 = push failed, not fatal
 python3 scripts/prompter.py release-lock --token '<token>'
 ```
 
