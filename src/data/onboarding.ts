@@ -34,7 +34,6 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'superdesign' },
   { category: 'skills', slug: 'superoffice' },
   { category: 'skills', slug: 'superhacker' },
-  { category: 'skills', slug: 'aside-browser' },
   { category: 'tools', slug: 'ego-lite' },
   // answer the agent from your own past decisions
   { category: 'skills', slug: 'prompter' },
@@ -203,24 +202,6 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
     On non-macOS, Playwright MAY be installed as the browser-automation fallback when needed. It is
     separate from ego lite and must be reported by its own name. If Playwright or SuperQA already
     exists, inspect and reuse or update it rather than marking it SUPERSEDED or suggesting uninstall.
-  aside-browser (browser automation + logged-in accounts)  https://github.com/cskwork/promptbox
-    macOS ONLY, also installed by default there — an additional route, not the browser layer; ego
-    lite stays the default browser. On Windows and Linux, skip it and report SKIPPED-UNSUPPORTED.
-    Same materialisation route as Debug Code: clone the promptbox repo and write the SKILL.md
-    embedded in src/content/skills/aside-browser.md out to
-    ~/.agents/skills/aside-browser/SKILL.md (name: aside-browser). It has no reference files.
-    Install the CLI it drives, which is a documented one-liner and needs no GUI:
-      curl -fsSL https://releases.aside.com/install.sh | bash
-    Then verify the CLI resolves and report the account state WITHOUT running any browser task:
-      command -v aside
-      aside account list      ('*' marks the active account)
-    A signed-out or absent account is NOT a failure of this run — the Aside app is a DMG the user
-    installs and signs into themselves. Report the skill as INSTALLED and the account as
-    PENDING-USER. Do not install the app, do not open its onboarding, do not run 'aside exec' or
-    'aside repl', and do not visit any site or log into anything.
-    Playwright remains the browser-automation route on every platform and is NOT installed here.
-    If Playwright or SuperQA already exists, inspect and reuse or update it rather than marking it
-    SUPERSEDED or suggesting uninstall. Report it by its own name.
 
 Derive each skill's canonical name from its SKILL.md frontmatter 'name:' field, not from the
 directory name, and fail loudly on a collision instead of silently overwriting. Two directories with
@@ -309,10 +290,6 @@ ego lite is the browser both I and the agent drive. There is no Homebrew formula
       EOF
     Printing 'ego-browser ready' is the only acceptable proof. An app that exists is not proof.
  6. Do not open any site, log into anything, or run any task in my session while verifying.
-
-The Aside APP driven by the aside-browser skill from step 4 is a different matter: never download,
-install, launch, or click through it. Report its account state from the read-only 'command -v aside'
-and 'aside account list' checks in step 4, as active or PENDING-USER. Aside is macOS-only today.
 
 === 6. MCP INTEGRATION ===
 
@@ -529,14 +506,9 @@ Also verify:
     authenticated, and no credits were spent.
   - gpt-image-2 is configured but not wired to trigger on anything except an explicit request.
   - On macOS, ego-browser resolves on PATH and answers the heredoc probe from 5b.5, or is reported
-    as PENDING-USER because GUI onboarding is unfinished. Also on macOS,
-    ~/.agents/skills/aside-browser/SKILL.md exists and 'command -v aside' resolves, with the
-    account reported as active or PENDING-USER from a read-only 'aside account list'. On other
-    platforms, ego lite and aside-browser are reported as SKIPPED-UNSUPPORTED; Playwright is
-    allowed as a separate fallback and, if installed, its package and browser versions are
-    reported. The Aside app was not downloaded, installed, or launched, and no browser task was
-    run ('aside exec' and 'aside repl' were never called). No site was visited, no login was
-    performed, and no Chrome data was migrated on my behalf.
+    as PENDING-USER because GUI onboarding is unfinished. On other platforms, ego lite is reported
+    as SKIPPED-UNSUPPORTED; Playwright is allowed as a separate fallback and, if installed, its
+    package and browser versions are reported.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 
