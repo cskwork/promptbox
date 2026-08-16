@@ -1,8 +1,8 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
 title_en: One-shot coding agent setup
-summary: "스킬 58종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr·rtk)와 에이전트용 기본 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다. macOS에서는 aside-browser 스킬과 Aside CLI도 함께 깔지만 기본 브라우저는 ego lite다 — Aside 앱 설치와 로그인은 사람 몫으로 남긴다."
-summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser — the kit's default on macOS — into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work. On macOS it also installs the aside-browser skill and the Aside CLI; installing and signing into the Aside app stays yours."
+summary: "스킬 58종과 공통 시스템 프롬프트, CLI 도구(officecli·herdr·rtk)와 에이전트용 기본 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 기본 구성에는 prompter(https://github.com/cskwork/prompter)가 포함돼, 에이전트가 물어보면 내 과거 결정 패턴으로 답장 초안을 만들고 y/yes 확인 전에는 보내지 않는다. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다. macOS에서는 aside-browser 스킬과 Aside CLI도 함께 깔지만 기본 브라우저는 ego lite다 — Aside 앱 설치와 로그인은 사람 몫으로 남긴다."
+summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser — the kit's default on macOS — into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work. The default setup includes prompter (https://github.com/cskwork/prompter), which drafts your reply to an agent's question from rules learned locally and never sends it without an explicit y/yes. On macOS it also installs the aside-browser skill and the Aside CLI; installing and signing into the Aside app stays yours."
 tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi, rtk, token-savings]
 author: cskwork
 order: 5
@@ -33,6 +33,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | hallmark | 스킬 | Nutlope/hallmark | AI 티 안 나는 UI 디자인·감사·리디자인 |
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
 | clean-code | 스킬 | cskwork/clean-code | 동작을 바꾸지 않고 레거시 코드 리팩터링 — 특성화 테스트로 현재 동작을 먼저 고정하고 작은 배치로 편집 |
+| **prompter** | 스킬 | [cskwork/prompter](https://github.com/cskwork/prompter) | 기본 구성에 포함. 에이전트가 "여기서 멈출까요, 더 갈까요?" 같은 질문을 던지면 내 과거 결정 패턴에서 뽑은 규칙으로 답장 초안을 만든다. 대화 원문이 아니라 재사용 가능한 규칙만 로컬에 남기고, 화면에 보인 문장 그대로에 `y`/`yes`를 받기 전에는 절대 보내지 않는다. `prompt/ init` → `prompt/` → `prompt/ update` 세 라우트뿐이고 명시 호출로만 발동한다 |
 | verify | 스킬 | cskwork/verify-skill | 초록 빌드를 검증으로 인정하지 않는 5게이트 검증 — 빌드·정적검사·클린코드·시나리오 API QA·보고. 게이트마다 재실행 가능한 증거(receipt)를 남기고, 실행하지 못한 게이트는 PASS가 아니라 BLOCKED. 토큰 발급 모듈과 payload 변형(happy·boundary·negative)이 딸려 있다. curl·jq 필요 |
 | **ego-browser** | 스킬 + 브라우저 앱 | citrolabs/ego-lite | 내 로그인 상태를 그대로 쓰는 에이전트용 브라우저(QA·웹 자동화)로 이 키트의 **macOS 기본 브라우저**. **macOS 전용**이며, Windows·Linux에서는 필요 시 Playwright 사용 |
 | **aside-browser** | 스킬 + CLI | cskwork/promptbox (skills/aside-browser) | 브라우저 자동화(QA·요소 조작·스냅샷·스크린샷)와, 내가 이미 로그인해 둔 계정·앱(Slack·X·LinkedIn)·방문 기록을 가로지르는 작업을 Aside에 넘긴다. 통째로 위임은 `aside exec`, 증거·결정적 조작은 Playwright 호환 `aside repl`. **macOS 전용이며 macOS에서는 기본 설치**, 그 외 OS는 건너뛰고 Playwright를 쓴다. 스킬과 CLI는 자동 설치되지만 앱 설치·로그인은 사람 몫이라 그전까지는 동작하지 않는다 |
