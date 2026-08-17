@@ -148,7 +148,19 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Autoresearch                        https://github.com/uditgoenka/autoresearch
   Call Agent                          https://github.com/cskwork/call-agent
   Archify                             https://github.com/tt-a1i/archify
-  Hallmark                            https://github.com/Nutlope/hallmark
+  Impeccable (design default)         https://github.com/pbakaus/impeccable
+                                      THE DEFAULT DESIGN SKILL for every frontend/UI task —
+                                      replaces any earlier design skill in this kit.
+                                      Use its official installer at GLOBAL scope with explicit
+                                      providers so it never prompts:
+                                        npx -y impeccable install --scope=global --providers=<detected>
+                                      Run it from the home directory, never inside a repo, or it
+                                      writes project-local files. This skill is NOT hub-symlinked:
+                                      its installer owns the layout and writes per-agent copies
+                                      plus detector hooks straight into each agent config — treat
+                                      those writes like any other agent config (back up before,
+                                      diff after). Update later with:  npx impeccable update
+                                      (Codex must then reopen /hooks and re-approve the hook).
   GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
   Clean Code                          https://github.com/cskwork/clean-code
   Prompter                            https://github.com/cskwork/prompter
