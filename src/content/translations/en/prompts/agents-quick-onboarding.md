@@ -22,7 +22,7 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 | autoresearch | Skill | uditgoenka/autoresearch | Autonomous research loops |
 | call-agent | Skill | cskwork/call-agent | Routes delegated work to Codex, agy, Kiro, Claude, and NotebookLM |
 | archify | Skill | tt-a1i/archify | Produces architecture, sequence, and data-flow diagrams as standalone HTML |
-| hallmark | Skill | Nutlope/hallmark | Designs, audits, and redesigns interfaces without the generic AI look |
+| impeccable | Skill | pbakaus/impeccable | The **default design skill** for every frontend task — 23 design commands, PRODUCT.md/DESIGN.md context, and per-edit detector hooks that keep the generic AI look out |
 | gpt-image-2 | Skill | agentspace-so/agent-skills | Generates images through a ChatGPT subscription without separate image API billing |
 | clean-code | Skill | cskwork/clean-code | Refactors legacy code without changing behavior by locking in characterization tests first and editing in small batches |
 | verify | Skill | cskwork/verify-skill | Five gates that refuse to call a green build verified: build, static checks, clean-code review, scenario API QA, report. Each gate leaves a re-runnable receipt, and a gate that could not run is BLOCKED rather than PASS. Ships a token module and payload variants (happy, boundary, negative). Needs curl and jq |

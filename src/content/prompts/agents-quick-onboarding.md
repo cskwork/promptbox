@@ -30,7 +30,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
 | call-agent | 스킬 | cskwork/call-agent | codex·agy·kiro·claude·notebooklm로 위임 라우팅 |
 | archify | 스킬 | tt-a1i/archify | 아키텍처·시퀀스·데이터플로 다이어그램을 단일 HTML로 |
-| hallmark | 스킬 | Nutlope/hallmark | AI 티 안 나는 UI 디자인·감사·리디자인 |
+| impeccable | 스킬 | pbakaus/impeccable | **디자인 기본 스킬** — 프론트엔드 설계·리디자인·감사·폴리시 23개 명령과 PRODUCT.md/DESIGN.md 컨텍스트, 편집마다 도는 감지 훅으로 AI 티 나는 디자인을 원천 차단 |
 | gpt-image-2 | 스킬 | agentspace-so/agent-skills | ChatGPT 구독으로 이미지 생성(별도 과금 없음) |
 | clean-code | 스킬 | cskwork/clean-code | 동작을 바꾸지 않고 레거시 코드 리팩터링 — 특성화 테스트로 현재 동작을 먼저 고정하고 작은 배치로 편집 |
 | **prompter** | 스킬 | [cskwork/prompter](https://github.com/cskwork/prompter) | 기본 구성에 포함. 에이전트가 "여기서 멈출까요, 더 갈까요?" 같은 질문을 던지면 내 과거 결정 패턴에서 뽑은 규칙으로 답장 초안을 만든다. 대화 원문이 아니라 재사용 가능한 규칙만 로컬에 남기고, 화면에 보인 문장 그대로에 `y`/`yes`를 받기 전에는 절대 보내지 않는다. `prompt/ init` → `prompt/` → `prompt/ update` 세 라우트뿐이고 명시 호출로만 발동한다 |
@@ -240,7 +240,19 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
   Autoresearch                        https://github.com/uditgoenka/autoresearch
   Call Agent                          https://github.com/cskwork/call-agent
   Archify                             https://github.com/tt-a1i/archify
-  Hallmark                            https://github.com/Nutlope/hallmark
+  Impeccable (design default)         https://github.com/pbakaus/impeccable
+                                      THE DEFAULT DESIGN SKILL for every frontend/UI task —
+                                      replaces any earlier design skill in this kit.
+                                      Use its official installer at GLOBAL scope with explicit
+                                      providers so it never prompts:
+                                        npx -y impeccable install --scope=global --providers=<detected>
+                                      Run it from the home directory, never inside a repo, or it
+                                      writes project-local files. This skill is NOT hub-symlinked:
+                                      its installer owns the layout and writes per-agent copies
+                                      plus detector hooks straight into each agent config — treat
+                                      those writes like any other agent config (back up before,
+                                      diff after). Update later with:  npx impeccable update
+                                      (Codex must then reopen /hooks and re-approve the hook).
   GPT Image 2                         https://github.com/agentspace-so/agent-skills/tree/main/gpt-image-2
   Clean Code                          https://github.com/cskwork/clean-code
   Prompter                            https://github.com/cskwork/prompter
