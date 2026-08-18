@@ -1,0 +1,158 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import CopyButton from '~/components/CopyButton.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const currentHref = `${base}/tips/`;
+
+const installPrime = `curl -fsSL https://app.primeintellect.ai/prime-agent/install.sh | sh`;
+const installNpm = `npm install -g prime-agent   # Node >= 22.8 (대안 설치 경로)`;
+const startPrime = `cd /path/to/project
+prime-agent`;
+const primeCli = `uv tool install prime        # Prime Intellect CLI
+prime config set-api-key <API_KEY>   # app.primeintellect.ai에서 발급
+prime config view                    # 확인`;
+const envKeys = `export ANTHROPIC_API_KEY=sk-ant-...   # 또는
+export ZAI_API_KEY=...                 # GLM Coding Plan (GLM-5/4.6 계열)
+export PRIME_API_KEY=...               # Prime Inference`;
+const visionInstall = `git clone https://github.com/cskwork/promptbox ~/promptbox
+ln -s ~/promptbox/plugins/glm-vision ~/.agents/skills/glm-vision`;
+const visionUse = `python3 ~/.agents/skills/glm-vision/glm_vision.py screenshot.png -q "read the error text"`;
+const visionTest = `cd ~/promptbox/plugins/glm-vision
+python3 test/run_test.py   # → verdict=PASS (2026-08-18 실측, glm-4.6v, 5.2s)`;
+---
+
+<BaseLayout
+  title="Tips & Tricks — promptbox"
+  titleKo="Tips & Tricks — promptbox"
+  description="Field-tested setup tips: Prime Agent as the recommended harness, one-prompt onboarding, verified install commands, API key setup, and the glm-vision GLM-4.6V skill."
+  descriptionKo="실측 기반 세팅 팁: 추천 하네스 Prime Agent, 원 프롬프트 온보딩, 검증된 설치 명령, API 키 설정, glm-vision GLM-4.6V 스킬."
+  currentHref={currentHref}
+>
+  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
+    <a href={base + '/'} class="hover:text-accent-700 dark:hover:text-accent-400"><span data-lang="en">Home</span><span data-lang="ko">홈</span></a>
+    <span aria-hidden="true">›</span>
+    <span class="text-ink-700 dark:text-ink-200">Tips &amp; Tricks</span>
+  </nav>
+
+  <header class="glass-panel mb-6 rounded-2xl p-5 lg:p-6">
+    <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">Tips &amp; Tricks</h1>
+    <p class="mt-2 text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
+      <span data-lang="en">A field-tested path from zero to a working agent setup — every command below was verified on a real machine (macOS, 2026-08).</span>
+      <span data-lang="ko">에이전트 세팅을 처음부터 끝까지 잡아주는 실측 가이드. 아래 명령은 전부 실제 머신(macOS, 2026-08)에서 검증했다.</span>
+    </p>
+  </header>
+
+  <div class="space-y-6">
+
+    <!-- 1. Recommended harness -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">01</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Recommended harness: Prime Agent</span><span data-lang="ko">추천 하네스: Prime Agent</span></h2>
+      </div>
+      <p class="mb-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">If you are choosing an agent to drive this toolbox, start with <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href="https://github.com/PrimeIntellect-ai/prime-agent" target="_blank" rel="noopener">Prime Agent</a> (<a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>catalog entry</a>). Its persistent IPython kernel keeps variables and data alive across turns, subagents are plain code calls, and it reads the same <code class="font-mono text-[0.85em]">~/.agents/skills/</code> directory this site installs into.</span>
+        <span data-lang="ko">이 사이트의 도구를 실어 돌릴 에이전트를 고르고 있다면 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href="https://github.com/PrimeIntellect-ai/prime-agent" target="_blank" rel="noopener">Prime Agent</a>(<a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>카탈로그 항목</a>)부터. 영구 IPython 커널 덕분에 변수와 데이터가 턴이 바뀌어도 살아 있고, 서브에이전트를 코드처럼 호출하며, 이 사이트가 설치하는 <code class="font-mono text-[0.85em]">~/.agents/skills/</code> 디렉터리를 그대로 읽는다.</span>
+      </p>
+    </section>
+
+    <!-- 2. Onboarding prompt -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">02</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Onboard the whole kit with one prompt</span><span data-lang="ko">프롬프트 하나로 전체 키트 온보딩</span></h2>
+      </div>
+      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Instead of installing items one by one, hand your agent the <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/prompts/agents-quick-onboarding/`}>quick-onboarding prompt</a> (INSTALL_PROMPT). It sets up a unified <code class="font-mono text-[0.85em]">~/.agents/</code> layout, symlinks every skill into each CLI you own, and re-running it repairs instead of duplicating.</span>
+        <span data-lang="ko">항목을 하나씩 설치하는 대신 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/prompts/agents-quick-onboarding/`}>퀵 온보딩 프롬프트</a>(INSTALL_PROMPT)를 에이전트에게 그대로 줘라. 통합 <code class="font-mono text-[0.85em]">~/.agents/</code> 레이아웃을 잡고, 보유한 모든 CLI에 스킬을 심링크하며, 다시 실행하면 중복이 아니라 복구를 한다.</span>
+      </p>
+    </section>
+
+    <!-- 3. Install prime-agent -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">03</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Install Prime Agent (verified)</span><span data-lang="ko">Prime Agent 설치 (실측)</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Official installer (macOS/Linux) — downloads a versioned release and verifies its SHA-256:</span>
+        <span data-lang="ko">공식 인스톨러(macOS/Linux) — 버전이 지정된 릴리스를 받아 SHA-256으로 검증한다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-install-prime" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{installPrime}</code>
+        <CopyButton target="#tip-install-prime" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">npm works too (verified: <code class="font-mono text-[0.85em]">prime-agent@0.7.3</code> on Node 22):</span>
+        <span data-lang="ko">npm으로도 된다(실측: Node 22에 <code class="font-mono text-[0.85em]">prime-agent@0.7.3</code> 설치 확인):</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{installNpm}</code>
+      </div>
+      <p class="mb-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Then start it from the directory you want it to work in:</span>
+        <span data-lang="ko">그다음 작업할 디렉터리에서 실행한다:</span>
+      </p>
+      <div class="flex items-stretch gap-2">
+        <code class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{startPrime}</code>
+      </div>
+    </section>
+
+    <!-- 4. API keys -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">04</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">API key setup</span><span data-lang="ko">API 키 설정</span></h2>
+      </div>
+      <ul class="mb-3 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-ink-600 dark:text-ink-300 marker:text-accent-500">
+        <li>
+          <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">Subscription</strong>: type <code class="font-mono text-[0.85em]">/login</code> in the TUI and pick Claude Pro/Max, ChatGPT Plus/Pro (Codex), or GitHub Copilot.</span>
+          <span data-lang="ko"><strong class="font-semibold text-ink-800 dark:text-ink-100">구독</strong>: TUI에서 <code class="font-mono text-[0.85em]">/login</code> 입력 후 Claude Pro/Max · ChatGPT Plus/Pro(Codex) · GitHub Copilot 선택.</span>
+        </li>
+        <li>
+          <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">API keys</strong>: export one before launch — the key is then stored in <code class="font-mono text-[0.85em]">~/.prime/agent/auth.json</code>:</span>
+          <span data-lang="ko"><strong class="font-semibold text-ink-800 dark:text-ink-100">API 키</strong>: 실행 전에 하나만 export하면 이후 <code class="font-mono text-[0.85em]">~/.prime/agent/auth.json</code>에 저장된다:</span>
+        </li>
+      </ul>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{envKeys}</code>
+      </div>
+      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">For Prime Inference (OpenAI-compatible model API), the <code class="font-mono text-[0.85em]">prime</code> CLI manages the key separately:</span>
+        <span data-lang="ko">Prime Inference(OpenAI 호환 모델 API)용 키는 <code class="font-mono text-[0.85em]">prime</code> CLI가 따로 관리한다:</span>
+      </p>
+      <div class="mt-2 flex items-stretch gap-2">
+        <code class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{primeCli}</code>
+      </div>
+    </section>
+
+    <!-- 5. glm-vision -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">05</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Read images with glm-vision (GLM-4.6V)</span><span data-lang="ko">glm-vision으로 이미지 읽기 (GLM-4.6V)</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">A stdlib-only skill that ships an image to GLM-4.6V and prints what it reads — text, shapes, charts. It reuses a logged-in Z.ai key automatically, and works with any OpenAI-compatible vision endpoint (<a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>full entry</a>):</span>
+        <span data-lang="ko">이미지를 GLM-4.6V에 보내 읽은 내용 — 텍스트·도형·차트 — 을 출력하는 무의존성 스킬. 로그인된 Z.ai 키를 자동 재사용하고, OpenAI 호환 비전 엔드포인트라면 어디든 동작한다(<a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>전체 문서</a>):</span>
+      </p>
+      <div class="mb-2 flex items-stretch gap-2">
+        <code class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{visionInstall}</code>
+      </div>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{visionUse}</code>
+      </div>
+      <p class="mb-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">The plugin ships a machine-checked test: it plants known text and shapes into a generated image, calls the real API, and asserts the model read them back. Real run on this machine:</span>
+        <span data-lang="ko">플러그인에는 기계 채점 테스트가 딸려 있다 — 알려진 텍스트와 도형을 심은 이미지를 만들고 실제 API를 호출해 모델이 정확히 읽었는지 판정한다. 이 머신에서의 실측 결과:</span>
+      </p>
+      <div class="flex items-stretch gap-2">
+        <code class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{visionTest}</code>
+      </div>
+      <pre class="mt-2 overflow-x-auto rounded-lg border border-accent-500/25 bg-accent-500/5 px-3 py-2 font-mono text-[0.78rem] leading-relaxed text-ink-600 dark:text-ink-300">Shapes: blue rectangle, red circle, green triangle
+Text: PROMPTBOX-7742 / shape count: 3 / bottom word: ZEBRA</pre>
+    </section>
+
+  </div>
+</BaseLayout>
