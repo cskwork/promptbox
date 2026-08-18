@@ -293,7 +293,7 @@ html[lang='ko'] [data-lang='en'] {
   .prose-pc li { @apply marker:text-accent-500; }
   .prose-pc a  { @apply text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2 decoration-accent-500/40 hover:decoration-accent-500; }
   .prose-pc strong { @apply text-ink-900 dark:text-ink-50 font-semibold; }
-  .prose-pc blockquote { @apply border-l-[3px] border-accent-500/60 pl-4 my-4 text-ink-600 dark:text-ink-300; }
+  .prose-pc blockquote { @apply border-l border-ink-300 pl-4 my-4 text-ink-600 dark:border-ink-700 dark:text-ink-300; }
   .prose-pc table { @apply block w-full overflow-x-auto border-collapse my-4 text-sm; }
   .prose-pc th, .prose-pc td { @apply border border-ink-200/70 dark:border-ink-800/70 px-3 py-2 text-left align-top; }
   .prose-pc th { @apply bg-ink-50/80 dark:bg-ink-900/70 font-semibold text-ink-800 dark:text-ink-100; }
