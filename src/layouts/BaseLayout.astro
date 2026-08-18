@@ -56,6 +56,11 @@ const items = lists.flatMap((entries, idx) => {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    {/* Brand favicon set: the header `>_` glyph on ink-950, emerald stroke.
+        SVG first (modern), ICO fallback (16/32/48), full-bleed PNG for iOS. */}
+    <link rel="icon" href={`${base}/favicon.svg`} type="image/svg+xml" />
+    <link rel="icon" href={`${base}/favicon.ico`} sizes="32x32" />
+    <link rel="apple-touch-icon" href={`${base}/apple-touch-icon.png`} />
     <meta name="theme-color" content="#f7f9f8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#070912" media="(prefers-color-scheme: dark)" />
     <title>{title}</title>
