@@ -86,7 +86,7 @@ opencode
 
 ## 함정
 
-- **GLM Coding Plan 모델은 이미지를 못 읽는다.** 카탈로그상 `glm-5.3`을 포함한 5개 모델 전부 `input.image: false`다. 스크린샷을 붙여넣어도 읽지 못하므로, 이미지는 [glm-vision 플러그인](https://cskwork.github.io/promptbox/plugins/glm-vision/) 같은 별도 경로로 넘겨야 한다.
+- **GLM Coding Plan 모델은 이미지를 못 읽는다.** 카탈로그상 `glm-5.3`을 포함한 5개 모델 전부 `input.image: false`다. 비전이 필요하면 Z.ai **일반 API**를 별도 공급자로 붙여야 한다 — `zai` 공급자(`https://api.z.ai/api/paas/v4`)의 `glm-5v-turbo`·`glm-4.6v`가 이미지·영상을 읽는다. **코딩 플랜 키와는 별개의 키·과금이다.** 키를 하나만 쓰고 싶으면 [glm-vision 플러그인](https://cskwork.github.io/promptbox/plugins/glm-vision/)으로 우회한다.
 - **`opencode auth login` 후 모델이 안 보이면 `opencode models --refresh`.** 모델 카탈로그는 캐시된다.
 - **npm 패키지 이름은 `opencode-ai`, 실행 명령은 `opencode`.** `opencode`라는 이름의 npm 패키지를 설치하면 다른 물건이다.
 - **`opencode2`는 별개의 v2 베타(`@opencode-ai/cli`)다.** 설정 파일과 플러그인 호환성이 v1과 다르므로, 입문자는 `opencode`(v1)로 시작하는 편이 안전하다.

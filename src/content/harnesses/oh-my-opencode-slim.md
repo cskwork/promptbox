@@ -80,10 +80,36 @@ npx oh-my-opencode-slim@latest install
 
 파일 이름은 에이전트 이름 그대로다(`orchestrator.md`, `oracle.md`, …).
 
+## 이미지를 읽히려면 — Observer (선택)
+
+`observer`는 기본 비활성이고, 켜려면 비전 모델이 필요하다. **GLM Coding Plan(`zai-coding-plan`) 모델 5개는 전부 이미지 입력을 지원하지 않는다.** 비전 모델은 Z.ai **일반 API**(`zai` 공급자, `https://api.z.ai/api/paas/v4`)에 있고, 이쪽은 코딩 플랜과 키도 과금도 별개다.
+
+| 모델 | 입력 | 컨텍스트 | 100만 토큰당 |
+|---|---|---|---|
+| `zai/glm-5v-turbo` | 텍스트·이미지·영상·PDF | 200,000 | $1.20 / $4.00 |
+| `zai/glm-4.6v` | 텍스트·이미지·영상 | 128,000 | $0.30 / $0.90 |
+| `zai/glm-4.5v` | 텍스트·이미지·영상 | 64,000 | $0.60 / $1.80 |
+
+`opencode auth login`으로 `zai` 공급자를 추가한 뒤, 설정에 아래를 합친다(스키마 검증 통과):
+
+```json
+{
+  "disabled_agents": [],
+  "image_routing": "auto",
+  "presets": {
+    "glm": {
+      "observer": { "model": "zai/glm-5v-turbo", "skills": [], "mcps": [] }
+    }
+  }
+}
+```
+
+`disabled_agents: []`가 Observer를 켠다. `image_routing`은 `"auto"`(첨부를 디스크에 저장하고 `@observer`에게 위임 유도)와 `"direct"`(무조건 Orchestrator에게 그대로 전달) 중 하나이며, `"auto"`는 Observer가 켜져 있을 때만 쓴다. 두 번째 키를 만들고 싶지 않다면 Observer는 끈 채로 두고 [glm-vision](https://cskwork.github.io/promptbox/plugins/glm-vision/)으로 이미지를 처리하면 된다.
+
 ## 함정
 
 - **내장 에이전트의 `prompt` 필드는 JSON에 못 쓴다.** `orchestrator`·`oracle` 같은 내장 에이전트는 모델·스킬·MCP만 JSON으로 설정하고, 프롬프트는 위의 마크다운 파일로만 바꾼다. 커스텀 에이전트(`agents.<이름>`)는 `prompt`를 직접 쓸 수 있다.
-- **`observer`를 켜려면 비전 모델이 따로 필요하다.** GLM Coding Plan 모델 5개는 전부 이미지 입력을 지원하지 않으므로, GLM만 쓰는 구성이라면 `observer`는 끈 채로 두고 이미지는 [glm-vision](https://cskwork.github.io/promptbox/plugins/glm-vision/)으로 처리하는 편이 낫다.
+- **이미지 담당은 `designer`가 아니라 `observer`다.** Designer의 역할은 "UI/UX 판단과 프론트엔드 구현"이고, 이미지 첨부는 `image_routing` 설정에 따라 Observer 쪽으로 간다. 헷갈려서 Designer에 비전 모델을 물려도 첨부 이미지가 그리로 가지 않는다.
 - **설정 우선순위**: 프로젝트의 `.opencode/oh-my-opencode-slim.json` → 사용자 `~/.config/opencode/oh-my-opencode-slim.jsonc` → `.json`. `.jsonc`가 있으면 `.json`을 덮는다.
 - **배경 작업이 기본값이다.** 전문 에이전트가 동시에 돌기 때문에, tmux·Zellij 같은 멀티플렉서를 붙여 각 에이전트를 별도 창에서 보는 편이 상황 파악에 훨씬 낫다.
 - **`oh-my-opencode`의 경량 포크다.** 원본과 설정 파일 이름이 다르니 문서를 섞어 보면 안 된다.
