@@ -1,0 +1,14 @@
+$ /Users/danny/.pyenv/versions/3.9.7/bin/python3 /Users/danny/Documents/PARA/Resource/promptbox/plugins/glm-vision/glm_vision.py /Users/danny/Documents/PARA/Resource/promptbox/plugins/glm-vision/test/vision_test.png -q List every shape with its color, then transcribe ALL text in the image exactly as written.
+exit=0 wall=5.2s verdict=PASS
+--- stdout ---
+Shapes:  
+- Blue rectangle  
+- Red circle  
+- Green triangle  
+
+Text:  
+PROMPTBOX-7742  
+shape count: 3  
+bottom word: ZEBRA
+--- stderr ---
+[glm-vision] model=glm-4.6v elapsed=5.1s
