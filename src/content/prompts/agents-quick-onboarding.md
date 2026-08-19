@@ -1,9 +1,9 @@
 ---
 title: 코딩 에이전트 온보딩 한 방 설치
 title_en: One-shot coding agent setup
-summary: "공통 시스템 프롬프트와 스킬, CLI 도구(officecli·herdr·rtk), 에이전트용 기본 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 기본 구성에는 prompter(https://github.com/cskwork/prompter)가 포함돼, 에이전트가 물어보면 내 과거 결정 패턴으로 답장 초안을 만들고 y/yes 확인 전에는 보내지 않는다. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
-summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser — the kit's default on macOS — into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work. The default setup includes prompter (https://github.com/cskwork/prompter), which drafts your reply to an agent's question from rules learned locally and never sends it without an explicit y/yes."
-tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi, rtk, token-savings]
+summary: "공통 시스템 프롬프트와 스킬, CLI 도구(officecli·herdr·rtk), 에이전트용 기본 브라우저(ego lite, macOS)를 ~/.agents/ 한곳에 모아 설치하고, 설치된 모든 코딩 CLI(Claude Code·Codex·Jcode·Pi·Gemini·Cursor·Kiro·OpenCode)에 자동으로 연결·MCP 구성하는 복사-붙여넣기 프롬프트. 기본 구성에는 prompter(https://github.com/cskwork/prompter)가 포함돼, 에이전트가 물어보면 내 과거 결정 패턴으로 답장 초안을 만들고 y/yes 확인 전에는 보내지 않는다. ai-memory(https://github.com/akitaonrails/ai-memory)도 기본이라, 모든 에이전트가 로컬 서버 하나를 공유해 세션 기억을 주고받는다 — 임베딩·벡터DB·로컬 LLM은 깔지 않는 구성이 기본값이다. 이미 있으면 그대로 두고, 빠졌거나 깨진 항목만 복구한다."
+summary_en: "One paste-and-go prompt that installs shared skills, instructions, CLI tools, and the ego lite browser — the kit's default on macOS — into ~/.agents/, then safely wires only the missing pieces into Claude Code, Codex, Jcode, Pi, Gemini, Cursor, Kiro, and OpenCode without replacing user-owned work. The default setup includes prompter (https://github.com/cskwork/prompter), which drafts your reply to an agent's question from rules learned locally and never sends it without an explicit y/yes, and ai-memory (https://github.com/akitaonrails/ai-memory), one shared local memory server every agent reads and writes — with no embeddings, vector database, or local LLM in the default configuration."
+tags: [onboarding, install, skills, system-prompt, symlink, agents-dir, dotfiles, mcp, cli-tools, idempotent, jcode, pi, rtk, ai-memory, shared-memory, token-savings]
 author: cskwork
 order: 5
 use_case: "새 머신을 세팅하거나 여러 코딩 CLI의 스킬·규칙을 한곳에서 관리하고 싶을 때. 에이전트 채팅창에 그대로 붙여넣으면 끝. 이미 설치된 환경이 깨졌을 때 복구용으로도 그대로 쓴다."
@@ -41,6 +41,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
 | **herdr** | 스킬 + CLI | ogulcancelik/herdr | 코딩 에이전트용 터미널 멀티플렉서 |
 | **rtk** | CLI + 훅 | rtk-ai/rtk | 셸 명령 출력을 압축해 컨텍스트로 들어가는 토큰을 줄인다(git·pytest·docker 등 100종+). MCP가 아니라 `PreToolUse` 훅으로 붙는다 |
+| **ai-memory** | CLI + 서버 + MCP + 훅 | [akitaonrails/ai-memory](https://github.com/akitaonrails/ai-memory) | 기본 구성에 포함. 설치된 **모든** 에이전트가 공유하는 로컬 메모리 서버 하나. 세션이 끝나면 훅이 남긴 관측을 요약 페이지로 묶고, 다음 에이전트는 첫 프롬프트 전에 "어디까지 했는지"를 받는다. 저장소는 FTS5 SQLite + 마크다운 위키라 `grep`·Obsidian·`rsync`가 그대로 통한다. **임베딩·벡터DB·로컬 LLM·Docker는 기본 구성이 아니다** — 설치하지 않는다 |
 
 > 설치된 CLI 수를 고정하지 않는다. 각 도구가 `~/.agents/skills`를 직접 읽는지 먼저 확인하고, 필요한 어댑터만 만든다.
 
@@ -59,8 +60,11 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 4. 설치된 CLI를 감지해 각 도구의 규칙 파일·스킬 폴더를 `~/.agents/`로 심링크한다.
 5. CLI 바이너리와 MCP 서버를 설치하고, **실제 핸드셰이크로 응답을 확인**한다. `rtk`도 여기서 깔고
    `rtk init -g`로 각 에이전트에 훅을 붙인다.
-6. 코드베이스 인덱서 MCP(codebase-memory-mcp 등)를 **찾아서 목록만 보여주고, 사용자가 승인하면** 제거한다.
-7. 읽기 전용 감사 스크립트를 남긴다 — 나중에 깨졌는지 확인하는 용도.
+6. **ai-memory 서버 하나**를 네이티브로 깔고 감지된 모든 에이전트를 거기에 붙인다. 임베딩·리랭커·
+   자동개선 스케줄러는 전부 끈 상태가 기본이고, 어시스턴트 답변 캡처도 켜지 않는다.
+7. 코드베이스 인덱서 MCP(codebase-memory-mcp 등)를 **찾아서 목록만 보여주고, 사용자가 승인하면** 제거한다.
+   ai-memory는 인덱서가 아니라 세션 기억이므로 이 목록에 넣지 않는다.
+8. 읽기 전용 감사 스크립트를 남긴다 — 나중에 깨졌는지 확인하는 용도.
 
 ## 함정
 
@@ -135,6 +139,20 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   아니라 context-diet가 그 서버를 **차단**해 둔 규칙이라, 지우면 사용자가 꺼둔 걸 다시 켜는 셈이 된다.
   주석 처리된 블록과 `enabled: false` 항목도 등록이 아니다. `mcpServers`/`[mcp_servers.*]` 아래
   살아있는 등록인지 확인한 것만 목록에 올린다.
+  **ai-memory는 이 목록에 넣지 않는다.** 레포를 인덱싱하는 게 아니라 세션 관측과 핸드오프를 저장하는
+  쪽이고, 6단계에서 방금 기본 구성으로 깐 것이다.
+- **ai-memory 포트 49374는 임시 포트 대역 안이다**: macOS는 49152–65535를 아무 프로세스에나 먼저
+  나눠 준다. 실제로 OpenCode 백그라운드 서비스(`opencode2 serve --service`)가 49374를 잡고 있어
+  서버가 못 떴다. 그 프로세스를 죽이면 붙어 있던 세션이 끊기므로 죽이지 말고, `config.toml`의
+  `bind`와 `server_url`을 대역 밖(예: `39374`)으로 옮긴다. 그러면 재부팅해도 다시 안 겹친다.
+- **ai-memory는 LLM 로그인 전에 provider를 켜면 기동을 거부한다**: `llm_provider`만 써두고
+  `auth login`을 안 하면 `provider not configured`로 죽는다. 순서가 곧 함정이다 — 로그인을 먼저
+  끝내거나, 두 키를 아예 빼면 된다. LLM 없이도 검색과 규칙 기반 요약은 정상 동작한다.
+- **`~/.local/bin` 심링크로 부르면 훅 설치기가 훅을 못 찾는다**: `install-hooks`는 *호출된 경로* 옆의
+  `hooks/`를 찾기 때문에 `could not locate hooks directory`로 실패한다. 압축을 푼 `hooks/` 트리를
+  데이터 디렉터리(`~/Library/Application Support/ai-memory/hooks`)로 복사해 두면 어느 경로로 불러도 된다.
+- **`--project-strategy repo-root`를 빼면 기억이 쪼개진다**: 기본값은 현재 폴더 이름이라, 세션 도중
+  하위 폴더로 `cd` 한 번만 해도 그 뒤 관측이 유령 프로젝트에 쌓인다. 증상이 조용해서 나중에야 안다.
 
 아래 프롬프트를 에이전트 채팅창에 그대로 붙여넣으세요.
 
@@ -395,6 +413,105 @@ ego lite is the browser both I and the agent drive. There is no Homebrew formula
     Printing 'ego-browser ready' is the only acceptable proof. An app that exists is not proof.
  6. Do not open any site, log into anything, or run any task in my session while verifying.
 
+=== 5c. INSTALL ai-memory (ONE SHARED MEMORY FOR EVERY AGENT) ===
+
+ai-memory (https://github.com/akitaonrails/ai-memory) is part of the default kit: one local server
+that every installed agent reads and writes, so what Claude Code worked out, Codex already knows.
+Install it NATIVE. Do NOT install Docker, Ollama, LM Studio, vLLM, an embedding model, or any local
+LLM for it. The default retrieval path is SQLite FTS5 + entities + graph neighbours and needs none
+of those.
+
+ 1. INSTALL THE BINARY. Download the release archive for the detected architecture into
+    ~/Applications/ai-memory, verify the published .sha256 BEFORE extracting, extract, and symlink
+    the binary onto PATH at ~/.local/bin/ai-memory. aarch64 = Apple Silicon, x86_64 = Intel.
+    If ai-memory is already installed, update in place and PRESERVE the existing data dir, wiki, and
+    config. Never run a destructive reset.
+
+ 2. STAGE THE HOOKS NEXT TO THE DATA DIR. install-hooks looks for a hooks/ directory beside the path
+    it was invoked as, so calling it through the ~/.local/bin symlink fails with "could not locate
+    hooks directory". Copy the extracted hooks/ tree to <data-dir>/hooks (macOS:
+    ~/Library/Application Support/ai-memory/hooks). That path is on the probe list, so every later
+    invocation works no matter which path was used.
+
+ 3. INITIALISE ONLY IF NOT ALREADY INITIALISED:   ai-memory init
+
+ 4. PICK A PORT THAT IS STILL FREE NEXT WEEK. The documented default is 127.0.0.1:49374, but 49374
+    sits INSIDE the macOS ephemeral range (49152-65535), so the OS can hand it to any process that
+    asks first — OpenCode's background service takes it in practice. Check with
+    lsof -nP -iTCP:49374 -sTCP:LISTEN. If something holds it, do NOT kill that process: set both
+    bind and server_url in <data-dir>/config.toml to a port below the ephemeral range (39374 works)
+    and use that port everywhere afterwards. Bind to 127.0.0.1 only, never 0.0.0.0, and do not
+    expose it to the LAN.
+
+ 5. NO EMBEDDINGS — THAT IS THE DEFAULT, NOT AN OPTIMISATION. Leave every one of these UNSET:
+    AI_MEMORY_EMBEDDING_PROVIDER, AI_MEMORY_EMBEDDING_BASE_URL, AI_MEMORY_EMBEDDING_MODEL,
+    AI_MEMORY_EMBEDDING_DIM, AI_MEMORY_RERANKER. Absent IS disabled; there is no "off" value to
+    write. Never run 'ai-memory embed'. If an embedding setting already exists specifically for
+    ai-memory, back up the config first, then remove it. Afterwards 'ai-memory status' must report
+    "embedding: disabled" and the models/ directory must still be empty.
+
+ 6. TURN OFF THE BACKGROUND SCHEDULER. The generated config.toml ships [auto_improve.scheduler] with
+    enabled = true, which sweeps every project through an LLM once an hour. Set it to false and
+    preserve every unrelated value in that file.
+
+ 7. LEAVE ASSISTANT CAPTURE OFF. Do not set capture_assistant and do not pass --capture-assistant to
+    install-hooks. Assistant turns can quote code and secrets, and they would flow straight into a
+    cloud LLM prompt.
+
+ 8. AN LLM PROVIDER IS OPTIONAL. Zero-LLM is a fully working tier: FTS5 + entity + graph retrieval
+    with rule-based session summaries. Only if I ask for LLM-written summaries, use my existing
+    ChatGPT/Codex subscription rather than a platform API key:
+      ai-memory auth login openai-oauth      device-code flow — STOP AND WAIT, only I can approve it
+    then set llm_provider = "openai-oauth" and llm_model = "gpt-5-mini" in config.toml. A mini-class
+    model is correct here; consolidation and lint are summarisation, not reasoning.
+    ORDER MATTERS: if a provider is configured and no token is stored, the server REFUSES TO START
+    with "provider not configured". Finish the login first, or leave both keys out entirely.
+    Never substitute OPENAI_API_KEY for this, and never print an access or refresh token.
+
+ 9. RUN EXACTLY ONE SERVER. Check for an existing listener before starting another:
+      ai-memory serve --transport http --bind 127.0.0.1:<port>
+    A small launcher script is fine; a process supervisor is not. On macOS a ~/Library/LaunchAgents
+    plist with RunAtLoad + KeepAlive is the supported way to survive reboot — ASK ME before
+    installing one, and if I decline, give me the manual start command instead. There must never be
+    one ai-memory process per agent, one data store per agent, or one wiki per agent.
+
+10. WIRE EVERY DETECTED AGENT TO THAT ONE SERVER. For each agent found in step 1's detection, run
+    BOTH commands, substituting the identifier:
+      ai-memory install-mcp   --client <id> --apply
+      ai-memory install-hooks --agent  <id> --project-strategy repo-root --apply
+    Identifiers in current releases: claude-code, codex, open-code, cursor, gemini-cli,
+    antigravity-cli, omp, kiro-cli, pi (hooks only), plus kimi-code, grok, devin, command-code,
+    openclaw, and zero when those are installed. Do NOT invent an identifier: read
+    'ai-memory install-mcp --help' and 'ai-memory install-hooks --help' first and use only what the
+    installed version lists. Configure ONLY the agents actually present; do not install a new agent
+    just because ai-memory supports it.
+    ALWAYS pass --project-strategy repo-root. The default resolves the project from the current
+    folder name, so one 'cd' into a subdirectory mid-session files the rest of that session under a
+    phantom project and splits the memory. Run each command once WITHOUT --apply and read the
+    rendered output before applying. --apply is idempotent, writes a timestamped backup first, and
+    preserves unrelated MCP servers, hooks, permissions, models, and plugins — verify that by
+    diffing against the pre-flight inventory, not by trusting the message.
+
+11. TWO EXCEPTIONS.
+    Pi has no mcp.json. 'install-mcp --client pi' deliberately prints guidance instead of writing an
+    ignored file; the extension written by 'install-hooks --agent pi' carries lifecycle capture AND
+    the MCP bridge. Do not hand-write ~/.pi/agent/mcp.json. Oh My Pi (omp) is a separate target with
+    its own .omp paths — never conflate the two. Respect PI_CODING_AGENT_DIR when it is set.
+    Hermes has no first-party installer. Do NOT run 'install-hooks --agent hermes' — that agent
+    value does not exist. Merge an HTTP MCP entry into Hermes' own config instead, preferring its
+    native command ('hermes mcp add ai-memory --url http://127.0.0.1:<port>/mcp'), preserve every
+    existing mcp_servers entry and provider setting, and verify with 'hermes mcp list' and
+    'hermes mcp test ai-memory'. Do not install the third-party ai-memory-hermes-plugin without
+    asking me first.
+
+12. RESTARTS AND TRUST PROMPTS ARE NOT OPTIONAL DETAILS. OpenCode, Pi, and Oh My Pi are wired
+    through a generated TypeScript file and load it only on restart. Codex asks me to trust the new
+    hooks on its next start. Report both as actions left for me rather than claiming capture is
+    already live.
+
+13. DO NOT TOUCH MY REPOSITORIES. This is a machine-level install. Do not insert ai-memory routing
+    text into arbitrary AGENTS.md, CLAUDE.md, or README.md files across my projects.
+
 === 6. MCP INTEGRATION ===
 
 For any tool registering an MCP server:
@@ -421,6 +538,9 @@ REMOVAL IS NOT AUTOMATIC.
     claude-context, code-index-mcp, codegraph, sourcegraph/cody MCP, repomix-style whole-repo
     indexers. If a server's description says it indexes, embeds, or graphs a repository for search,
     it belongs on the list.
+    ai-memory IS NOT ONE OF THESE. It stores session observations, summaries, and handoffs — it
+    never indexes, embeds, or graphs a repository for code search, and step 5c just installed it as
+    part of the default kit. Never put it on this list, and never remove it here.
     A NAME IS NOT A REGISTRATION. Grepping for these names hits things that are not servers, and
     "removing" them breaks unrelated configuration. Before listing an entry, confirm it is a live
     registration under an mcpServers / mcp / [mcp_servers.*] key. Specifically exclude: strings in a
@@ -613,6 +733,14 @@ Also verify:
     as PENDING-USER because GUI onboarding is unfinished. On other platforms, ego lite is reported
     as SKIPPED-UNSUPPORTED; Playwright is allowed as a separate fallback and, if installed, its
     package and browser versions are reported.
+  - ai-memory: EXACTLY ONE server process (ps -axo pid,%cpu,rss,command | grep ai-memory), listening
+    on 127.0.0.1 and not 0.0.0.0 (lsof -nP -iTCP:<port> -sTCP:LISTEN), 'ai-memory status' reporting
+    "embedding: disabled", an empty models/ directory, [auto_improve.scheduler] disabled,
+    capture_assistant unset on both the server and the installed hooks, and a real
+    initialize -> tools/list handshake against http://127.0.0.1:<port>/mcp returning the memory_*
+    tools. Then confirm each wired agent sees it with that agent's own MCP command where one exists
+    (claude mcp list, codex mcp list, hermes mcp test ai-memory). A config file that contains the
+    right string is NOT evidence that anything connected.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 

@@ -2,13 +2,14 @@
 title: ai-memory
 summary: 설치된 모든 코딩 에이전트가 하나의 로컬 서버를 공유하는 크로스 하네스 영속 메모리. FTS5 SQLite + 마크다운 위키로 임베딩 없이 동작하고, 세션 종료 시 훅이 자동으로 기억을 남긴다.
 summary_en: One local memory server every coding agent shares. FTS5 SQLite plus a markdown wiki, no embeddings required, with lifecycle hooks that capture each session automatically.
-tags: [mcp, memory, cross-agent, sqlite, fts5, hooks, claude-code, codex, opencode, rust, local]
+tags: [tool, memory, mcp, cross-agent, sqlite, fts5, hooks, claude-code, codex, opencode, rust, local]
 source: https://github.com/akitaonrails/ai-memory
 author: akitaonrails
 license: MIT
 order: 15
-server_name: ai-memory
-transport: http
+languages: [Rust]
+platforms: [macOS, Linux, WSL2, Windows]
+install: "curl -fsSL -O https://github.com/akitaonrails/ai-memory/releases/latest/download/ai-memory-macos-aarch64.tar.gz"
 ---
 
 ## 한 줄
