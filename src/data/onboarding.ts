@@ -14,7 +14,11 @@ export interface OnboardingPick {
 }
 
 export const ONBOARDING_PICKS: OnboardingPick[] = [
-  // start here — the router over everything else
+  // start here — pick ONE workflow set; its router routes everything else.
+  // agent-skills is the default; the other two are the alternatives the install
+  // prompt offers in section 4a. Never install more than one — the routers collide.
+  { category: 'plugins', slug: 'agent-skills' },
+  { category: 'plugins', slug: 'superpowers' },
   { category: 'skills', slug: 'ask-matt' },
   { category: 'skills', slug: 'setup-matt-pocock-skills' },
   // one shared memory every agent reads and writes
@@ -129,12 +133,104 @@ removes it.
 Back up every file BEFORE modifying it. Backups are timestamped and additive; never overwrite a
 previous run's backup directory. Record the active backup path in ~/.agents/.last-backup.
 
+=== 4a. WORKFLOW SET — ASK ME, THEN INSTALL EXACTLY ONE ===
+
+A workflow set is the meta-skill layer that decides HOW the agent works: which phase it is in, which
+skill to load, and when to stop for me. Three sets solve that same problem in incompatible ways, so
+INSTALLING TWO IS A BUG, NOT A BONUS. Their routers (using-agent-skills, using-superpowers, ask-matt)
+each claim the same incoming task and send it down a different pipeline; whichever loads first wins,
+arbitrarily, and the other set's rules leak into it.
+
+BEFORE INSTALLING ANY SKILL, SHOW ME THIS TABLE AND ASK WHICH SET I WANT. Present the default, wait
+for my answer, and do not start step 4 until I answer. If I do not answer, or you are running
+non-interactively, install A (Agent Skills) and say so in the report.
+
+  Aspect        | A. Agent Skills (DEFAULT)      | B. Superpowers               | C. Matt Pocock Skills
+  --------------|--------------------------------|------------------------------|--------------------------
+  Source        | addyosmani/agent-skills        | obra/superpowers             | mattpocock/skills
+  Philosophy    | encode the whole lifecycle,    | reason deeply up front, then | requirements first; refuses
+                | human checkpoint each phase    | hands-off autonomous run     | to own your process
+  Size          | 24 skills over 6 phases        | 6 pipeline stages            | many small modular skills
+  Invocation    | 8 slash commands               | pipeline activates itself    | user-invoked and
+                | /spec /plan /build /test       |                              | model-invoked kept separate
+                | /review /code-simplify         |                              |
+                | /webperf /ship                 |                              |
+  Execution     | stop at each phase for me      | fresh subagent per task      | one agent, light guidance
+                | (/build auto runs a whole      | in an isolated git worktree  |
+                | approved plan on its own)      |                              |
+  Signature     | 4 review personas fan out in   | 2-5 minute task granularity  | grilling: one question at a
+                | parallel at ship; CI evals     | with exact file paths; code  | time, dependency-aware
+                | that test the skills; explicit | review between every task    | requirements interrogation
+                | rebuttals to rationalizations  |                              |
+  Strongest     | breadth — security, perf,      | ambiguous exploratory work;  | when the bottleneck is an
+                | observability, CI/CD,          | approve once and walk away;  | unclear spec; easy to read
+                | deprecation; team vocabulary   | cherry-pick the pieces       | and rewrite yourself
+  Weakest       | opinionated and interlinked;   | heavy overhead on small,     | thinner coverage on long
+                | extending it risks routing     | well-defined tasks           | lifecycles; needs you in
+                | conflicts; least composable    |                              | the loop more often
+  Pick it when  | production features that go    | big task, fuzzy architecture,| you know roughly what to
+                | through security review to     | you want to delegate and     | build but not exactly what
+                | deploy; team standardization   | stop supervising             | it should do
+  --------------|--------------------------------|------------------------------|--------------------------
+  None of them fits a small, well-defined task — the process overhead outweighs the benefit.
+  No published benchmark compares any of the three against plain prompting, so treat the choice as a
+  preference about how much control you want, not as a measured performance claim.
+  Comparison source: https://dev.to/jamilxt/superpowers-vs-agent-skills-vs-pocock-three-philosophies-of-ai-coding-workflows-e6n
+
+RECORD MY ANSWER as WORKFLOW_SET=A|B|C in ~/.agents/install-manifest.json and in the step 11 report.
+Every later step that says "the chosen set" reads that value.
+
+IF A SET IS ALREADY INSTALLED AND I CHOOSE A DIFFERENT ONE, SWITCH — DO NOT STACK. Move the old set's
+links out of ~/.agents/skills into ~/.agents/disabled-skills/<set>-<timestamp>/ (mv, never delete),
+leave its source clone in place so the choice stays reversible, and add each moved skill name to
+~/.agents/skills-excluded if that file exists. THAT LAST STEP IS THE ONE THAT MATTERS: a relink pass
+walks the source tree and re-links every SKILL.md it finds, so a set that was only unlinked comes
+back on the next run with no broken link or empty directory to reveal it.
+
 === 4. INSTALL SKILLS ===
+
+Install the workflow set I chose in 4a, then every set-independent skill below it.
 
 Clone or update once into ~/.agents/sources/<owner>/<repo>. Prefer each repository's official Agent
 Skills installer ONLY IF it is non-interactive and non-destructive; otherwise clone and link yourself.
 
-  Matt Pocock Skills, incl. ask-matt  https://github.com/mattpocock/skills
+  --- THE WORKFLOW SET (install ONLY the one chosen in 4a) ---
+
+  A. Agent Skills (DEFAULT)           https://github.com/addyosmani/agent-skills
+                                      24 skills under skills/<name>/SKILL.md, all of them, no
+                                      hand-picking. Router is using-agent-skills; the lifecycle is
+                                      DEFINE -> PLAN -> BUILD -> VERIFY -> REVIEW -> SHIP.
+                                      Clone to ~/.agents/sources/addyosmani-agent-skills and link each
+                                      skills/<name>/ directory into ~/.agents/skills/<name>, so Codex and
+                                      OpenCode pick them up through the hub with no second install.
+                                      THREE CLAUDE-CODE-ONLY ASSETS DO NOT LIVE IN THE HUB, so link them
+                                      separately or they are simply missing:
+                                        - the 8 slash commands from .claude/commands/*.md into
+                                          ~/.claude/commands/agent-skills/ — the SUBDIRECTORY NAME BECOMES
+                                          THE COMMAND PREFIX (/agent-skills:build), which is what keeps
+                                          /build from colliding with a command you already own
+                                        - the 4 review personas from agents/*.md into ~/.claude/agents/
+                                        - hooks/ stays OPT-IN: do not register its SessionStart hook
+                                          unless I ask, and never on top of an existing session banner
+                                      For Codex and OpenCode, the slash commands have no equivalent. If I
+                                      want them, generate adapted copies (Codex: ~/.codex/prompts/,
+                                      OpenCode: ~/.config/opencode/command/) with the 'agent-skills:'
+                                      plugin prefix STRIPPED from the skill names in the body — copied
+                                      verbatim, the prefixed name resolves to nothing on those agents.
+                                      Do NOT use per-skill installs (npx skills add … --skill <name>):
+                                      they copy skills/<name>/ without the repo-root references/
+                                      directory, so the skill loads but its checklist links dangle.
+                                      If the marketplace route is used instead, note it clones over SSH
+                                      and fails with 'Permission denied (publickey)' without GitHub SSH
+                                      keys; force HTTPS rather than generating keys unattended.
+
+  B. Superpowers                      https://github.com/obra/superpowers
+                                      Pipeline set: brainstorming -> git worktrees -> writing-plans ->
+                                      subagent-driven-development -> TDD -> code review -> finish.
+                                      Install only if I chose B in 4a.
+
+  C. Matt Pocock Skills, incl. ask-matt  https://github.com/mattpocock/skills
+                                      Install only if I chose C in 4a.
                                       INSTALL EVERY SKILL IN THIS REPO — do not hand-pick. After the
                                       clone/pull, enumerate every directory containing a SKILL.md under
                                       skills/ (today: skills/engineering, skills/misc, skills/productivity
@@ -146,6 +242,9 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       landed this way and were simply absent). On every rerun, diff the
                                       enumerated upstream set against the existing links and install the
                                       difference — an install that is merely intact is not up to date.
+
+  --- SET-INDEPENDENT SKILLS (install these whichever set was chosen) ---
+
   Context Diet                        https://github.com/cskwork/context-diet-skill
   Autoresearch                        https://github.com/uditgoenka/autoresearch
   Call Agent                          https://github.com/cskwork/call-agent
@@ -233,14 +332,17 @@ causes it. For each linked skill, after updating its source, confirm <link>/SKIL
 non-empty; if it is not, search the source repo (skills/<name>/, then any SKILL.md within a few
 levels, excluding .git) and retarget the link to the directory that actually holds it.
 
-This setup's global rules require agents to open ask-matt automatically. After every clone/update,
-resolve the canonical ask-matt SKILL.md through its installed link and make it model-invokable:
+THE CHOSEN SET'S ROUTER MUST BE MODEL-INVOKABLE, or the global rules in step 7 point at a skill the
+agent never loads. The router is using-agent-skills for set A, using-superpowers for set B, ask-matt
+for set C. For set C only, upstream ships ask-matt as user-invoked, so after every clone/update
+resolve the canonical ask-matt SKILL.md through its installed link and flip that one flag:
   - Back up the file before the first change.
   - If frontmatter says 'disable-model-invocation: true', change only that value to false.
   - If it is already false or the field is absent, leave it unchanged.
   - Do not change this flag for any other skill.
 Treat this normalization as part of installation and repair, so reruns cannot restore the upstream
 user-invoked default and silently hide ask-matt from an agent's available-skills catalog.
+Sets A and B ship their routers model-invokable already — verify the frontmatter, change nothing.
 
 === 5. INSTALL STANDALONE TOOLS ===
 
@@ -459,7 +561,17 @@ REMOVAL IS NOT AUTOMATIC.
 === 7. GLOBAL INSTRUCTION FILES ===
 
 Replace every detected agent's global instruction file with the following content, from
-"# Operating Instructions" through the end of the "8. Report" paragraph:
+"# Operating Instructions" through the end of the "8. Report" paragraph.
+
+KEEP THIS FILE LEAN. Every agent loads it on every session, so it is the most expensive text in the
+setup. State the pipeline as one line of phase-to-command mapping; do not draw the ASCII box diagram
+from the upstream README into it. Diagrams belong in documentation, not in a per-session prompt.
+
+THE ROUTER NAME IN THE "Skill routing" LINE AND IN STEP 1 DEPENDS ON THE SET CHOSEN IN 4a. The text below is written for set A. For
+set B write using-superpowers, for set C write ask-matt, and in step 4 swap interview-me and
+documentation-and-adrs for that set's equivalents (set C: grilling and domain-modeling). A router
+name that does not match the installed set is a silent failure: the agent finds no such skill, skips
+orientation, and nothing in the file reveals why.
 
 # Operating Instructions
 
@@ -467,7 +579,9 @@ Replace every detected agent's global instruction file with the following conten
 
 **Domain rules** — Always read \`~/.agents/rules/rules.md\` (Windows: \`%USERPROFILE%\\.agents\\rules\\rules.md\`).
 
-**1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Open \`ask-matt\` to select the right skill. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
+**Skill routing** — \`~/.agents/skills/\` is the skill hub; \`using-agent-skills\` is the router. Place the task in one phase and drive it with that phase's command: DEFINE \`/spec\` → PLAN \`/plan\` → BUILD \`/build\` → VERIFY \`/test\` → REVIEW \`/review\` → SHIP \`/ship\`. Steps 1–8 below are how a phase is executed, not a second pipeline.
+
+**1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Route through \`using-agent-skills\`. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
 **2. Options** — Right after exploration, before any plan or code, give exactly three genuinely distinct approaches — different in strategy, not in wording. One line each: approach · main tradeoff · cost/risk. Rank them 1/2/3, mark 1 as recommended with one clause of why. Then stop and ask the user to pick. No code, no long prose. Skip only when one approach is obviously the only sane one.
 
@@ -476,7 +590,7 @@ Skip delegation only when you already know the exact file and symbol, or the cha
 
 **4. Plan** — State: \`task type · goal · files · contracts · verification · assumptions\`.
 
-After stating the plan, run a \`grilling\` session (using \`domain-modeling\`, producing ADRs/glossary) to interview the user until their intent is clearly understood and confirmed. Do not start implementation before this confirmation. Skip the grilling for trivial or unambiguous changes — state assumptions and proceed.
+After stating the plan, run \`interview-me\` — one question at a time until the user's intent is clear and confirmed at ~95% confidence — and record the hard-to-reverse decisions and glossary terms with \`documentation-and-adrs\`. Do not start implementation before this confirmation. Skip the interview for trivial or unambiguous changes — state assumptions and proceed.
 
 **5. Adversarial review** — After every plan, challenge:
 
@@ -606,12 +720,20 @@ followed by \`n+=1\` performs STRING CONCATENATION, so the script reports counts
 verification script that lies is worse than none.
 
 Also verify:
-  - The canonical ask-matt SKILL.md does not contain 'disable-model-invocation: true', and every
-    installed ask-matt link resolves to that same file.
-  - Every directory holding a SKILL.md under the Matt Pocock source (all categories, in-progress
-    included) has a corresponding link in ~/.agents/skills. Report the upstream count, the linked
-    count, and any name present upstream but missing locally. These two numbers must be equal; a
-    smaller local count is a stale install, not a healthy one.
+  - EXACTLY ONE workflow set is live. Count the routers present in ~/.agents/skills:
+    using-agent-skills, using-superpowers, ask-matt. The count must be 1, and it must be the set
+    recorded as WORKFLOW_SET. Two routers is the failure mode section 4a exists to prevent, and it
+    produces no broken link, no empty directory, and no error — only inconsistent behaviour.
+  - The chosen set's skill count matches upstream. Enumerate every directory holding a SKILL.md in
+    that set's source and confirm each has a link in ~/.agents/skills. Report the upstream count, the
+    linked count, and any name present upstream but missing locally. These must be equal; a smaller
+    local count is a stale install, not a healthy one. Set A is 24 skills today; set C enumerates all
+    categories including in-progress. Do not hardcode either number — read the source tree.
+  - For set A: the 8 slash commands resolve under ~/.claude/commands/agent-skills/ and the 4 personas
+    under ~/.claude/agents/, and the agent-skills SessionStart hook is NOT registered unless I asked.
+  - For set C only: the canonical ask-matt SKILL.md does not contain 'disable-model-invocation: true',
+    and every installed ask-matt link resolves to that same file.
+  - The router named in step 1 of the instruction file is the router that is actually installed.
   - Every CLI responds to --version / --help.
   - Every MCP server passes the handshake probe from step 6.3.
   - Instruction-file checksums are identical across all documented agent paths, including Jcode's
