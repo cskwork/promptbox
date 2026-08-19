@@ -89,7 +89,7 @@ cd ~/my-project && opencode
 
 ## 함정
 
-- **GLM Coding Plan 모델은 이미지를 못 읽는다.** 카탈로그상 `glm-5.3`을 포함한 5개 모델 전부 `input.image: false`다. 비전이 필요하면 Z.ai **일반 API**를 별도 공급자로 붙여야 한다 — `zai` 공급자(`https://api.z.ai/api/paas/v4`)의 `glm-5v-turbo`·`glm-4.6v`가 이미지·영상을 읽는다. **코딩 플랜 키와는 별개의 키·과금이다.** 키를 하나만 쓰고 싶으면 [glm-vision 플러그인](https://cskwork.github.io/promptbox/plugins/glm-vision/)으로 우회한다.
+- **GLM Coding Plan의 채팅 모델은 이미지를 못 읽는다 — 하지만 플랜에 비전은 있다.** 카탈로그상 `glm-5.3`을 포함한 5개 모델 전부 `input.image: false`지만, 플랜은 GLM-4.6V를 **Vision MCP 서버**(`@z_ai/mcp-server`)로 제공한다. 같은 키로 붙고 같은 구독에서 차감되며, Z.ai 공식 문서에 OpenCode용 `mcp` 설정 예시가 그대로 실려 있다. 별도 키가 필요한 쪽은 `zai` 일반 API(`https://api.z.ai/api/paas/v4`)의 비전 **모델**(`glm-5v-turbo`·`glm-4.6v`)을 직접 물릴 때다.
 - **패키지 이름과 명령 이름이 어긋난다.** v1은 패키지 `opencode-ai` → 명령 `opencode`, v2는 패키지 `@opencode-ai/cli@beta` → 명령 `opencode2`. `@opencode-ai/cli`의 `latest` 태그는 명령 이름이 `lildax`인 다른 물건이므로 **반드시 `@beta`를 붙인다.**
 - **`--refresh`는 v1 전용이다.** v2의 `opencode2 models`에는 `--refresh` 플래그가 없다.
 - **v2는 프리뷰다.** 버전이 `0.0.0-beta-*`이며, 플러그인이 MCP를 코드로 등록하는 경로가 없어 MCP 서버는 v2 설정에 직접 선언해야 한다.

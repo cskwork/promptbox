@@ -100,36 +100,53 @@ v2는 호스트 설정 디렉터리가 다르므로 `~/.config/opencode2/opencod
 
 파일 이름은 에이전트 이름 그대로다(`orchestrator.md`, `oracle.md`, …).
 
-## 이미지를 읽히려면 — Observer (선택)
+## 이미지를 읽히려면 — Vision MCP (GLM-4.6V)
 
-`observer`는 기본 비활성이고, 켜려면 비전 모델이 필요하다. **GLM Coding Plan(`zai-coding-plan`) 모델 5개는 전부 이미지 입력을 지원하지 않는다.** 비전 모델은 Z.ai **일반 API**(`zai` 공급자, `https://api.z.ai/api/paas/v4`)에 있고, 이쪽은 코딩 플랜과 키도 과금도 별개다.
+**Coding Plan에는 GLM-4.6V가 들어 있다 — 모델이 아니라 MCP 서버로.** Z.ai 공식 크레딧 표에 `GLM-4.6V（Vision MCP）`가 입력 1.2 / 캐시 0.3 / 출력 2.7 배수로 올라 있고 같은 구독에서 차감된다. 별도 키·별도 과금이 필요 없다.
 
-| 모델 | 입력 | 컨텍스트 | 100만 토큰당 |
-|---|---|---|---|
-| `zai/glm-5v-turbo` | 텍스트·이미지·영상·PDF | 200,000 | $1.20 / $4.00 |
-| `zai/glm-4.6v` | 텍스트·이미지·영상 | 128,000 | $0.30 / $0.90 |
-| `zai/glm-4.5v` | 텍스트·이미지·영상 | 64,000 | $0.60 / $1.80 |
-
-`opencode auth login`으로 `zai` 공급자를 추가한 뒤, 설정에 아래를 합친다(스키마 검증 통과):
+1. 호스트 설정(v2는 `~/.config/opencode2/opencode.json`, v1은 `~/.config/opencode/opencode.json`)에 MCP를 등록한다 — Z.ai 공식 문서의 OpenCode 예시 그대로다:
 
 ```json
 {
-  "disabled_agents": [],
-  "image_routing": "auto",
-  "presets": {
-    "glm": {
-      "observer": { "model": "zai/glm-5v-turbo", "skills": [], "mcps": [] }
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "zai-mcp-server": {
+      "type": "local",
+      "command": ["npx", "-y", "@z_ai/mcp-server@latest"],
+      "environment": {
+        "Z_AI_API_KEY": "코딩플랜_키",
+        "Z_AI_MODE": "ZAI"
+      }
     }
   }
 }
 ```
 
-`disabled_agents: []`가 Observer를 켠다. `image_routing`은 `"auto"`(첨부를 디스크에 저장하고 `@observer`에게 위임 유도)와 `"direct"`(무조건 Orchestrator에게 그대로 전달) 중 하나이며, `"auto"`는 Observer가 켜져 있을 때만 쓴다. 두 번째 키를 만들고 싶지 않다면 Observer는 끈 채로 두고 [glm-vision](https://cskwork.github.io/promptbox/plugins/glm-vision/)으로 이미지를 처리하면 된다.
+2. 눈이 필요한 에이전트에 MCP를 준다. `mcps`에 이름을 넣으면 끝이고, **모델은 비전이 아니어도 된다**:
+
+```json
+{
+  "presets": {
+    "glm": {
+      "designer": { "model": "zai-coding-plan/glm-5.3", "skills": [], "mcps": ["zai-mcp-server"] }
+    }
+  }
+}
+```
+
+**실측(2026-08-19)**: 이 설정에서 비전이 없는 `glm-5.3`으로 도는 `@designer`가 `analyze_image`를 호출해 테스트 PNG의 문자열과 도형을 정확히 읽었다.
+
+도구 8종: `ui_to_artifact`(스크린샷 → 코드) · `extract_text_from_screenshot`(OCR) · `diagnose_error_screenshot`(에러 화면 진단) · `understand_technical_diagram`(아키텍처·UML·ERD) · `analyze_data_visualization`(차트·대시보드) · `ui_diff_check`(UI 두 장 비교) · `analyze_image` · `analyze_video`. 앞의 여섯은 Designer·Observer와, `diagnose_error_screenshot`은 Fixer와 잘 맞는다.
+
+**대안 — 비전 모델을 직접 물리기.** 에이전트 `model`에 비전 모델을 넣어도 동작한다. 실측으로 `designer`에 `openai/gpt-5.6-luna`를 물리고 `--file`로 이미지를 붙였더니 그대로 읽었다. 다만 Coding Plan 안에는 비전 채팅 모델이 없어서, 이 길은 Z.ai 일반 API(`zai` 공급자, 별도 키)나 다른 공급자를 끌어와야 한다. 키 하나로 끝내려면 위의 Vision MCP가 낫다.
+
+**함정**: 이미지를 클라이언트에 붙여넣지 마라. Z.ai 문서가 명시하듯 대부분의 클라이언트는 붙여넣은 이미지를 자체 변환해 모델을 직접 호출하므로 MCP를 타지 않는다. 파일을 디스크에 두고 프롬프트에서 경로·이름으로 지목한다. Node.js 22 이상 필요.
 
 ## 함정
 
 - **내장 에이전트의 `prompt` 필드는 JSON에 못 쓴다.** `orchestrator`·`oracle` 같은 내장 에이전트는 모델·스킬·MCP만 JSON으로 설정하고, 프롬프트는 위의 마크다운 파일로만 바꾼다. 커스텀 에이전트(`agents.<이름>`)는 `prompt`를 직접 쓸 수 있다.
-- **이미지 담당은 `designer`가 아니라 `observer`다.** Designer의 역할은 "UI/UX 판단과 프론트엔드 구현"이고, 이미지 첨부는 `image_routing` 설정에 따라 Observer 쪽으로 간다. 헷갈려서 Designer에 비전 모델을 물려도 첨부 이미지가 그리로 가지 않는다.
+- **`image_routing`은 첨부 이미지의 자동 경로만 정한다.** `"auto"`는 Observer가 켜져 있을 때 첨부를 디스크에 저장해 `@observer`에게 위임을 유도하고, `"direct"`는 Orchestrator에게 그대로 넘긴다. 이건 *자동 라우팅* 이야기일 뿐이고, **Vision MCP나 비전 모델을 가진 에이전트는 경로를 지목받으면 누구든 이미지를 읽는다** — Designer 포함.
+- **`observer`는 여전히 기본 비활성이다.** 켜려면 `disabled_agents: []`로 비우고 비전 모델 또는 Vision MCP를 붙여야 한다. Observer의 값어치는 원본 파일을 메인 컨텍스트에 올리지 않고 구조화된 관찰 결과만 돌려준다는 데 있다.
 - **설정 우선순위**: 프로젝트의 `.opencode/oh-my-opencode-slim.json` → 사용자 `~/.config/opencode/oh-my-opencode-slim.jsonc` → `.json`. `.jsonc`가 있으면 `.json`을 덮는다.
 - **배경 작업이 기본값이다.** 전문 에이전트가 동시에 돌기 때문에, tmux·Zellij 같은 멀티플렉서를 붙여 각 에이전트를 별도 창에서 보는 편이 상황 파악에 훨씬 낫다.
 - **`oh-my-opencode`의 경량 포크다.** 원본과 설정 파일 이름이 다르니 문서를 섞어 보면 안 된다.
