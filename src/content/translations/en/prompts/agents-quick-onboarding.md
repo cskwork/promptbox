@@ -17,7 +17,10 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 |---|---|---|---|
 | AGENTS.md | Shared rules | Operating instructions embedded in the prompt | One system prompt shared by every CLI |
 | rules/rules.md | Domain rules | Written by you on this machine | Domain and safety rules that differ per environment. Keeps the instruction file identical everywhere while the rules vary. Never overwritten |
-| **Matt Pocock Skills** (37) | Skills | mattpocock/skills | `ask-matt` for design, debugging, and trade-offs, plus `tdd`, `triage`, `code-review`, `research`, `prototype`, `implement`, `to-spec`, and more |
+| **Workflow set — pick one** (default A) | Skill bundle | A: addyosmani/agent-skills · B: obra/superpowers · C: mattpocock/skills | The layer that decides *how* the agent works. **Install exactly one** — the routers claim the same task, so two is a bug, not a bonus. Section 4a of the prompt shows the table below and asks before installing anything |
+| **A. Agent Skills** (default, 24) | Skills | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | Forces the whole lifecycle: DEFINE → PLAN → BUILD → VERIFY → REVIEW → SHIP, one slash command per phase (`/spec` `/plan` `/build` `/test` `/review` `/code-simplify` `/webperf` `/ship`), four review personas, router `using-agent-skills` |
+| B. Superpowers (optional) | Skills | obra/superpowers | Plans deeply up front, then runs hands-off: git worktree isolation and a fresh subagent per task |
+| C. Matt Pocock Skills (optional, whole repo) | Skills | mattpocock/skills | `ask-matt` for design, debugging, and trade-offs, plus `grilling`, `tdd`, `triage`, `to-spec`, `wayfinder`, and more |
 | context-diet | Skill | cskwork/context-diet-skill | Measures and reduces system-prompt bloat |
 | autoresearch | Skill | uditgoenka/autoresearch | Autonomous research loops |
 | call-agent | Skill | cskwork/call-agent | Routes delegated work to Codex, agy, Kiro, Claude, and NotebookLM |
@@ -34,6 +37,30 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 
 > The prompt does not assume a fixed number of installed CLIs. It first checks whether each tool reads `~/.agents/skills` directly, then creates only the adapters that are actually needed.
 
+## Three philosophies — which one to pick
+
+The prompt shows this table **before** installing any skill and asks for A, B, or C. With no answer,
+or in a non-interactive run, it installs **A (Agent Skills)** and says so in its report.
+
+| Aspect | **A. Agent Skills** (default) | B. Superpowers | C. Matt Pocock Skills |
+|---|---|---|---|
+| Author | Addy Osmani | Jesse Vincent (obra) | Matt Pocock |
+| Philosophy | Encode the whole lifecycle, **human checkpoint at each phase** | Reason deeply up front, then **hands-off autonomous execution** | **Requirements first**; refuses to own your process |
+| Size | 24 skills over 6 phases | 6 pipeline stages | Many small modular skills |
+| Invocation | 8 slash commands | The pipeline activates itself | User-invoked and model-invoked kept separate |
+| Execution | Stops at each phase (`/build auto` runs a whole approved plan on its own) | Fresh subagent per task in an isolated git worktree | One agent with light guidance |
+| Signature | Four review personas fan out in parallel at ship; CI evals that test the skills; explicit rebuttals to rationalizations like "I'll write tests later" | 2–5 minute task granularity with exact file paths; code review between every task | `grilling` — one question at a time, dependency-aware requirements interrogation |
+| Strongest | Breadth: security, performance, observability, CI/CD, deprecation; a shared team vocabulary | Ambiguous exploratory work; approve once and walk away; easy to cherry-pick | When the bottleneck is an unclear spec; easy to read and rewrite |
+| Weakest | Opinionated and interlinked, so extending it risks routing conflicts; least composable | Heavy overhead on small, well-defined tasks | Thinner coverage on long lifecycles; needs you in the loop more often |
+| Pick it when | Production features that go through security review to deploy; team standardization | A big task with fuzzy architecture that you want to delegate and stop supervising | You know roughly what to build but not exactly what it should do |
+
+- **None of them fits a small, well-defined task** — the process overhead outweighs the benefit.
+- **There is no benchmark.** No published experiment compares any of the three against plain
+  prompting without skill scaffolding, and the context they occupy can hurt on simple tasks. Treat
+  the choice as a preference about how much control you want, not a measured performance claim.
+- Comparison source: [Superpowers vs Agent Skills vs Pocock — dev.to/jamilxt](https://dev.to/jamilxt/superpowers-vs-agent-skills-vs-pocock-three-philosophies-of-ai-coding-workflows-e6n)
+  · catalog entries: [Agent Skills](../../plugins/agent-skills/) · [Superpowers](../../plugins/superpowers/)
+
 ## When to use it
 
 - When setting up a new laptop or server and you want your frequently used skills installed in one pass.
@@ -43,12 +70,13 @@ Skills are linked into `~/.agents/skills/`, while their source repositories are 
 ## What it does
 
 1. **Inventories the current state before touching anything** in `inventory.tsv`, so every replacement has a restore path.
-2. Makes `~/.agents/` the single source of truth for shared `AGENTS.md` rules, linked skills, cloned sources, setup scripts, documentation, and the install manifest.
-3. Clones upstream repositories and links each complete skill directory into `~/.agents/skills/<name>`. Existing items are updated, while incomplete or broken items are repaired.
-4. Detects installed coding CLIs and connects only their documented global instruction and skill paths to the shared hub.
-5. Installs the required CLI tools and MCP servers, then validates MCP integrations with a real protocol handshake rather than merely checking that a process starts. `rtk` is installed here too, and `rtk init -g` wires its hook into each detected agent.
-6. Finds codebase-indexer MCP servers such as codebase-memory-mcp, lists them for you, and removes them **only after you approve**.
-7. Leaves behind a read-only audit script and an idempotent repair script for future failures.
+2. **Asks you to pick one workflow set** and installs no skill until you answer. If another set is already installed and you pick a different one, it **switches instead of stacking**: the old links move to `~/.agents/disabled-skills/<set>-<timestamp>/` (moved, never deleted) and their names go into `skills-excluded` — that last step is the one that matters, because a relink pass otherwise resurrects an unlinked set with nothing broken to reveal it.
+3. Makes `~/.agents/` the single source of truth for shared `AGENTS.md` rules, linked skills, cloned sources, setup scripts, documentation, and the install manifest.
+4. Clones upstream repositories and links each complete skill directory into `~/.agents/skills/<name>`. Existing items are updated, while incomplete or broken items are repaired.
+5. Detects installed coding CLIs and connects only their documented global instruction and skill paths to the shared hub.
+6. Installs the required CLI tools and MCP servers, then validates MCP integrations with a real protocol handshake rather than merely checking that a process starts. `rtk` is installed here too, and `rtk init -g` wires its hook into each detected agent.
+7. Finds codebase-indexer MCP servers such as codebase-memory-mcp, lists them for you, and removes them **only after you approve**.
+8. Leaves behind a read-only audit script and an idempotent repair script for future failures.
 
 ## Gotchas the prompt handles
 
