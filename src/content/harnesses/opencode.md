@@ -1,7 +1,7 @@
 ---
 title: OpenCode
-summary: "터미널에서 도는 오픈소스 코딩 에이전트. 특정 모델 회사에 묶이지 않고 Z.ai·OpenAI·Anthropic 등 어느 공급자든 붙여 쓰며, LSP(코드 분석 서버)로 파일을 이해하고 명령마다 실행 권한을 물어본다. GLM-5.3(컨텍스트 100만 토큰)을 붙이면 구독 하나로 대형 코드베이스를 다룰 수 있다."
-summary_en: "Open-source terminal coding agent that is provider-agnostic by design — plug in Z.ai, OpenAI, or Anthropic, get LSP-aware editing and per-command permission prompts. Paired with GLM-5.3 it gives you a 1M-token context on a single coding-plan subscription."
+summary: "터미널에서 도는 오픈소스 코딩 에이전트(v2 프리뷰 opencode2 권장). 특정 모델 회사에 묶이지 않고 Z.ai·OpenAI·Anthropic 등 어느 공급자든 붙여 쓰며, LSP(코드 분석 서버)로 파일을 이해하고 명령마다 실행 권한을 물어본다. GLM-5.3(컨텍스트 100만 토큰)을 붙이면 구독 하나로 대형 코드베이스를 다룰 수 있다."
+summary_en: "Open-source terminal coding agent (v2 preview, opencode2) that is provider-agnostic by design — plug in Z.ai, OpenAI, or Anthropic, get LSP-aware editing and per-command permission prompts. Paired with GLM-5.3 it gives you a 1M-token context on a single coding-plan subscription."
 tags: [harness, opencode, terminal, tui, provider-agnostic, glm, zai-coding-plan, lsp, agents-md]
 source: https://github.com/anomalyco/opencode
 author: anomalyco
@@ -11,7 +11,7 @@ base_agent: "자체 하네스 (모델 공급자 무관)"
 base_agent_en: "Standalone harness (provider-agnostic)"
 languages: [TypeScript]
 platforms: [macOS, Linux, Windows]
-install: "curl -fsSL https://opencode.ai/install | bash"
+install: "npm install -g @opencode-ai/cli@beta   # 실행 명령은 opencode2"
 ---
 
 ## 한 줄
@@ -28,24 +28,27 @@ install: "curl -fsSL https://opencode.ai/install | bash"
 
 ## 설치와 첫 실행 (verified 2026-08-19)
 
+두 계열이 있다. **v2 프리뷰(`opencode2`)** 가 현재 권장 경로이고, **v1 안정판(`opencode`)** 이 기존 경로다.
+
 ```bash
-# 1. 설치 — 공식 스크립트 (macOS / Linux / WSL). 실행 파일 이름은 opencode
-curl -fsSL https://opencode.ai/install | bash
+# ── v2 프리뷰 (권장) ── 패키지 @opencode-ai/cli 의 beta 태그, 실행 명령은 opencode2
+npm install -g @opencode-ai/cli@beta
+opencode2 --version            # 실측: v0.0.0-beta-17595
 
-#    npm이 익숙하면 이것도 같다 (Windows 포함, darwin/linux/win32 · arm64/x64 바이너리 제공)
-npm install -g opencode-ai@latest
+opencode2 auth login           # 목록에서 zai-coding-plan 선택 → 키 붙여넣기
+opencode2 models | grep zai    # glm-5.3 이 보이면 구독이 열린 것
 
-# 2. 키 연결 — 목록에서 zai-coding-plan 선택 후 API 키 붙여넣기
+cd ~/my-project && opencode2
+
+# ── v1 안정판 ── 패키지 opencode-ai, 실행 명령은 opencode
+curl -fsSL https://opencode.ai/install | bash   # macOS / Linux / WSL
+npm install -g opencode-ai@latest               # 같은 것, Windows는 이쪽
 opencode auth login
-#    저장 위치: ~/.local/share/opencode/auth.json  ({"type":"api","key":"..."})
-
-# 3. 이 계정이 실제로 쓸 수 있는 모델 목록 새로고침
-opencode models --refresh
-
-# 4. 작업할 폴더에서 실행
-cd ~/my-project
-opencode
+opencode models --refresh      # --refresh 는 v1에만 있다
+cd ~/my-project && opencode
 ```
+
+키는 로컬 `~/.local/share/opencode/auth.json`에 `{"type":"api","key":"..."}` 형태로 저장된다.
 
 에이전트 안에서 `/models`로 모델을 고른다. Z.ai GLM Coding Plan 구독으로 열리는 모델은 다음 5개다(2026-08 카탈로그 실측):
 
@@ -59,7 +62,7 @@ opencode
 
 ## 설정 파일
 
-`~/.config/opencode/opencode.json`(전역) 또는 프로젝트의 `.opencode/`가 설정 위치다. 모델별 옵션을 고정하려면:
+**계열마다 디렉터리가 다르다.** v1은 `~/.config/opencode/opencode.json`, v2는 `~/.config/opencode2/opencode.json`을 읽는다. 프로젝트 단위 설정은 `.opencode/`. 모델별 옵션을 고정하려면:
 
 ```json
 {
@@ -87,6 +90,6 @@ opencode
 ## 함정
 
 - **GLM Coding Plan 모델은 이미지를 못 읽는다.** 카탈로그상 `glm-5.3`을 포함한 5개 모델 전부 `input.image: false`다. 비전이 필요하면 Z.ai **일반 API**를 별도 공급자로 붙여야 한다 — `zai` 공급자(`https://api.z.ai/api/paas/v4`)의 `glm-5v-turbo`·`glm-4.6v`가 이미지·영상을 읽는다. **코딩 플랜 키와는 별개의 키·과금이다.** 키를 하나만 쓰고 싶으면 [glm-vision 플러그인](https://cskwork.github.io/promptbox/plugins/glm-vision/)으로 우회한다.
-- **`opencode auth login` 후 모델이 안 보이면 `opencode models --refresh`.** 모델 카탈로그는 캐시된다.
-- **npm 패키지 이름은 `opencode-ai`, 실행 명령은 `opencode`.** `opencode`라는 이름의 npm 패키지를 설치하면 다른 물건이다.
-- **`opencode2`는 별개의 v2 베타(`@opencode-ai/cli`)다.** 설정 파일과 플러그인 호환성이 v1과 다르므로, 입문자는 `opencode`(v1)로 시작하는 편이 안전하다.
+- **패키지 이름과 명령 이름이 어긋난다.** v1은 패키지 `opencode-ai` → 명령 `opencode`, v2는 패키지 `@opencode-ai/cli@beta` → 명령 `opencode2`. `@opencode-ai/cli`의 `latest` 태그는 명령 이름이 `lildax`인 다른 물건이므로 **반드시 `@beta`를 붙인다.**
+- **`--refresh`는 v1 전용이다.** v2의 `opencode2 models`에는 `--refresh` 플래그가 없다.
+- **v2는 프리뷰다.** 버전이 `0.0.0-beta-*`이며, 플러그인이 MCP를 코드로 등록하는 경로가 없어 MCP 서버는 v2 설정에 직접 선언해야 한다.

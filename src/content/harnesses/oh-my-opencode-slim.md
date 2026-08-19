@@ -47,6 +47,26 @@ npx oh-my-opencode-slim@latest install
 
 설치기가 `~/.config/opencode/opencode.json`의 `plugin` 배열에 `oh-my-opencode-slim`을 등록하고, `~/.config/opencode/oh-my-opencode-slim.json`을 만든다. 이때 생성되는 프리셋은 `openai`와 `opencode-go` 둘뿐이고 기본값은 `openai`다. **GLM 프리셋은 직접 써 넣어야 한다.**
 
+## opencode2(v2)에서 쓰기
+
+플러그인은 **v1·v2 양쪽에서 도는 같은 패키지**다. 패키지 기본 export가 `{ id, server, setup }`이고 v1은 `server`, v2는 `setup`을 로드한다.
+
+v2는 호스트 설정 디렉터리가 다르므로 `~/.config/opencode2/opencode.json`에도 등록해야 한다:
+
+```json
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": ["oh-my-opencode-slim@latest"],
+  "mcp": {
+    "gh_grep": { "type": "remote", "url": "https://mcp.grep.app" }
+  }
+}
+```
+
+`opencode2 plugin list`에 `oh-my-opencode-slim`이 나오면 붙은 것이다. **v2에는 플러그인이 MCP를 코드로 등록하는 경로가 없다** — 에이전트가 쓸 MCP 서버는 위처럼 `mcp` 항목에 직접 선언한다.
+
+플러그인 자체 설정(`oh-my-opencode-slim.json`)은 호스트가 v2여도 `~/.config/opencode/`에 그대로 둔다.
+
 ## GLM-5.3 프리셋 (스키마 검증 통과)
 
 `~/.config/opencode/oh-my-opencode-slim.json`을 아래처럼 만들면 팀 전체가 Z.ai GLM Coding Plan 위에서 돈다. 무겁게 생각해야 하는 자리에는 `glm-5.3`(컨텍스트 100만), 탐색·문서조회처럼 양이 많고 값싼 자리에는 `glm-5-turbo`를 물렸다.
