@@ -19,6 +19,8 @@ they land on `main`.
 - `hooks/` — lifecycle hook scripts (`PreToolUse` / `PostToolUse` / `Stop`) that gate or augment tool calls. One repo / many scripts in `hooks/` directory + `settings.json` snippet.
 - `configs/` — whole-file agent system prompts (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`)
 - `mcps/` — MCP server install/usage snippets
+- `tools/` — **standalone CLIs and binaries** a developer installs and runs directly (`orca`, `herdr`, `officecli`, `ai-memory`). It may also expose an MCP endpoint or ship skills; what puts it here is that the deliverable is a program you run.
+- `apps/` — **end-user applications**, usually self-hosted or GUI (`docmost`, `plane`, `meetily`). Something you deploy and open, not something an agent loads.
 
 ### Category routing rules
 
@@ -30,13 +32,23 @@ they land on `main`.
 | A **coding agent itself**, or a workflow/runtime layer (`oh-my-codex`-like) wrapping one, or a harness builder (`Archon`-like) | `harnesses/` |
 | Lifecycle hook scripts — PreToolUse / PostToolUse / Stop / etc., usually shipped as a `hooks/` directory + `settings.json` snippet | `hooks/` |
 | A whole-file agent system prompt (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`) | `configs/` |
-| MCP server install snippet or `mcpServers` JSON config | `mcps/` |
+| MCP server install snippet or `mcpServers` JSON config, and that snippet is the whole item | `mcps/` |
+| A CLI / binary you install and run yourself, even if it also serves MCP or ships hooks | `tools/` |
+| A self-hosted or GUI application you deploy and open | `apps/` |
 
 Tie-breaker: **match the artifact's filename / packaging**. A `SKILL.md` goes in
 `skills/`; a repo with `.claude-plugin/` + `skills/<many>/` goes in `plugins/`;
 a repo whose entry point is `omx`/`omp`/`archon` CLI (and the skills are
 secondary) goes in `harnesses/`; a repo whose primary deliverable is
 `hooks/*.sh` + `settings.json` matchers goes in `hooks/`.
+
+`mcps/` vs `tools/` is the one people get wrong. Ask what you install: if the
+answer is "a JSON snippet pointing at something someone else runs", it is
+`mcps/`; if you download a binary and run it, it is `tools/` even when MCP is
+how agents talk to it. `ai-memory` ships a Rust binary, a server, hooks, and an
+MCP endpoint — it lives in `tools/ai-memory.md`. **Slugs are unique across
+categories**; there is no entry filed under two of them, so move rather than
+copy.
 
 If a source repo has no `SKILL.md` but the user says "add this as a skill", **you write
 the SKILL.md** in the body (frontmatter + Markdown matching the SKILL.md spec) so the
@@ -94,6 +106,11 @@ tools?: string[]         # which tools read it (Claude Code, Codex CLI, Cursor, 
 # mcps/
 server_name?: string
 transport?: 'stdio' | 'sse' | 'http'
+
+# tools/ and apps/ (identical field sets)
+languages?: string[]     # implementation languages (["Rust"], ["TypeScript"])
+platforms?: string[]     # supported OS / runtime (["macOS", "Linux", "WSL2"])
+install?: string         # primary install one-liner
 ```
 
 `title`, `summary`, `tags` are the practical minimum. Everything else is optional but
@@ -217,11 +234,15 @@ There is no test suite. The build is the validation step.
 
 ## What you must NOT do
 
-- Don't add a new top-level category without updating **all of**:
-  `src/content/config.ts` (Zod schema + `CATEGORY_META`), the `COLLECTIONS` arrays in
-  `src/pages/index.astro` / `src/pages/[category]/[...slug].astro` / `src/layouts/BaseLayout.astro`.
-  Current order is `['prompts', 'skills', 'plugins', 'harnesses', 'hooks', 'configs', 'mcps']` —
-  keep all three files in sync.
+- Don't add a new top-level category without updating `src/content/config.ts` in three
+  places: the Zod collection, the `collections` export, and both `CATEGORY_ORDER` and
+  `CATEGORY_META`. Current order is
+  `['prompts', 'skills', 'plugins', 'harnesses', 'hooks', 'configs', 'mcps', 'tools', 'apps']`.
+  `src/pages/index.astro`, `src/pages/[category]/[...slug].astro`, and
+  `src/layouts/BaseLayout.astro` all derive their list from `CATEGORY_ORDER`
+  (`[...CATEGORY_ORDER]`) — do **not** hand-edit a `COLLECTIONS` array in them; there
+  isn't one to edit. `translations/` is a real collection but not a category: it holds
+  full-body EN translations and never appears in navigation.
 - Don't rewrite layout/components for a single item. Adjust schema or body content first.
 - Don't commit `.tmp-sources/`, `dist/`, or `node_modules/`. They're gitignored.
 - Don't change `astro.config.mjs`'s default `BASE` (`/promptbox`) unless the GitHub
