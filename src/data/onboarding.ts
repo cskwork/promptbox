@@ -21,6 +21,8 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'plugins', slug: 'superpowers' },
   { category: 'skills', slug: 'ask-matt' },
   { category: 'skills', slug: 'setup-matt-pocock-skills' },
+  // set-independent: one keystroke that makes the agent re-explain itself
+  { category: 'skills', slug: 'wait-what' },
   // one shared memory every agent reads and writes
   { category: 'tools', slug: 'ai-memory' },
   // orient + plan
@@ -245,6 +247,26 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
 
   --- SET-INDEPENDENT SKILLS (install these whichever set was chosen) ---
 
+  wait-what                           https://github.com/mattpocock/skills
+                                      INSTALL THIS ONE FOR EVERY SET, INCLUDING A AND B. It lives in the
+                                      Matt Pocock repo but it is not part of that workflow set: it is a
+                                      six-line skill I type when a reply did not land, and it asks the
+                                      agent to re-pitch with context, in Simplified Technical English,
+                                      using the ubiquitous language from CONTEXT.md. It owns no
+                                      pipeline and declares no router, so it cannot conflict with the
+                                      chosen set.
+                                      Clone the repo (shallow is enough) and link ONLY
+                                      skills/productivity/wait-what as ~/.agents/skills/wait-what. Do not
+                                      enumerate the rest of that repo unless set C was chosen.
+                                      LEAVE 'disable-model-invocation: true' ALONE. It is deliberate —
+                                      the skill exists for me to invoke at the moment I am confused, and
+                                      a model that can invoke it will re-pitch on its own initiative. The
+                                      router normalization further down applies to the chosen set's
+                                      router only, never to this skill.
+                                      IF SET C WAS CHOSEN, the full-repo enumeration already links this
+                                      skill. Do not link it twice: two directories declaring
+                                      'name: wait-what' means only one loads and which one is arbitrary,
+                                      which is the duplicate family step 8 archives.
   Context Diet                        https://github.com/cskwork/context-diet-skill
   Autoresearch                        https://github.com/uditgoenka/autoresearch
   Call Agent                          https://github.com/cskwork/call-agent

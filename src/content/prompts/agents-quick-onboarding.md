@@ -29,6 +29,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | **A. Agent Skills** (기본값, 24종) | 스킬 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | 개발 전 과정을 DEFINE→PLAN→BUILD→VERIFY→REVIEW→SHIP 6단계로 강제. 단계별 슬래시 명령 8개(`/spec` `/plan` `/build` `/test` `/review` `/code-simplify` `/webperf` `/ship`), 리뷰 페르소나 4종, 라우터는 `using-agent-skills` |
 | B. Superpowers (선택) | 스킬 | obra/superpowers | 앞단에서 깊게 계획하고 그 뒤는 자율 실행. git worktree 격리 + 태스크마다 새 subagent |
 | C. Matt Pocock Skills (선택, 저장소 전체 35종) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `grilling`(한 번에 한 질문으로 요구 캐기), `tdd`, `triage`, `to-spec`, `wayfinder` 등 |
+| **wait-what** (세트와 무관, 항상 설치) | 스킬 | [mattpocock/skills](https://github.com/mattpocock/skills) (`skills/productivity/wait-what`) | 답이 이해가 안 될 때 내가 치는 한 방. 맥락을 붙여서, ASD-STE100 단순화 기술영어로, `CONTEXT.md`의 공통 용어로 **다시 설명하게** 한다. 6줄짜리 스킬이라 파이프라인도 라우터도 없고 어떤 세트와도 충돌하지 않아 **A·B를 골라도 깔린다**. `disable-model-invocation: true`는 의도된 값이니 그대로 둔다 — 내가 헷갈린 그 순간에 내가 부르는 스킬이다 |
 | context-diet | 스킬 | cskwork/context-diet-skill | 시스템 프롬프트 비대화 측정·감축 |
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
 | call-agent | 스킬 | cskwork/call-agent | codex·agy·kiro·claude·notebooklm로 위임 라우팅 |
@@ -380,6 +381,26 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
 
   --- SET-INDEPENDENT SKILLS (install these whichever set was chosen) ---
 
+  wait-what                           https://github.com/mattpocock/skills
+                                      INSTALL THIS ONE FOR EVERY SET, INCLUDING A AND B. It lives in the
+                                      Matt Pocock repo but it is not part of that workflow set: it is a
+                                      six-line skill I type when a reply did not land, and it asks the
+                                      agent to re-pitch with context, in Simplified Technical English,
+                                      using the ubiquitous language from CONTEXT.md. It owns no
+                                      pipeline and declares no router, so it cannot conflict with the
+                                      chosen set.
+                                      Clone the repo (shallow is enough) and link ONLY
+                                      skills/productivity/wait-what as ~/.agents/skills/wait-what. Do not
+                                      enumerate the rest of that repo unless set C was chosen.
+                                      LEAVE 'disable-model-invocation: true' ALONE. It is deliberate —
+                                      the skill exists for me to invoke at the moment I am confused, and
+                                      a model that can invoke it will re-pitch on its own initiative. The
+                                      router normalization further down applies to the chosen set's
+                                      router only, never to this skill.
+                                      IF SET C WAS CHOSEN, the full-repo enumeration already links this
+                                      skill. Do not link it twice: two directories declaring
+                                      'name: wait-what' means only one loads and which one is arbitrary,
+                                      which is the duplicate family step 8 archives.
   Context Diet                        https://github.com/cskwork/context-diet-skill
   Autoresearch                        https://github.com/uditgoenka/autoresearch
   Call Agent                          https://github.com/cskwork/call-agent
