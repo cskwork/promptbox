@@ -14,7 +14,7 @@ install: "npx skills add https://github.com/mattpocock/skills --skill wait-what"
 ## 한 줄
 
 **멈춰. 방금 그 메시지는 전달되지 않았다 — 다시 던져라.** 스킬 전체가 문장 두 개다.
-*EN: Stop. That last message did not land — re-pitch it.*
+*EN: "Stop. That last message did not land: re-pitch it."*
 
 > **온보딩 키트 기본 포함.** [퀵 온보딩 프롬프트](../../prompts/agents-quick-onboarding/)는 워크플로 세트를
 > A(Agent Skills)·B(Superpowers)·C(Matt Pocock) 중 하나만 깔지만, 이 스킬은 **어느 걸 골라도 깐다**.
@@ -33,11 +33,13 @@ install: "npx skills add https://github.com/mattpocock/skills --skill wait-what"
 1. **맥락을 조금 깔고 시작** — 어디까지 왔는지부터.
 2. **ASD-STE100 Simplified Technical English** — 항공·방산 기술문서용 제한 영어 규격. 어휘와 문장 구조를 좁혀서 모호함을 없앤다.
 3. **`CONTEXT.md`의 ubiquitous language(프로젝트 전체가 공유하는 용어)** 사용 — 임의 용어 금지.
+   `CONTEXT.md`가 여러 개인 레포에서는 `CONTEXT-MAP.md`를 따라 맞는 것을 고른다.
 
 ## 함정
 
 - **`disable-model-invocation: true`** — 모델이 알아서 부르지 않는다. `/wait-what`으로 직접 호출.
-- **`CONTEXT.md`가 있어야 3번이 산다.** 없다면 `/domain-modeling`으로 먼저 만든다.
+- **`CONTEXT.md`가 있어야 3번이 산다.** 없으면 먼저 만든다 — 기본 세트(Agent Skills)에서는
+  `documentation-and-adrs`, 세트 C에서는 `/domain-modeling`이 그 역할이다.
 - 영어 규격을 지정하는 스킬이라, 한국어로 답을 받으려면 호출 뒤에 그 요청을 덧붙이는 편이 확실하다.
 
 ## 원문 SKILL.md (전문)
@@ -45,9 +47,9 @@ install: "npx skills add https://github.com/mattpocock/skills --skill wait-what"
 ```markdown
 ---
 name: wait-what
-description: Stop. That last message did not land — re-pitch it.
+description: "Stop. That last message did not land: re-pitch it."
 disable-model-invocation: true
 ---
 
-Wait — I don't understand where you've got to here. Re-pitch that: give me a little bit of context, talk in ASD-STE100 Simplified Technical English, and use the ubiquitous language from `CONTEXT.md`.
+Wait, I don't understand where you've got to here. Re-pitch that: give me a little bit of context, talk in ASD-STE100 Simplified Technical English, and use the ubiquitous language from `CONTEXT.md` (follow `CONTEXT-MAP.md` to the right one if the repo has more than one).
 ```
