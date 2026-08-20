@@ -72,6 +72,54 @@ const cmdVisionAgent = `// ~/.config/opencode/oh-my-opencode-slim.json — 눈�
     }
   }
 }`;
+const cmdPerms = `python3 - <<'EOF'
+import json, os
+p = os.path.expanduser("~/.config/opencode/opencode.json")
+cfg = json.load(open(p)) if os.path.exists(p) else {}   # 이미 있으면 보존하고 합친다
+cfg["permissions"] = [
+    # ① 기본: 읽기·검색·셸 명령 전부 즉시 허용
+    {"action": "read", "resource": "*", "effect": "allow"},
+    {"action": "glob", "resource": "*", "effect": "allow"},
+    {"action": "grep", "resource": "*", "effect": "allow"},
+    {"action": "lsp", "resource": "*", "effect": "allow"},
+    {"action": "external_directory", "resource": "*", "effect": "allow"},
+    {"action": "shell", "resource": "*", "effect": "allow"},
+    # ② 파괴적인 명령만 승인을 요구한다 (뒤에 오는 규칙이 앞을 이긴다)
+    {"action": "shell", "resource": "rm *", "effect": "ask"},
+    {"action": "shell", "resource": "rmdir *", "effect": "ask"},
+    {"action": "shell", "resource": "chmod *", "effect": "ask"},
+    {"action": "shell", "resource": "chown *", "effect": "ask"},
+    {"action": "shell", "resource": "chgrp *", "effect": "ask"},
+    {"action": "shell", "resource": "sudo *", "effect": "ask"},
+    {"action": "shell", "resource": "dd *", "effect": "ask"},
+    {"action": "shell", "resource": "mkfs *", "effect": "ask"},
+    {"action": "shell", "resource": "kill *", "effect": "ask"},
+    {"action": "shell", "resource": "pkill *", "effect": "ask"},
+    {"action": "shell", "resource": "killall *", "effect": "ask"},
+    {"action": "shell", "resource": "shutdown *", "effect": "ask"},
+    {"action": "shell", "resource": "reboot *", "effect": "ask"},
+    {"action": "shell", "resource": "git reset --hard *", "effect": "ask"},
+    {"action": "shell", "resource": "git clean *", "effect": "ask"},
+    {"action": "shell", "resource": "git checkout -- *", "effect": "ask"},
+    {"action": "shell", "resource": "git restore *", "effect": "ask"},
+    {"action": "shell", "resource": "git branch -D *", "effect": "ask"},
+    {"action": "shell", "resource": "git tag -d *", "effect": "ask"},
+    {"action": "shell", "resource": "git remote remove *", "effect": "ask"},
+    {"action": "shell", "resource": "git remote set-url *", "effect": "ask"},
+    {"action": "shell", "resource": "git push --force*", "effect": "ask"},
+    {"action": "shell", "resource": "git push -f*", "effect": "ask"},
+    {"action": "shell", "resource": "gh repo delete *", "effect": "ask"},
+    {"action": "shell", "resource": "docker system prune *", "effect": "ask"},
+    {"action": "shell", "resource": "docker volume rm *", "effect": "ask"},
+    {"action": "shell", "resource": "kubectl delete *", "effect": "ask"},
+    {"action": "shell", "resource": "terraform destroy *", "effect": "ask"},
+    {"action": "shell", "resource": "aws s3 rm *", "effect": "ask"}
+]
+os.makedirs(os.path.dirname(p), exist_ok=True)
+with open(p, "w") as f:
+    json.dump(cfg, f, indent=2, ensure_ascii=False)
+print("permissions ->", p)
+EOF`;
 const cmdRun = `cd ~/my-project     # 작업할 폴더로 이동
 opencode2           # 실행`;
 const cmdFirst = `이 폴더의 코드를 읽고 프로젝트 구조를 요약해줘`;
@@ -322,6 +370,26 @@ cd ~/my-project && prime-agent
     <section class="glass-panel rounded-2xl p-5 lg:p-6">
       <div class="mb-2 flex items-baseline gap-2">
         <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 7</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">One-time setup — skip the approval spam</span><span data-lang="ko">한 번만 하는 설정 — 승인 요청 없이 바로 쓰기</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">OpenCode's default asks for confirmation before <em>every</em> shell command — for a beginner that means an approval popup every few seconds. Paste this block once and most commands run immediately; only genuinely destructive ones (<code class="font-mono text-[0.85em]">rm</code>, <code class="font-mono text-[0.85em]">git reset --hard</code>, force push, …) still ask. It merges into the host config — the same <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code> STEP 4's installer wrote the plugin into — so existing keys like <code class="font-mono text-[0.85em]">plugin</code> are preserved. Rules are last-match-wins: the catch-all <code class="font-mono text-[0.85em]">allow</code> sits first, the <code class="font-mono text-[0.85em]">ask</code> exceptions after it (macOS/Linux; v2 schema — if you picked the v1 <code class="font-mono text-[0.85em]">opencode</code> command in STEP 3, skip this step).</span>
+        <span data-lang="ko">OpenCode 기본값은 셸 명령을 <em>하나하나</em> 승인받게 되어 있다 — 초보자라면 몇 초마다 팝업이 뜨어 대화가 끊긴다. 아래 블록을 한 번 붙여넣으면 대부분의 명령은 즉시 실행되고, 진짜 파괴적인 명령(<code class="font-mono text-[0.85em]">rm</code>, <code class="font-mono text-[0.85em]">git reset --hard</code>, 강제 푸시 등)만 물어본다. 이 스크립트는 호스트 설정 — STEP 4에서 설치기가 플러그인을 등록한 바로 그 <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code> — 에 <em>합치는</em> 방식이라 <code class="font-mono text-[0.85em]">plugin</code> 같은 기존 키는 그대로 살아 있다. 규칙은 나중 것이 이긴다(last-match-wins) — 전체 허용 <code class="font-mono text-[0.85em]">allow</code>를 맨 앞, 파괴적인 <code class="font-mono text-[0.85em]">ask</code> 예외를 그 뒤에 둔 이유다(macOS/Linux 기준, v2 스키마. STEP 3에서 v1 <code class="font-mono text-[0.85em]">opencode</code>를 골랐다면 이 단계는 건너뛴다).</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-perms" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdPerms}</code>
+        <CopyButton target="#tip-perms" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Verified on a real machine (2026-08-20, opencode2 0.0.0-beta-17728): after this config, ordinary commands run without interruption and the snippet round-trips existing JSON safely. If <code class="font-mono text-[0.85em]">opencode2</code> is already running, <code class="font-mono text-[0.85em]">opencode2 service restart</code> applies it immediately. Want the prompts back? Delete the <code class="font-mono text-[0.85em]">permissions</code> key and restart.</span>
+        <span data-lang="ko">실제 머신에서 검증했다(2026-08-20, opencode2 0.0.0-beta-17728). 이 설정 후 일반 명령은 끊김 없이 실행됐고, 스크립트는 이미 있는 JSON을 안전하게 보존·병합했다. 이미 <code class="font-mono text-[0.85em]">opencode2</code>가 돌고 있다면 <code class="font-mono text-[0.85em]">opencode2 service restart</code> 한 번으로 즉시 반영된다. 다시 물어보게 하고 싶으면 <code class="font-mono text-[0.85em]">permissions</code> 키를 지우고 재시작하면 된다.</span>
+      </p>
+    </section>
+
+    <!-- STEP 8 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 8</span>
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Run it and talk</span><span data-lang="ko">실행하고 첫 대화</span></h2>
       </div>
       <div class="mb-3 flex items-stretch gap-2">
@@ -351,15 +419,15 @@ cd ~/my-project && prime-agent
         </li>
       </ul>
       <p class="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
-        <span data-lang="en">⚠ GLM Coding Plan <em>chat models</em> cannot read images — all five declare no image input, so pasting a screenshot does nothing. Vision comes from the Vision MCP in STEP 6 (same key, same plan) or glm-vision in STEP 8.</span>
-        <span data-lang="ko">⚠ GLM Coding Plan의 <em>채팅 모델</em>은 이미지를 읽지 못한다 — 5개 모두 이미지 입력을 지원하지 않아 스크린샷을 붙여넣어도 소용없다. 눈은 STEP 6의 Vision MCP(같은 키·같은 플랜)나 STEP 8의 glm-vision에서 온다.</span>
+        <span data-lang="en">⚠ GLM Coding Plan <em>chat models</em> cannot read images — all five declare no image input, so pasting a screenshot does nothing. Vision comes from the Vision MCP in STEP 6 (same key, same plan) or glm-vision in STEP 9.</span>
+        <span data-lang="ko">⚠ GLM Coding Plan의 <em>채팅 모델</em>은 이미지를 읽지 못한다 — 5개 모두 이미지 입력을 지원하지 않아 스크린샷을 붙여넣어도 소용없다. 눈은 STEP 6의 Vision MCP(같은 키·같은 플랜)나 STEP 9의 glm-vision에서 온다.</span>
       </p>
     </section>
 
-    <!-- STEP 8 -->
+    <!-- STEP 9 -->
     <section class="glass-panel rounded-2xl p-5 lg:p-6">
       <div class="mb-2 flex items-baseline gap-2">
-        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 8</span>
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 9</span>
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">(Optional) Skill kit &amp; image reading</span><span data-lang="ko">(선택) 스킬 키트와 이미지 읽기</span></h2>
       </div>
       <p class="mb-4 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
@@ -367,8 +435,8 @@ cd ~/my-project && prime-agent
         <span data-lang="ko">이 사이트의 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/prompts/agents-quick-onboarding/`}>퀵 온보딩 프롬프트</a>를 복사해 에이전트에 그대로 붙여넣으면, 공용 <code class="font-mono text-[0.85em]">~/.agents/</code> 구조를 잡고 보유한 모든 CLI에 스킬을 심링크해 준다. OpenCode는 <code class="font-mono text-[0.85em]">~/.config/opencode/skills/</code>에서 스킬을 읽는다.</span>
       </p>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">The <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision plugin</a> covers the blind spot from STEP 7: it sends any image to GLM-4.6V and returns the exact text/tables it reads. Two lines to install:</span>
-        <span data-lang="ko">STEP 7에서 짚은 사각지대를 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision 플러그인</a>이 메운다. 이미지를 GLM-4.6V로 보내 글자·표를 그대로 읽어 돌려준다. 설치는 두 줄:</span>
+        <span data-lang="en">The <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision plugin</a> covers the blind spot from STEP 8: it sends any image to GLM-4.6V and returns the exact text/tables it reads. Two lines to install:</span>
+        <span data-lang="ko">STEP 8에서 짚은 사각지대를 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision 플러그인</a>이 메운다. 이미지를 GLM-4.6V로 보내 글자·표를 그대로 읽어 돌려준다. 설치는 두 줄:</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
         <code id="tip-vision-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdVisionInstall}</code>
