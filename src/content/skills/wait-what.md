@@ -16,6 +16,10 @@ install: "npx skills add https://github.com/mattpocock/skills --skill wait-what"
 **멈춰. 방금 그 메시지는 전달되지 않았다 — 다시 던져라.** 스킬 전체가 문장 두 개다.
 *EN: Stop. That last message did not land — re-pitch it.*
 
+> **온보딩 키트 기본 포함.** [퀵 온보딩 프롬프트](../../prompts/agents-quick-onboarding/)는 워크플로 세트를
+> A(Agent Skills)·B(Superpowers)·C(Matt Pocock) 중 하나만 깔지만, 이 스킬은 **어느 걸 골라도 깐다**.
+> 파이프라인도 라우터도 없는 6줄이라 세트와 충돌할 여지가 없기 때문이다.
+
 ## 언제 쓰는가
 
 - 에이전트가 앞선 맥락을 다 갖고 있다는 전제로 설명해서 따라갈 수 없을 때
