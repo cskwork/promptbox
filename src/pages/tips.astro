@@ -22,8 +22,8 @@ const cmdOmoInstall = `bunx oh-my-opencode-slim@latest install
 
 # Bun이 없으면 npx도 같다:
 npx oh-my-opencode-slim@latest install`;
-const cmdOmoV2 = `# opencode2는 설정 디렉터리가 따로다 — ~/.config/opencode2/opencode.json 에 아래를 넣는다.
-# 파일이 이미 있으면 plugin 배열만 합칠 것.
+const cmdOmoV2 = `# opencode2는 v1과 같은 ~/.config/opencode/opencode.json 을 그대로 읽는다(실측 확인).
+# 아래 내용이 이미 STEP 4의 설치기에 의해 들어가 있으므로, 보통은 아무것도 할 필요 없다:
 {
   "$schema": "https://opencode.ai/config.json",
   "plugin": ["oh-my-opencode-slim@latest"]
@@ -49,7 +49,7 @@ const cmdPreset = `{
     }
   }
 }`;
-const cmdVisionMcp = `// ~/.config/opencode2/opencode.json  (v1이면 ~/.config/opencode/opencode.json)
+const cmdVisionMcp = `// ~/.config/opencode/opencode.json — v1(opencode)·v2(opencode2) 모두 이 파일을 읽는다
 {
   "$schema": "https://opencode.ai/config.json",
   "mcp": {
@@ -272,16 +272,16 @@ cd ~/my-project && prime-agent
         <span data-lang="ko">설치기가 <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code>에 플러그인을 등록하고 <code class="font-mono text-[0.85em]">~/.config/opencode/oh-my-opencode-slim.json</code>을 만든다. 다만 기본 생성되는 프리셋은 <code class="font-mono text-[0.85em]">openai</code>와 <code class="font-mono text-[0.85em]">opencode-go</code> 둘뿐이라, GLM으로 바꾸는 일은 STEP 6에서 한다.</span>
       </p>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">One extra step on v2</strong>: <code class="font-mono text-[0.85em]">opencode2</code> reads its host config from a different directory, so register the plugin there as well. The plugin is dual-compatible — the same package runs on v1 and v2.</span>
-        <span data-lang="ko"><strong class="font-semibold text-ink-800 dark:text-ink-100">v2에서는 한 단계가 더 있다</strong>. <code class="font-mono text-[0.85em]">opencode2</code>는 호스트 설정을 다른 디렉터리에서 읽으므로 거기에도 플러그인을 등록해야 한다. 플러그인 자체는 v1·v2 양쪽에서 도는 같은 패키지다.</span>
+        <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">v2 sanity check</strong>: an earlier revision of this guide claimed <code class="font-mono text-[0.85em]">opencode2</code> reads host config from a separate <code class="font-mono text-[0.85em]">~/.config/opencode2/</code> directory — that is wrong. Verified against the installed binary (0.0.0-beta-17728): both <code class="font-mono text-[0.85em]">opencode</code> and <code class="font-mono text-[0.85em]">opencode2</code> read the same <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code>. If the installer already registered the plugin there (previous block), you are done — nothing extra to do:</span>
+        <span data-lang="ko"><strong class="font-semibold text-ink-800 dark:text-ink-100">v2 확인 사항</strong>: 이전 판에서는 <code class="font-mono text-[0.85em]">opencode2</code>가 호스트 설정을 별도 디렉터리 <code class="font-mono text-[0.85em]">~/.config/opencode2/</code>에서 읽는다고 적혀 있었는데, 이것은 틀린 정보다. 설치된 바이너리(0.0.0-beta-17728)로 실측한 결과 <code class="font-mono text-[0.85em]">opencode</code>와 <code class="font-mono text-[0.85em]">opencode2</code>는 모두 같은 <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code>을 읽는다. 위 블록에서 설치기가 이미 플러그인을 등록했다면 추가로 할 일은 없다:</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
         <code id="tip-omo-v2" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdOmoV2}</code>
         <CopyButton target="#tip-omo-v2" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
       </div>
       <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Check it took: <code class="font-mono text-[0.85em]">opencode2 plugin list</code> should print <code class="font-mono text-[0.85em]">oh-my-opencode-slim</code>. Note that v2 has no programmatic MCP registration, so any MCP server the agents use must be declared in this same v2 config.</span>
-        <span data-lang="ko">제대로 붙었는지는 <code class="font-mono text-[0.85em]">opencode2 plugin list</code>로 확인한다 — 목록에 <code class="font-mono text-[0.85em]">oh-my-opencode-slim</code>이 나와야 한다. v2에는 플러그인이 MCP를 코드로 등록하는 경로가 없으므로, 에이전트가 쓸 MCP 서버는 이 v2 설정 파일에 직접 선언해야 한다.</span>
+        <span data-lang="en">Check it took: <code class="font-mono text-[0.85em]">opencode2 plugin list</code> should print <code class="font-mono text-[0.85em]">oh-my-opencode-slim</code>. Note that v2 has no programmatic MCP registration, so any MCP server the agents use must be declared in this same config file.</span>
+        <span data-lang="ko">제대로 붙었는지는 <code class="font-mono text-[0.85em]">opencode2 plugin list</code>로 확인한다 — 목록에 <code class="font-mono text-[0.85em]">oh-my-opencode-slim</code>이 나와야 한다. v2에는 플러그인이 MCP를 코드로 등록하는 경로가 없으므로, 에이전트가 쓸 MCP 서버는 이 설정 파일에 직접 선언해야 한다.</span>
       </p>
     </section>
 
@@ -316,8 +316,8 @@ cd ~/my-project && prime-agent
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Point the team at GLM-5.3</span><span data-lang="ko">팀 전체를 GLM-5.3에 물리기</span></h2>
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Open the plugin config. It stays under <code class="font-mono text-[0.85em]">~/.config/opencode/</code> even when the host is <code class="font-mono text-[0.85em]">opencode2</code> — only the host config moved to <code class="font-mono text-[0.85em]">~/.config/opencode2/</code>:</span>
-        <span data-lang="ko">플러그인 설정 파일을 연다. 호스트가 <code class="font-mono text-[0.85em]">opencode2</code>여도 이 파일은 <code class="font-mono text-[0.85em]">~/.config/opencode/</code>에 그대로 있다 — 옮겨간 것은 호스트 설정뿐이다:</span>
+        <span data-lang="en">Open the plugin config. Both the host config and this plugin config live under <code class="font-mono text-[0.85em]">~/.config/opencode/</code> — <code class="font-mono text-[0.85em]">opencode2</code> reads the same directory as v1:</span>
+        <span data-lang="ko">플러그인 설정 파일을 연다. 호스트 설정이든 이 플러그인 설정이든 모두 <code class="font-mono text-[0.85em]">~/.config/opencode/</code> 아래에 있다 — <code class="font-mono text-[0.85em]">opencode2</code>는 v1과 같은 디렉터리를 읽는다:</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
         <code id="tip-preset-open" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdPresetOpen}</code>
