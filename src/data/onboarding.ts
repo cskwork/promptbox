@@ -484,12 +484,71 @@ of those.
     with "provider not configured". Finish the login first, or leave both keys out entirely.
     Never substitute OPENAI_API_KEY for this, and never print an access or refresh token.
 
- 9. RUN EXACTLY ONE SERVER. Check for an existing listener before starting another:
-      ai-memory serve --transport http --bind 127.0.0.1:<port>
-    A small launcher script is fine; a process supervisor is not. On macOS a ~/Library/LaunchAgents
-    plist with RunAtLoad + KeepAlive is the supported way to survive reboot — ASK ME before
-    installing one, and if I decline, give me the manual start command instead. There must never be
-    one ai-memory process per agent, one data store per agent, or one wiki per agent.
+ 9. RUN EXACTLY ONE SERVER, AND MAKE IT START ITSELF AT LOGIN. Everything above is inert while the
+    server is down: the hooks still fire, they just fail, and every agent silently loses the shared
+    memory. Autostart is part of the default kit — INSTALL IT WITHOUT ASKING ME. Check for an
+    existing listener before starting anything (lsof -nP -iTCP:<port> -sTCP:LISTEN), and never end
+    up with one process per agent, one data store per agent, or one wiki per agent.
+
+    macOS — a LaunchAgent. It loads at LOGIN, not at boot, which is what I want: the data dir lives
+    in my home. Write ~/Library/LaunchAgents/com.github.akitaonrails.ai-memory.plist:
+
+      <?xml version="1.0" encoding="UTF-8"?>
+      <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+        "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+      <plist version="1.0">
+      <dict>
+        <key>Label</key>             <string>com.github.akitaonrails.ai-memory</string>
+        <key>ProgramArguments</key>  <array>
+          <string>/Users/<me>/.local/bin/ai-memory</string>
+          <string>serve</string><string>--transport</string><string>http</string>
+        </array>
+        <key>RunAtLoad</key>         <true/>
+        <key>KeepAlive</key>         <true/>
+        <key>ThrottleInterval</key>  <integer>10</integer>
+        <key>EnvironmentVariables</key> <dict>
+          <key>HOME</key> <string>/Users/<me></string>
+          <key>PATH</key> <string>/Users/<me>/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+        </dict>
+        <key>StandardOutPath</key>   <string>/Users/<me>/Library/Logs/ai-memory.out.log</string>
+        <key>StandardErrorPath</key> <string>/Users/<me>/Library/Logs/ai-memory.err.log</string>
+      </dict>
+      </plist>
+
+    ABSOLUTE PATHS ONLY — launchd expands no ~ and reads no login shell, so a bare 'ai-memory' or a
+    tilde path exits 127 on every retry, forever. OMIT --bind: config.toml already carries bind and
+    server_url, and a port repeated in the plist is how the two drift apart after step 4 moves it.
+    Then load it and PROVE it, because a plist on disk is not a running server:
+      plutil -lint ~/Library/LaunchAgents/com.github.akitaonrails.ai-memory.plist
+      launchctl bootout   gui/$(id -u)/com.github.akitaonrails.ai-memory 2>/dev/null
+      launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.github.akitaonrails.ai-memory.plist
+      lsof -nP -iTCP:<port> -sTCP:LISTEN      -> must show ai-memory LISTEN
+      ai-memory status                        -> same bind + data-dir as config.toml
+    Use bootstrap, not kickstart, as that proof: bootstrap alone runs the same RunAtLoad path login
+    uses, so a listener appearing after it IS the login evidence. Read the exit-status column of
+    'launchctl list | grep ai-memory' too — a non-zero value there means crash-looping, not running.
+
+    Windows — a per-user Scheduled Task with an AtLogOn trigger, registered AS ME:
+      $exe = "$env:LOCALAPPDATA\\Programs\\ai-memory\\ai-memory.exe"   # the path actually installed
+      $act = New-ScheduledTaskAction -Execute $exe -Argument 'serve --transport http'
+      $trg = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+      $opt = @{ AllowStartIfOnBatteries = $true; DontStopIfGoingOnBatteries = $true
+                RestartCount = 3; RestartInterval = (New-TimeSpan -Minutes 1)
+                ExecutionTimeLimit = (New-TimeSpan -Seconds 0) }   # 0 = never time out
+      $set = New-ScheduledTaskSettingsSet @opt
+      Register-ScheduledTask -TaskName ai-memory -Action $act -Trigger $trg -Settings $set -Force
+      Start-ScheduledTask -TaskName ai-memory
+    Verify with (Get-ScheduledTask ai-memory).State and
+    Get-NetTCPConnection -LocalPort <port> -State Listen. Do NOT register it under SYSTEM or with
+    -RunLevel Highest: the data dir, config, and wiki live in my profile, and a SYSTEM copy would
+    quietly build a second, empty memory next to mine.
+
+    ONE SUPERVISOR, NOT TWO. No pm2, no brew services, no login-item wrapper script, and never an
+    'ai-memory serve' line in my shell profile — that starts one server per terminal window. If a
+    supervisor entry for ai-memory already exists, repair it in place instead of adding a second one.
+    While you are in ~/Library/LaunchAgents, also report any DEAD memory-server agent you find: a
+    plist whose program no longer exists respawns every ThrottleInterval forever. Give me its label
+    and the missing path, and ask before removing it.
 
 10. WIRE EVERY DETECTED AGENT TO THAT ONE SERVER. For each agent found in step 1's detection, run
     BOTH commands, substituting the identifier:

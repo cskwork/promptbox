@@ -34,6 +34,7 @@ Claude Code에서 알아낸 것을 Codex와 OpenCode도 그대로 이어받게 �
 ## 함정
 
 - **포트 49374는 macOS ephemeral 범위(49152–65535) 안이다.** 다른 프로세스가 먼저 잡으면 서버가 못 뜬다. 실제로 `opencode2 serve --service`가 이 포트를 가져가는 사례가 있다. 충돌 시 `bind`/`server_url`을 39374처럼 범위 밖 포트로 옮기면 재발하지 않는다.
+- **재부팅하면 그냥 없어진다.** 설치기는 자동 시작을 걸어 주지 않는다. 서버가 없으면 훅은 실패하고 에이전트는 공유 기억 없이 계속 일하는데, 에러가 눈에 안 띈다. 아래 LaunchAgent(또는 Windows 로그온 예약 작업)를 같이 걸어 둔다. 셸 프로필에 `ai-memory serve`를 넣는 방식은 터미널 창마다 서버가 하나씩 뜨므로 쓰지 않는다.
 - **LLM provider를 설정해 놓고 토큰이 없으면 서버가 아예 기동을 거부한다.** `provider not configured`로 죽으므로, provider를 켜기 전에 `ai-memory auth login`을 먼저 끝낸다.
 - **`--project-strategy repo-root`를 빼먹지 말 것.** 기본값 `basename`은 세션 도중 `cd sub` 한 번에 `sub`라는 유령 프로젝트를 만들어 기억을 쪼갠다.
 - **`capture_assistant`는 이중 opt-in이고 기본 off다.** 어시스턴트 최종 답변에는 코드·비밀이 섞일 수 있고 그대로 클라우드 LLM 프롬프트로 흘러간다. 필요 없으면 켜지 않는다.
@@ -57,6 +58,69 @@ ai-memory init
 
 # 3. 서버 기동 (루프백 전용)
 ai-memory serve --transport http --bind 127.0.0.1:49374
+```
+
+## 로그인할 때 자동 기동 (macOS LaunchAgent)
+
+ai-memory는 스스로 뜨지 않는다. 재부팅하면 훅은 그대로 발사되지만 받는 서버가 없어 그냥 실패한다.
+LaunchAgent 하나로 로그인마다 기동 + 죽으면 재기동까지 해결된다. plist에는 절대 경로만 쓴다 —
+launchd는 `~`도 로그인 셸도 모르기 때문에 `ai-memory`나 `~/...`는 exit 127로 무한 재시도한다.
+포트는 `--bind`로 중복해 쓰지 말고 `config.toml`의 `bind` 하나만 단일 출처로 둔다.
+
+```bash
+cat > ~/Library/LaunchAgents/com.github.akitaonrails.ai-memory.plist <<PLIST
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key><string>com.github.akitaonrails.ai-memory</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>$HOME/.local/bin/ai-memory</string>
+        <string>serve</string><string>--transport</string><string>http</string>
+    </array>
+    <key>RunAtLoad</key><true/>
+    <key>KeepAlive</key><true/>
+    <key>ThrottleInterval</key><integer>10</integer>
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>HOME</key><string>$HOME</string>
+        <key>PATH</key><string>$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+    </dict>
+    <key>StandardOutPath</key><string>$HOME/Library/Logs/ai-memory.out.log</string>
+    <key>StandardErrorPath</key><string>$HOME/Library/Logs/ai-memory.err.log</string>
+</dict>
+</plist>
+PLIST
+
+plutil -lint ~/Library/LaunchAgents/com.github.akitaonrails.ai-memory.plist
+launchctl bootout   gui/$(id -u)/com.github.akitaonrails.ai-memory 2>/dev/null
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.github.akitaonrails.ai-memory.plist
+
+# 확인: plist가 있는 것과 서버가 도는 것은 다르다
+lsof -nP -iTCP:39374 -sTCP:LISTEN   # ai-memory ... (LISTEN) 이 나와야 한다
+ai-memory status                    # config.toml과 같은 bind/data-dir
+```
+
+`kickstart` 없이 `bootstrap`만으로 LISTEN이 뜨면 로그인 때도 뜬다는 뜻이다 — 둘 다 같은 `RunAtLoad`
+경로를 탄다. `launchctl list | grep ai-memory`의 종료 코드 열이 0이 아니면 도는 게 아니라 크래시 루프다.
+
+Windows는 로그온 트리거 예약 작업으로 같은 일을 한다. SYSTEM 계정이나 `-RunLevel Highest`로 걸지
+않는다 — 데이터 디렉터리와 wiki가 사용자 프로필 안에 있어서 빈 기억이 하나 더 생긴다.
+
+```powershell
+$exe = "$env:LOCALAPPDATA\Programs\ai-memory\ai-memory.exe"   # 실제 설치 경로
+$act = New-ScheduledTaskAction -Execute $exe -Argument 'serve --transport http'
+$trg = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+$opt = @{ AllowStartIfOnBatteries = $true; DontStopIfGoingOnBatteries = $true
+          RestartCount = 3; RestartInterval = (New-TimeSpan -Minutes 1)
+          ExecutionTimeLimit = (New-TimeSpan -Seconds 0) }
+$set = New-ScheduledTaskSettingsSet @opt
+Register-ScheduledTask -TaskName ai-memory -Action $act -Trigger $trg -Settings $set -Force
+Start-ScheduledTask -TaskName ai-memory
+
+(Get-ScheduledTask ai-memory).State
+Get-NetTCPConnection -LocalPort 39374 -State Listen
 ```
 
 ## 임베딩 없는 경량 설정
