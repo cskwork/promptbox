@@ -1,14 +1,14 @@
 ---
-title: superqa (cskwork/superqa-skill)
+title: browser-qa (cskwork/browser-qa)
 summary: "실제 브라우저로 웹사이트를 QA하는 스킬 — 프롬프트를 사용자 스토리 YAML DAG 시나리오로 바꿔 검토하고 실행하며, 콘솔·JS 오류·실패한 요청·예상 못한 팝업 같은 부작용을 사람이 읽는 리포트로 정리한다. 실행 디렉토리와 리포트 없이는 통과라고 말하지 않는다."
 summary_en: "Real-browser QA with user-story YAML DAGs: review the journey before replay, run it with local browser bindings, and report browser-side failures with evidence."
 tags: [skill, qa, browser, playwright, dag, regression, ci, junit, cskwork]
-source: https://github.com/cskwork/superqa-skill
+source: https://github.com/cskwork/browser-qa
 author: cskwork
 license: MIT
 order: 30
-trigger: "/superqa · QA this <url> · browser test · regression check · review scenario DAG · record a scenario · smoke check · verify this URL"
-install: "git clone https://github.com/cskwork/superqa-skill ~/.claude/skills/superqa && pip3 install textual playwright pyyaml && python3 -m playwright install chromium"
+trigger: "/browser-qa · QA this <url> · browser test · regression check · review scenario DAG · record a scenario · smoke check · verify this URL"
+install: "git clone https://github.com/cskwork/browser-qa ~/.claude/skills/browser-qa && pip3 install textual playwright pyyaml && python3 -m playwright install chromium"
 ---
 
 ## 한 줄
