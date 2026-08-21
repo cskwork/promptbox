@@ -83,6 +83,9 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 ## 무엇을 하는가
 
 1. 손대기 전에 **현재 상태를 전부 기록**한다 (`inventory.tsv`) — 이게 없으면 나중에 복구할 수 없다.
+   같은 단계에서 **플랫폼을 확정**한다. macOS와 Windows는 같은 프롬프트의 다른 분기를 타고, 명령마다
+   `macOS:` / `Windows:` 라벨이 붙는다. Windows는 클론 전에 개발자 모드(심링크 권한)·`core.longpaths`·
+   `core.autocrlf` 세 가지를 먼저 확인한다.
 2. **워크플로 세트를 하나 고르게 한다** — 비교표를 띄우고 A/B/C를 묻는다. 답을 받기 전에는 스킬을
    깔지 않는다. 이미 다른 세트가 깔려 있고 다른 걸 고르면 **쌓지 않고 교체**한다: 기존 링크를
    `~/.agents/disabled-skills/<세트>-<시각>/`으로 옮기고(지우지 않는다) 이름을 `skills-excluded`에
@@ -174,6 +177,18 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   살아있는 등록인지 확인한 것만 목록에 올린다.
   **ai-memory는 이 목록에 넣지 않는다.** 레포를 인덱싱하는 게 아니라 세션 관측과 핸드오프를 저장하는
   쪽이고, 6단계에서 방금 기본 구성으로 깐 것이다.
+- **Windows에서 조용히 무너지는 세 가지**: ① 심링크는 개발자 모드나 관리자 셸 없이는 거부된다 —
+  폴백(Junction·복사)으로 흘러가면 "허브 하나" 모델 자체가 깨지므로 먼저 켜라고 말해야 한다.
+  ② `~/.agents/sources/<owner>/<repo>/skills/<name>/references/...`는 260자를 넘겨 clone이
+  `Filename too long`으로 죽는다(`core.longpaths true`). ③ `core.autocrlf=true`면 클론된 훅 `.sh`가
+  CRLF가 되어 Git Bash·WSL에서 `bad interpreter`로 죽는다(`core.autocrlf input`).
+- **PowerShell에서 `Test-Path`는 링크를 따라간다**: 끊어진 심링크와 없는 경로가 똑같이 False다.
+  9단계가 게이트로 삼는 broken link 카운트가 항상 0이 되어 감사 스크립트가 거짓말을 한다.
+  `Get-Item -Force`의 `.LinkType`·`.Target`으로 분류하고, `Junction`도 링크로 세야 한다.
+- **Windows 로그온 작업은 S4U로 걸어야 한다**: 평범한 `AtLogOn` 작업은 콘솔 실행 파일을 대화형 세션에
+  띄워서 로그인마다 검은 창이 뜨고, 그 창을 닫으면 서버가 죽는다. `-LogonType S4U`는 같은 계정·같은
+  프로필로 창 없이 돈다. SYSTEM이나 `-RunLevel Highest`는 금지 — 데이터 디렉터리가 사용자 프로필
+  안이라 빈 기억이 하나 더 생긴다.
 - **ai-memory 포트 49374는 임시 포트 대역 안이다**: macOS는 49152–65535를 아무 프로세스에나 먼저
   나눠 준다. 실제로 OpenCode 백그라운드 서비스(`opencode2 serve --service`)가 49374를 잡고 있어
   서버가 못 떴다. 그 프로세스를 죽이면 붙어 있던 세션이 끊기므로 죽이지 말고, `config.toml`의
@@ -218,7 +233,9 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 </div>
 
 ```text
-Set up and maintain a global coding-agent environment on native macOS or Windows PowerShell.
+Set up and maintain a global coding-agent environment on native macOS or native Windows PowerShell.
+ONE PROMPT, TWO BRANCHES: section 0b resolves the platform once, and every platform-specific step is
+labelled 'macOS:' / 'Windows:'. Run only your branch; never translate the other one by hand.
 The process must be IDEMPOTENT and SELF-HEALING: if an item already exists, update or repair it —
 never duplicate it, never delete my work to make room for it.
 
@@ -248,6 +265,47 @@ RESOLVE INTERPRETERS TO ABSOLUTE PATHS. Version managers (nvm, pyenv, rbenv) fre
 initialise in a non-interactive shell — 'node' may resolve to a broken shim. Detect the real
 binary path once and use it everywhere.
 
+=== 0b. PLATFORM BRANCH (resolve once, then obey it everywhere) ===
+
+Resolve PLATFORM = macos | windows | linux in step 1 and record it in ~/.agents/install-manifest.json.
+Every step below that offers two forms labels them 'macOS:' and 'Windows:'. THE LABELS ARE THE
+INSTRUCTION, NOT A COURTESY — run only the branch that matches PLATFORM, and never hand-translate a
+macOS command when a Windows branch is printed a few lines away.
+
+Where a command is unlabelled, this table is the translation. Use it instead of guessing:
+
+  home                macOS  ~                          Windows  $HOME (PowerShell resolves ~ too)
+  scripts you write   *.sh (bash)                       *.ps1 (write for 5.1, prefer 7)
+  process list        ps -axo pid,%cpu,rss,command      Get-Process / Get-CimInstance Win32_Process
+  listening port      lsof -nP -iTCP:<p> -sTCP:LISTEN   Get-NetTCPConnection -LocalPort <p> -State Listen
+  checksum            shasum -a 256                     Get-FileHash -Algorithm SHA256
+  archive             tar -xzf <a>.tar.gz               Expand-Archive <a>.zip   (Windows assets are ZIP)
+  python              python3                           py -3   ('python3' hits the Store stub and exits 9009)
+  directory link      ln -s                             New-Item -ItemType SymbolicLink, else Junction
+  file link           ln -s                             New-Item -ItemType SymbolicLink, else HardLink
+  service at login    ~/Library/LaunchAgents plist      Scheduled Task, AtLogOn trigger, S4U principal
+
+WINDOWS PREREQUISITES — CHECK ALL THREE IN STEP 1, BEFORE THE FIRST CLONE. They cause most of the
+silent failures on Windows, and every one of them looks like something else:
+ - SYMLINK PRIVILEGE. New-Item -ItemType SymbolicLink fails with "required privilege is not held"
+   unless Developer Mode is on or the shell is elevated. Read
+   HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock -> AllowDevelopmentWithoutDevLicense.
+   If it is not 1, TELL ME to turn Developer Mode on rather than quietly falling through to junctions
+   and copies: this kit's whole model is one canonical hub, and a copy-based install stops being one.
+ - LONG PATHS. ~/.agents/sources/<owner>/<repo>/skills/<name>/references/<file>.md passes 260
+   characters routinely, and git aborts mid-clone with "Filename too long".
+     git config --global core.longpaths true
+ - LINE ENDINGS. core.autocrlf=true rewrites every cloned .sh to CRLF, and those hooks then die with
+   "bad interpreter: no such file or directory" under Git Bash and WSL.
+     git config --global core.autocrlf input
+   A repo already checked out with CRLF must be re-checked-out, not hand-edited.
+
+WSL IS A SEPARATE INSTALL AND THE HOST IS THE DEFAULT. Detect it independently, but do NOT install on
+both sides unless I ask: install where my agents actually run, and report the other side as
+NOT-INSTALLED with the single command that would install it. Two hubs across that boundary is the
+same duplicate-skill failure as two workflow sets, plus /mnt/c path drift, CRLF drift, and symlinks
+that resolve on only one side.
+
 === 1. DETECTION ===
 
 Detect OS, architecture, Git, Node.js, Python 3.10+, and available package managers. For each
@@ -257,7 +315,10 @@ Identify installed agents: Claude Code, Codex, Jcode, Pi, Hermes, Kiro, Antigrav
 For each, record its global instruction file path and its global skills directory path — and
 whether each is currently a real file/directory, a symlink, or absent.
 
-Treat WSL as a separate environment and perform detection independently within it.
+Record PLATFORM (macos | windows | linux) and, on Windows, the result of all three prerequisite
+checks from section 0b — symlink privilege, core.longpaths, core.autocrlf — BEFORE any clone. Report
+them in step 11 even when they pass. Treat WSL as a separate environment and detect independently
+within it, then apply the one-side rule from section 0b.
 
 === 2. PRE-FLIGHT INVENTORY (before touching anything) ===
 
@@ -449,6 +510,11 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       directory itself. After linking, run scripts/selftest.sh — it
                                       stands up a throwaway server and checks the harness in about 20
                                       seconds; 22/22 means the install works. Needs curl and jq.
+                                      Windows: the selftest is a bash script. Run it under Git Bash
+                                      (bash scripts/selftest.sh) with jq present
+                                      (winget install jqlang.jq). If there is no bash, link the skill
+                                      anyway and report the selftest as SKIPPED-UNSUPPORTED — do NOT
+                                      claim 22/22 you did not run.
   Debug Code                          https://github.com/cskwork/promptbox
                                       Clone the promptbox repo, then link src/content/skills/debug-code
                                       as a skill directory. The skill ships its SKILL.md and two reference
@@ -472,8 +538,12 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       Its frontmatter sets 'disable-model-invocation: true' BY DESIGN: it
                                       mutates a skill library and must stay user-invoked. Leave that flag
                                       alone — the normalization above applies to ask-matt only.
-                                      Requires python3 3.9+. Verify with the engine, not the directory:
-                                        python3 ~/.agents/skills/skill-curator/scripts/curator.py --help
+                                      Requires Python 3.9+. Verify with the engine, not the directory:
+                                        macOS:   python3 ~/.agents/skills/skill-curator/scripts/curator.py --help
+                                        Windows: py -3 $HOME\.agents\skills\skill-curator\scripts\curator.py --help
+                                      On Windows 'python3' normally resolves to the Microsoft Store
+                                      stub, which exits 9009 without running anything — that looks
+                                      like a missing skill, not a missing interpreter.
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
   ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
@@ -521,8 +591,15 @@ Install or update via the official package manager. USE THE SAME MECHANISM THE T
 INSTALLED WITH — switching from a curl installer to Homebrew (or pip to uv) leaves two binaries on
 PATH and the wrong one wins.
 
-  OfficeCLI           brew install officecli
-  Herdr               official installer, or 'herdr update'
+  OfficeCLI           macOS:   brew install officecli
+                      Windows: scoop install officecli
+                               or  irm https://raw.githubusercontent.com/iOfficeAI/OfficeCLI/main/install.ps1 | iex
+                      Either platform: npm install -g @officecli/officecli fetches the native binary.
+                      Windows ships x64 AND arm64 builds, so ARM Windows is supported here.
+  Herdr               macOS:   official installer (curl -fsSL https://herdr.dev/install.sh | sh),
+                               brew install herdr, or 'herdr update'
+                      Windows: powershell -ExecutionPolicy Bypass -c "irm https://herdr.dev/install.ps1 | iex"
+
   rtk                 https://github.com/rtk-ai/rtk — CLI proxy that compresses shell command
                       output (git, pytest, docker, kubectl, cargo, eslint, 100+ commands) before it
                       reaches the model's context.
@@ -531,6 +608,8 @@ PATH and the wrong one wins.
                         Windows:      download the x86_64-msvc release binary, or cargo install --git https://github.com/rtk-ai/rtk
                       Do NOT 'cargo install rtk' from crates.io — an unrelated crate owns that name.
                       Ensure ripgrep is on PATH; some rtk filters shell out to it.
+                        macOS:   brew install ripgrep
+                        Windows: winget install BurntSushi.ripgrep.MSVC  (or scoop install ripgrep)
                       Wire it into every detected agent with:  rtk init -g
                       This writes hooks (Claude Code PreToolUse, Gemini CLI BeforeTool, OpenCode/Pi
                       plugins, Windsurf/Cline rules), NOT an MCP server. Treat those hook files like
@@ -586,24 +665,46 @@ Install it NATIVE. Do NOT install Docker, Ollama, LM Studio, vLLM, an embedding 
 LLM for it. The default retrieval path is SQLite FTS5 + entities + graph neighbours and needs none
 of those.
 
- 1. INSTALL THE BINARY. Download the release archive for the detected architecture into
-    ~/Applications/ai-memory, verify the published .sha256 BEFORE extracting, extract, and symlink
-    the binary onto PATH at ~/.local/bin/ai-memory. aarch64 = Apple Silicon, x86_64 = Intel.
+ 1. INSTALL THE BINARY, THEN RECORD ITS ABSOLUTE PATH AS AI_MEMORY_BIN in the manifest. Every later
+    step (hooks, MCP registration, autostart) uses that recorded value — do not re-guess the path.
+    macOS: download ai-memory-macos-<arch>.tar.gz into ~/Applications/ai-memory, verify the published
+      .sha256 BEFORE extracting (shasum -a 256 -c), extract, and symlink the binary onto PATH at
+      ~/.local/bin/ai-memory. aarch64 = Apple Silicon, x86_64 = Intel.
+    Windows: the asset is ai-memory-windows-x86_64.ZIP, not a tarball, so tar/shasum instructions do
+      not apply — verify with Get-FileHash -Algorithm SHA256 against the published .sha256, then
+      Expand-Archive into $env:LOCALAPPDATA\Programs\ai-memory. THERE IS NO windows-aarch64 BUILD:
+      on ARM Windows stop here and report SKIPPED-UNSUPPORTED instead of downloading the x86_64
+      archive. Do NOT symlink into ~/.local/bin — that directory is not on PATH on Windows. Append
+      the install directory to the USER Path instead
+      ([Environment]::SetEnvironmentVariable('Path', <old>+';'+<dir>, 'User')), and remember the
+      change only reaches shells started afterwards. The release also ships ai-memory-wrapper.ps1 and
+      ai-memory-wrapper.cmd; prefer the .cmd wrapper wherever a config needs a stable launcher that
+      cmd.exe can execute.
     If ai-memory is already installed, update in place and PRESERVE the existing data dir, wiki, and
     config. Never run a destructive reset.
 
- 2. STAGE THE HOOKS NEXT TO THE DATA DIR. install-hooks looks for a hooks/ directory beside the path
-    it was invoked as, so calling it through the ~/.local/bin symlink fails with "could not locate
-    hooks directory". Copy the extracted hooks/ tree to <data-dir>/hooks (macOS:
-    ~/Library/Application Support/ai-memory/hooks). That path is on the probe list, so every later
-    invocation works no matter which path was used.
+ 2. STAGE THE HOOKS NEXT TO THE DATA DIR — READ THE RENDERED CONFIG FIRST. install-hooks looks for a
+    hooks/ directory beside the path it was invoked as, so calling it through the ~/.local/bin symlink
+    fails with "could not locate hooks directory". The data dir is
+      macOS:   ~/Library/Application Support/ai-memory
+      Windows: %LOCALAPPDATA%\ai-memory
+    macOS: copy the extracted hooks/ tree to <data-dir>/hooks. That path is on the probe list, so every
+      later invocation works no matter which path was used.
+    Windows: run install-hooks WITHOUT --apply first and read what it renders. Recent releases emit the
+      native 'ai-memory hook' invocation (the WindowsNative config) instead of hooks/<agent>/<event>.sh,
+      and in that case there is nothing to stage. Copy the tree ONLY if the rendered config actually
+      references a hooks/ path. If it does, copy it to %LOCALAPPDATA%\ai-memory\hooks and remember the
+      .sh files inside must keep LF endings (section 0b) or the shell shims break.
 
  3. INITIALISE ONLY IF NOT ALREADY INITIALISED:   ai-memory init
 
  4. PICK A PORT THAT IS STILL FREE NEXT WEEK. The documented default is 127.0.0.1:49374, but 49374
     sits INSIDE the macOS ephemeral range (49152-65535), so the OS can hand it to any process that
     asks first — OpenCode's background service takes it in practice. Check with
-    lsof -nP -iTCP:49374 -sTCP:LISTEN. If something holds it, do NOT kill that process: set both
+    the listener probe for this platform (section 0b): lsof -nP -iTCP:49374 -sTCP:LISTEN on macOS,
+    Get-NetTCPConnection -LocalPort 49374 -State Listen on Windows. Windows has its own ephemeral
+    range (dynamic ports start at 49152 there too), so this collision is not a macOS-only problem.
+    If something holds the port, do NOT kill that process: set both
     bind and server_url in <data-dir>/config.toml to a port below the ephemeral range (39374 works)
     and use that port everywhere afterwards. Bind to 127.0.0.1 only, never 0.0.0.0, and do not
     expose it to the LAN.
@@ -636,7 +737,8 @@ of those.
  9. RUN EXACTLY ONE SERVER, AND MAKE IT START ITSELF AT LOGIN. Everything above is inert while the
     server is down: the hooks still fire, they just fail, and every agent silently loses the shared
     memory. Autostart is part of the default kit — INSTALL IT WITHOUT ASKING ME. Check for an
-    existing listener before starting anything (lsof -nP -iTCP:<port> -sTCP:LISTEN), and never end
+    existing listener before starting anything (section 0b's listener probe for this platform), and
+    never end
     up with one process per agent, one data store per agent, or one wiki per agent.
 
     macOS — a LaunchAgent. It loads at LOGIN, not at boot, which is what I want: the data dir lives
@@ -677,27 +779,38 @@ of those.
     uses, so a listener appearing after it IS the login evidence. Read the exit-status column of
     'launchctl list | grep ai-memory' too — a non-zero value there means crash-looping, not running.
 
-    Windows — a per-user Scheduled Task with an AtLogOn trigger, registered AS ME:
-      $exe = "$env:LOCALAPPDATA\Programs\ai-memory\ai-memory.exe"   # the path actually installed
+    Windows — a per-user Scheduled Task with an AtLogOn trigger, registered AS ME. Use AI_MEMORY_BIN
+    from step 1; do not invent a path here:
+      $me  = "$env:USERDOMAIN\$env:USERNAME"          # bare USERNAME is ambiguous on domain-joined PCs
+      $exe = <AI_MEMORY_BIN recorded in step 1>
       $act = New-ScheduledTaskAction -Execute $exe -Argument 'serve --transport http'
-      $trg = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME
+      $trg = New-ScheduledTaskTrigger -AtLogOn -User $me
+      $pri = New-ScheduledTaskPrincipal -UserId $me -LogonType S4U -RunLevel Limited
       $opt = @{ AllowStartIfOnBatteries = $true; DontStopIfGoingOnBatteries = $true
                 RestartCount = 3; RestartInterval = (New-TimeSpan -Minutes 1)
                 ExecutionTimeLimit = (New-TimeSpan -Seconds 0) }   # 0 = never time out
       $set = New-ScheduledTaskSettingsSet @opt
-      Register-ScheduledTask -TaskName ai-memory -Action $act -Trigger $trg -Settings $set -Force
+      Register-ScheduledTask -TaskName ai-memory -Action $act -Trigger $trg -Principal $pri -Settings $set -Force
       Start-ScheduledTask -TaskName ai-memory
-    Verify with (Get-ScheduledTask ai-memory).State and
+    -LogonType S4U IS THE POINT, NOT A DETAIL. A plain AtLogOn task launches a console executable in my
+    interactive session, so a black console window pops up at every single logon and closing it kills
+    the server. S4U runs the same task as me, with my profile and my data dir, without an interactive
+    window and without storing a password. -RunLevel Limited keeps it unelevated on purpose.
+    Verify: (Get-ScheduledTask ai-memory).State, (Get-ScheduledTaskInfo ai-memory).LastTaskResult
+    (0 = ran cleanly), Get-Process ai-memory, and
     Get-NetTCPConnection -LocalPort <port> -State Listen. Do NOT register it under SYSTEM or with
     -RunLevel Highest: the data dir, config, and wiki live in my profile, and a SYSTEM copy would
     quietly build a second, empty memory next to mine.
 
     ONE SUPERVISOR, NOT TWO. No pm2, no brew services, no login-item wrapper script, and never an
-    'ai-memory serve' line in my shell profile — that starts one server per terminal window. If a
-    supervisor entry for ai-memory already exists, repair it in place instead of adding a second one.
-    While you are in ~/Library/LaunchAgents, also report any DEAD memory-server agent you find: a
-    plist whose program no longer exists respawns every ThrottleInterval forever. Give me its label
-    and the missing path, and ask before removing it.
+    'ai-memory serve' line in my shell profile or PowerShell $PROFILE — that starts one server per
+    terminal window. If a supervisor entry for ai-memory already exists, repair it in place instead of
+    adding a second one. Then sweep for DEAD memory-server entries and report what you find — an
+    entry whose program no longer exists respawns on every retry interval forever and burns CPU:
+      macOS:   ~/Library/LaunchAgents (a plist whose ProgramArguments path is gone)
+      Windows: Get-ScheduledTask | Where-Object TaskName -like '*memory*', the Startup folder
+               ([Environment]::GetFolderPath('Startup')), and Get-CimInstance Win32_StartupCommand
+    Give me the label or task name and the missing path, and ask before removing it.
 
 10. WIRE EVERY DETECTED AGENT TO THAT ONE SERVER. For each agent found in step 1's detection, run
     BOTH commands, substituting the identifier:
@@ -848,8 +961,16 @@ Pi `~/.pi/agent/AGENTS.md`, Gemini `~/.gemini/GEMINI.md`, OpenCode instructions,
 Preserve only a timestamped backup of the previous content.
 
 Prefer ONE canonical file (~/.agents/AGENTS.md) with each agent's path symlinked to it, so a single
-write propagates everywhere. After writing, verify by comparing checksums across all target paths —
-they must be identical, and the count must equal the number of detected agents.
+write propagates everywhere.
+  macOS:   ln -sfn ~/.agents/AGENTS.md <agent path>
+  Windows: New-Item -ItemType SymbolicLink -Path <agent path> -Target $HOME\.agents\AGENTS.md
+           If that is denied, fall back to -ItemType HardLink (these are FILES and a hardlink keeps
+           one write propagating, unlike a copy) — same volume only. Real copies are the last resort,
+           and if you fall back to copies you must SAY SO: from then on every future edit has to be
+           written N times, and a partial rewrite leaves agents disagreeing with each other.
+After writing, verify by comparing checksums across all target paths — they must be identical, and the
+count must equal the number of detected agents.
+  macOS: shasum -a 256    Windows: Get-FileHash -Algorithm SHA256
 
 Sweep for STALE SIBLING INSTRUCTION FILES the previous configuration left behind (for example an
 extra file in Kiro's steering directory). One of them silently re-injects the old rules alongside
@@ -904,8 +1025,14 @@ absent from both until linked individually.
 NEVER convert a populated skills directory into a symlink to the hub. Doing so hides every skill that
 harness installed for itself — 185 of them, in the case above. Link PER SKILL and leave the rest alone:
 
-  Hermes:  ln -sfn ~/.agents/skills/<name> ~/.hermes/skills/<name>
-  Pi:      ln -sfn ../../.agents/skills/<name> ~/.pi/skills/<name>    (match its existing relative style)
+  Hermes,  macOS:   ln -sfn ~/.agents/skills/<name> ~/.hermes/skills/<name>
+           Windows: New-Item -ItemType SymbolicLink -Path $HOME\.hermes\skills\<name>
+                             -Target $HOME\.agents\skills\<name>
+                    denied -> the same command with -ItemType Junction (directories only)
+  Pi,      macOS:   ln -sfn ../../.agents/skills/<name> ~/.pi/skills/<name>  (match its relative style)
+           Windows: use an ABSOLUTE SymbolicLink or Junction. Do not copy Pi's relative style across —
+                    a relative Windows link resolves against the process working directory, not the
+                    link's own directory, so it works when you create it and dangles afterwards.
 
 THE LINK NAME IS THE SKILL'S name:, NOT THE REPO NAME. `cskwork/canvas-ui-skill` must be linked as
 `canvas-ui-design`. A mismatch loads nothing and reports nothing — it fails silently.
@@ -932,9 +1059,11 @@ readable through the new link for a few known skills before calling it repaired.
 
 === 9. VERIFICATION ===
 
-Produce a SEPARATE, READ-ONLY audit script (~/.agents/work/audit-skills.sh) that mutates nothing and
+Produce a SEPARATE, READ-ONLY audit script that mutates nothing and
 classifies every entry: symlink-with-SKILL.md, realdir-with-SKILL.md, broken link, empty directory,
-missing SKILL.md. Run it and report the counts. Have it also list any two entries whose SKILL.md
+missing SKILL.md. Write it in the platform's own language — macOS: ~/.agents/work/audit-skills.sh,
+Windows: ~/.agents/work/audit-skills.ps1. A bash audit is not runnable in native PowerShell, and an
+unrunnable audit means nothing in this section was ever verified. Run it and report the counts. Have it also list any two entries whose SKILL.md
 declares the same frontmatter 'name:'.
 EMPTY DIRECTORIES AND BROKEN LINKS MUST BOTH BE ZERO.
 
@@ -944,10 +1073,16 @@ count as damage, every run ends in DAMAGE FOUND, and after the second or third t
 result, which is how real breakage gets missed. Report missing-SKILL.md as a WARN list for a human
 to read, and never auto-delete those directories.
 
-If you write the audit in zsh or bash, declare counters with `local -i n=0`. A plain `local n=0`
-followed by `n+=1` performs STRING CONCATENATION, so the script reports counts like
-"1111111111111111111" or a garbage negative number while every other line looks correct — a
-verification script that lies is worse than none.
+A verification script that lies is worse than none, and each language has its own way of lying here:
+  bash/zsh: declare counters with `local -i n=0`. A plain `local n=0` followed by `n+=1` performs
+    STRING CONCATENATION, so counts come out as "1111111111111111111" or a garbage negative number
+    while every other line looks correct.
+  PowerShell: Test-Path FOLLOWS the link, so a broken symlink and an absent path both report False —
+    the "broken link" class silently becomes zero, which is exactly the count this section gates on.
+    Classify with Get-Item -Force and read .LinkType and .Target instead. Also treat LinkType
+    'Junction' as a link, not as a real directory: on Windows the junction fallback from section 0b is
+    a normal outcome, and an audit that calls every junction a realdir reports the whole hub as
+    unlinked.
 
 Also verify:
   - EXACTLY ONE workflow set is live. Count the routers present in ~/.agents/skills:
@@ -977,8 +1112,13 @@ Also verify:
     as PENDING-USER because GUI onboarding is unfinished. On other platforms, ego lite is reported
     as SKIPPED-UNSUPPORTED; Playwright is allowed as a separate fallback and, if installed, its
     package and browser versions are reported.
-  - ai-memory: EXACTLY ONE server process (ps -axo pid,%cpu,rss,command | grep ai-memory), listening
-    on 127.0.0.1 and not 0.0.0.0 (lsof -nP -iTCP:<port> -sTCP:LISTEN), 'ai-memory status' reporting
+  - ai-memory: EXACTLY ONE server process, listening on 127.0.0.1 and not 0.0.0.0
+      macOS:   ps -axo pid,%cpu,rss,command | grep ai-memory
+               lsof -nP -iTCP:<port> -sTCP:LISTEN
+      Windows: Get-Process ai-memory
+               Get-NetTCPConnection -LocalPort <port> -State Listen | Select-Object LocalAddress,OwningProcess
+    plus the autostart entry from 5c.9 present and healthy (launchctl print ... state = running /
+    (Get-ScheduledTaskInfo ai-memory).LastTaskResult = 0), 'ai-memory status' reporting
     "embedding: disabled", an empty models/ directory, [auto_improve.scheduler] disabled,
     capture_assistant unset on both the server and the installed hooks, and a real
     initialize -> tools/list handshake against http://127.0.0.1:<port>/mcp returning the memory_*
@@ -995,8 +1135,10 @@ and produce no new backup entries.
 
 Empty-directory damage is caused by OTHER tools after setup finishes, so the environment needs a
 repair path that outlives this run. Leave behind:
-  - audit-skills.sh  read-only, safe to run any time
-  - link-skills.sh   idempotent repair, safe to re-run
+  - audit-skills.sh / audit-skills.ps1   read-only, safe to run any time
+  - link-skills.sh  / link-skills.ps1    idempotent repair, safe to re-run
+    Write the pair for THIS platform only. A .sh left on a Windows machine is a repair path that
+    cannot be run on the day it is needed.
   - a note in ~/.agents/docs/: if an agent reports a skill as missing, run the audit first; if it
     shows empty directories, run the linker.
 
