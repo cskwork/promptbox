@@ -110,24 +110,36 @@ macOS command when a Windows branch is printed a few lines away.
 
 Where a command is unlabelled, this table is the translation. Use it instead of guessing:
 
-  home                macOS  ~                          Windows  $HOME (PowerShell resolves ~ too)
+  home                macOS  ~                          Windows  $HOME  (see the ~ warning below)
   scripts you write   *.sh (bash)                       *.ps1 (write for 5.1, prefer 7)
   process list        ps -axo pid,%cpu,rss,command      Get-Process / Get-CimInstance Win32_Process
   listening port      lsof -nP -iTCP:<p> -sTCP:LISTEN   Get-NetTCPConnection -LocalPort <p> -State Listen
   checksum            shasum -a 256                     Get-FileHash -Algorithm SHA256
   archive             tar -xzf <a>.tar.gz               Expand-Archive <a>.zip   (Windows assets are ZIP)
-  python              python3                           py -3   ('python3' hits the Store stub and exits 9009)
+  python              python3                           py -3, python, python3 — first one that runs
   directory link      ln -s                             New-Item -ItemType SymbolicLink, else Junction
   file link           ln -s                             New-Item -ItemType SymbolicLink, else HardLink
   service at login    ~/Library/LaunchAgents plist      Scheduled Task, AtLogOn trigger, S4U principal
 
+'~' IS NOT PORTABLE INTO A NATIVE BINARY. PowerShell expands ~ for its own cmdlets, so Get-Content
+~/x.md works — but 'ai-memory.exe --data-dir ~/x' passes a LITERAL tilde to the .exe, which then
+creates a folder actually named '~'. Every path you hand to a native binary or write into a config
+file must be fully expanded first. The same applies to 'python3' on Windows: resolve the interpreter
+once (py -3, python, python3 — whichever runs) and store the ABSOLUTE path, per section 0's
+interpreter rule. A bare 'python3' may be the Microsoft Store app-execution alias, which opens the
+Store instead of running your script.
+
 WINDOWS PREREQUISITES — CHECK ALL THREE IN STEP 1, BEFORE THE FIRST CLONE. They cause most of the
 silent failures on Windows, and every one of them looks like something else:
- - SYMLINK PRIVILEGE. New-Item -ItemType SymbolicLink fails with "required privilege is not held"
-   unless Developer Mode is on or the shell is elevated. Read
-   HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock -> AllowDevelopmentWithoutDevLicense.
-   If it is not 1, TELL ME to turn Developer Mode on rather than quietly falling through to junctions
-   and copies: this kit's whole model is one canonical hub, and a copy-based install stops being one.
+ - SYMLINK PRIVILEGE. PROVE IT BY CREATING ONE, NOT BY READING A REGISTRY KEY. Make a throwaway link
+   in a temp directory, check it, delete it, and branch on the ACTUAL error. Developer Mode
+   (HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AppModelUnlock -> AllowDevelopmentWithoutDevLicense = 1)
+   is necessary but NOT sufficient: Windows PowerShell 5.1 does not request unprivileged symlink
+   creation, so the same command that works in PowerShell 7 still fails with "required privilege is
+   not held" in 5.1 with Developer Mode on. If the probe fails, report BOTH facts (Developer Mode
+   state and $PSVersionTable.PSVersion) and TELL ME — turning on Developer Mode or running the
+   linking step under pwsh 7 is a ten-second fix, whereas quietly falling through to junctions and
+   copies ends the one-canonical-hub model this whole kit is built on.
  - LONG PATHS. ~/.agents/sources/<owner>/<repo>/skills/<name>/references/<file>.md passes 260
    characters routinely, and git aborts mid-clone with "Filename too long".
      git config --global core.longpaths true
@@ -135,6 +147,15 @@ silent failures on Windows, and every one of them looks like something else:
    "bad interpreter: no such file or directory" under Git Bash and WSL.
      git config --global core.autocrlf input
    A repo already checked out with CRLF must be re-checked-out, not hand-edited.
+
+LINUX FOLLOWS THE macOS BRANCH, WITH THREE SUBSTITUTIONS. The labels below say 'macOS:' because that
+is the platform this kit is written on; a macOS-labelled command is the POSIX branch and Linux runs it
+unchanged UNLESS it names something macOS-only. Substitute those:
+  brew install <x>                     -> the distro package manager, or the project's install.sh
+  ~/Library/Application Support/<app>  -> ~/.local/share/<app>   (XDG data dir)
+  ~/Library/LaunchAgents plist         -> a systemd --user unit  (recipe in 5c.9)
+Release archives: use the linux-<arch> asset, never the macos-<arch> one. ego lite stays
+SKIPPED-UNSUPPORTED, exactly as on Windows.
 
 WSL IS A SEPARATE INSTALL AND THE HOST IS THE DEFAULT. Detect it independently, but do NOT install on
 both sides unless I ask: install where my agents actually run, and report the other side as
@@ -513,9 +534,11 @@ of those.
       archive. Do NOT symlink into ~/.local/bin — that directory is not on PATH on Windows. Append
       the install directory to the USER Path instead
       ([Environment]::SetEnvironmentVariable('Path', <old>+';'+<dir>, 'User')), and remember the
-      change only reaches shells started afterwards. The release also ships ai-memory-wrapper.ps1 and
-      ai-memory-wrapper.cmd; prefer the .cmd wrapper wherever a config needs a stable launcher that
-      cmd.exe can execute.
+      change only reaches shells started afterwards. IGNORE ai-memory-wrapper.ps1 and
+      ai-memory-wrapper.cmd in the release assets. Despite the names they are NOT launchers for the
+      native binary — they forward every command into the akitaonrails/ai-memory Docker container and
+      exit 127 when Docker is missing. Wiring a config to them contradicts the NATIVE rule at the top
+      of this section and turns a working install into a Docker dependency.
     If ai-memory is already installed, update in place and PRESERVE the existing data dir, wiki, and
     config. Never run a destructive reset.
 
@@ -523,6 +546,7 @@ of those.
     hooks/ directory beside the path it was invoked as, so calling it through the ~/.local/bin symlink
     fails with "could not locate hooks directory". The data dir is
       macOS:   ~/Library/Application Support/ai-memory
+      Linux:   ~/.local/share/ai-memory
       Windows: %LOCALAPPDATA%\\ai-memory
     macOS: copy the extracted hooks/ tree to <data-dir>/hooks. That path is on the probe list, so every
       later invocation works no matter which path was used.
@@ -638,12 +662,36 @@ of those.
     -RunLevel Highest: the data dir, config, and wiki live in my profile, and a SYSTEM copy would
     quietly build a second, empty memory next to mine.
 
+    Linux (and WSL when systemd is running) — a user unit at ~/.config/systemd/user/ai-memory.service:
+      [Unit]
+      Description=ai-memory
+      [Service]
+      ExecStart=%h/.local/bin/ai-memory serve --transport http
+      Restart=always
+      RestartSec=10
+      [Install]
+      WantedBy=default.target
+    Then: systemctl --user daemon-reload && systemctl --user enable --now ai-memory
+    and loginctl enable-linger $USER — WITHOUT LINGER the unit is killed when my last session closes,
+    which looks exactly like "it never started". Verify with systemctl --user is-active ai-memory plus
+    the listener probe. On a WSL distro with no systemd there is no supported autostart: say so and
+    give me the manual command instead of inventing one.
+
+    THE THREE BRANCHES DO NOT RESTART ALIKE — SAY WHICH ONE I GOT. launchd KeepAlive and systemd
+    Restart=always both relaunch after ANY exit, forever. A Scheduled Task's -RestartCount 3 fires
+    only when the task FAILS, and gives up after three tries — a clean exit(0) is not a failure, so
+    Windows alone will not bring the server back. If I want launchd-equivalent behaviour on Windows,
+    add a repeating trigger (New-ScheduledTaskTrigger ... -RepetitionInterval (New-TimeSpan -Minutes 5))
+    and leave MultipleInstances at IgnoreNew, so a five-minute tick restarts a stopped server and does
+    nothing while one is already running.
+
     ONE SUPERVISOR, NOT TWO. No pm2, no brew services, no login-item wrapper script, and never an
     'ai-memory serve' line in my shell profile or PowerShell $PROFILE — that starts one server per
     terminal window. If a supervisor entry for ai-memory already exists, repair it in place instead of
     adding a second one. Then sweep for DEAD memory-server entries and report what you find — an
     entry whose program no longer exists respawns on every retry interval forever and burns CPU:
       macOS:   ~/Library/LaunchAgents (a plist whose ProgramArguments path is gone)
+      Linux:   systemctl --user list-units '*memor*' and ~/.config/systemd/user
       Windows: Get-ScheduledTask | Where-Object TaskName -like '*memory*', the Startup folder
                ([Environment]::GetFolderPath('Startup')), and Get-CimInstance Win32_StartupCommand
     Give me the label or task name and the missing path, and ask before removing it.
@@ -899,8 +947,8 @@ Produce a SEPARATE, READ-ONLY audit script that mutates nothing and
 classifies every entry: symlink-with-SKILL.md, realdir-with-SKILL.md, broken link, empty directory,
 missing SKILL.md. Write it in the platform's own language — macOS: ~/.agents/work/audit-skills.sh,
 Windows: ~/.agents/work/audit-skills.ps1. A bash audit is not runnable in native PowerShell, and an
-unrunnable audit means nothing in this section was ever verified. Run it and report the counts. Have it also list any two entries whose SKILL.md
-declares the same frontmatter 'name:'.
+unrunnable audit means nothing in this section was ever verified. Run it and report the counts. Have
+it also list any two entries whose SKILL.md declares the same frontmatter 'name:'.
 EMPTY DIRECTORIES AND BROKEN LINKS MUST BOTH BE ZERO.
 
 Gate the exit status on those two counts only. A skills directory legitimately contains folders that
