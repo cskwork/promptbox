@@ -3,7 +3,6 @@ title: debug-code
 summary: "증거 기반 진단으로 symptom(증상)에서 causal chain(인과 사슬)을 세우고 최소 안전 패치를 만드는 디버깅 스킬. 프로덕션 전용·간헐적·성능·레거시 버그를 제한된 접근 환경에서도 잡는다."
 summary_en: "Evidence-first debugging that turns a symptom into an evidenced causal chain and the smallest safe fix, even with codebase-only access."
 tags: [skill, debugging, production, legacy, evidence, invariant, root-cause, triage]
-author: debug-code
 order: 61
 trigger: "behavior is broken / incorrect / failing / slow / flaky / production-only bug / intermittent / data-dependent / debug this / root-cause analysis"
 install: "debug-code 디렉토리를 당신의 에이전트 skills 폴더에 복사"
