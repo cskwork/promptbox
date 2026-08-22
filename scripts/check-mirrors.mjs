@@ -11,8 +11,11 @@
  */
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const CONTENT_ROOT = new URL('../src/content/', import.meta.url).pathname;
+// fileURLToPath strips the leading slash .pathname leaves on Windows
+// (/D:/… would resolve as D:\D:\… and crash readdir).
+const CONTENT_ROOT = fileURLToPath(new URL('../src/content/', import.meta.url));
 const FETCH_TIMEOUT_MS = 15000;
 
 async function markdownFiles(dir) {
@@ -26,7 +29,9 @@ async function markdownFiles(dir) {
 }
 
 function frontmatterValue(text, key) {
-  const block = text.match(/^---\n([\s\S]*?)\n---/);
+  // \r? tolerates CRLF checkouts (git autocrlf on Windows) — an LF-only
+  // pattern silently matches nothing there and the whole check false-passes.
+  const block = text.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (!block) return null;
   const line = block[1].match(new RegExp(`^${key}:\\s*(.+)$`, 'm'));
   return line ? line[1].trim().replace(/^["']|["']$/g, '') : null;
@@ -35,7 +40,7 @@ function frontmatterValue(text, key) {
 /** The payload is the outermost fenced block; entries use 4 backticks when the
  *  original itself contains triple-backtick blocks. */
 function fencedPayload(text) {
-  const body = text.replace(/^---\n[\s\S]*?\n---\n/, '');
+  const body = text.replace(/^---\r?\n[\s\S]*?\r?\n---\r?\n/, '');
   const open = body.match(/^(`{3,})[^\n]*\n/m);
   if (!open) return null;
   const fence = open[1];
@@ -88,7 +93,10 @@ for (const { file, url, payload } of mirrors) {
     }
     continue;
   }
-  if (payload.trim() === upstream.trim()) {
+  // Normalize CRLF→LF on both sides: a Windows checkout embeds \r\n while
+  // upstream raw files use \n; trim() alone does not remove interior \r.
+  const norm = (s) => s.replace(/\r\n/g, '\n').trim();
+  if (norm(payload) === norm(upstream)) {
     console.log(`OK     ${label}`);
   } else {
     console.error(
