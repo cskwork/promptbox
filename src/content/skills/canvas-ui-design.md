@@ -43,10 +43,13 @@ description: Design and build expressive website interfaces with Canvas UI (gith
 # Canvas UI Design
 
 Treat `https://github.com/DavidHDev/canvas-ui` as the primary creative reference for
-the UI. Read its component source before writing your own shader or canvas code.
+the UI: install its components and read their source rather than writing your own
+shader or canvas code.
 
-Full component catalog, wiring examples, and the effect-picking table:
-[REFERENCE.md](REFERENCE.md).
+Read [REFERENCE.md](REFERENCE.md) before picking an effect, and again before wiring
+one up — it carries the full component catalog, the effect-picking table, the
+registry naming scheme, and the vanilla factory contract the JSX example below
+does not cover.
 
 ## Design rules
 
@@ -75,13 +78,12 @@ These override any instinct toward "more effects."
 2. **Pick one effect** from the table in [REFERENCE.md](REFERENCE.md), matched to
    tone — fluid/optical for calm and premium, glitch/retro for loud and technical,
    particle/3D for product showcases.
-3. **Install it** into the project (see below). Do not hand-roll an imitation; the
-   real shaders are better than what you will write.
+3. **Install it** from the registry (see Install).
 4. **Build the page around it.** Layout, type scale, palette, and copy carry the
    design. The effect is the accent that makes it memorable.
 5. **Verify the fallback path.** Load the page in a browser without the html-in-canvas
    flag and confirm it still looks intentional (see Browser support).
-6. **Check the guardrails** in the last section before calling it done.
+6. **Clear every guardrail** in the last section before calling it done.
 
 ## Install
 
@@ -94,7 +96,7 @@ npx shadcn@latest add @canvas-ui/liquid-react
 
 Swap `liquid` for any component in [REFERENCE.md](REFERENCE.md), and `react` for
 `solid`, `preact`, `vue`, `svelte`, or `vanilla`. Files land in `components/canvasui/`
-and are yours to edit.
+(Svelte: `src/lib/components/canvasui/`) and are yours to edit.
 
 Most components wrap content rather than sit beside it:
 
@@ -118,9 +120,11 @@ Design for the fallback as the default state. The flagged version is the upgrade
 
 ## Guardrails
 
-- Honor `prefers-reduced-motion` — Canvas UI components already do; do not defeat it.
+- Honor `prefers-reduced-motion` — the components already do; any motion you add
+  checks it too.
 - Keep the effect off the critical render path so first paint is text, not a blank canvas.
-- Call `destroy()` on unmount / route change. Leaked WebGL contexts kill the tab.
+- On the vanilla path call `destroy()` on teardown or route change; the framework
+  wrappers already destroy on unmount. Leaked WebGL contexts kill the tab.
 - One WebGL context per page. Each additional canvas costs a context and a frame budget.
 - Contrast is measured against the *rendered* result, not the CSS color underneath.
 - License is MIT + Commons Clause: free to use in your own projects, commercial or not;
