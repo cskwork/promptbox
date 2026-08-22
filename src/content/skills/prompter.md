@@ -45,9 +45,9 @@ install: "npx skills@latest add ./prompter"
 ````markdown
 ---
 name: prompter
-description: Infer the user's most likely reply to an agent question from compact, consented decision-pattern evidence, and recommend the development prompts the user would most plausibly send next after a bounded read-only exploration of the current repository. Use only for direct skill invocation or the explicit routes prompt/ init, prompt/, prompt/ explore, and prompt/ update (compact init/explore/update aliases are accepted). Always show the proposed reply and require y/yes before continuing.
+description: Infers the user's most likely reply to a pending agent question, and recommends the development prompts they would most plausibly send next after a read-only exploration of the current repository. Use only for direct skill invocation or the explicit routes prompt/ init, prompt/, prompt/ explore, and prompt/ update (compact init/explore/update aliases are accepted).
 license: MIT
-compatibility: Requires Python 3.9+ for local session discovery. Works without Python when the user supplies evidence manually.
+compatibility: Requires Python 3.9+ for the bundled session scanner used by Init and Update; without it those routes fall back to a bounded read-only harness explorer.
 allowed-tools: Read Grep Glob Bash Task
 metadata:
   version: "1.1.0"
@@ -61,7 +61,7 @@ metadata:
 
 # Prompter
 
-Explicit-invocation router for four workflows. Activate only on an exact keyword below or a direct `prompter` invocation. Never infer activation from an ordinary request; never answer an agent question without the confirmation gate.
+Explicit-invocation router for four workflows. Activate only on an exact keyword below or a direct `prompter` invocation. Never infer activation from an ordinary request.
 
 ## Route
 
@@ -94,10 +94,11 @@ When shell access is available, use the dependency-free helper (resolve relative
 ```bash
 python3 scripts/prompter.py discover
 python3 scripts/prompter.py acquire-lock
-python3 scripts/prompter.py scan --mode init --output "$TMPDIR/prompter-evidence.json"
-python3 scripts/prompter.py scan --mode update --state ~/.prompter/state.json --output "$TMPDIR/prompter-evidence.json"
-python3 scripts/prompter.py install-profile --input "$TMPDIR/prompter-profile.json" --lock ~/.prompter/profile.lock --token '<token>'
-python3 scripts/prompter.py commit-state --evidence "$TMPDIR/prompter-evidence.json" --state ~/.prompter/state.json
+python3 scripts/prompter.py scan --mode init --focus '<focus>' --output "${TMPDIR:-/tmp}/prompter-evidence.json"
+python3 scripts/prompter.py scan --mode update --state ~/.prompter/state.json --focus '<focus>' --output "${TMPDIR:-/tmp}/prompter-evidence.json"
+python3 scripts/prompter.py validate-profile "${TMPDIR:-/tmp}/prompter-profile.candidate.json"
+python3 scripts/prompter.py install-profile --input "${TMPDIR:-/tmp}/prompter-profile.candidate.json" --lock ~/.prompter/profile.lock --token '<token>'
+python3 scripts/prompter.py commit-state --evidence "${TMPDIR:-/tmp}/prompter-evidence.json" --state ~/.prompter/state.json
 python3 scripts/prompter.py sync --mode pull   # optional; exit 3 = conflict, stop the route
 python3 scripts/prompter.py sync --mode push   # optional; exit 4 = push failed, not fatal
 python3 scripts/prompter.py release-lock --token '<token>'
