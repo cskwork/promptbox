@@ -28,6 +28,8 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   // orient + plan
   { category: 'skills', slug: 'grill-with-docs' },
   { category: 'skills', slug: 'improve-codebase-architecture' },
+  // multi-agent architectural swarms
+  { category: 'skills', slug: 'swarm-forge' },
   { category: 'skills', slug: 'triage' },
   { category: 'skills', slug: 'handoff' },
   // build + verify
@@ -35,6 +37,8 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'prototype' },
   { category: 'skills', slug: 'diagnose' },
   { category: 'skills', slug: 'verify' },
+  // default QA skill
+  { category: 'skills', slug: 'browser-qa' },
   { category: 'mcps', slug: 'codebase-memory-mcp' },
   // super* end-to-end suite
   { category: 'skills', slug: 'supergoal' },
@@ -168,7 +172,8 @@ that resolve on only one side.
 Detect OS, architecture, Git, Node.js, Python 3.10+, and available package managers. For each
 interpreter record the ABSOLUTE PATH THAT ACTUALLY WORKS IN A NON-INTERACTIVE SHELL.
 
-Identify installed agents: Claude Code, Codex, Jcode, Pi, Hermes, Kiro, Antigravity/agy, Gemini CLI, OpenCode, Cursor.
+Identify installed agents: Claude Code, Codex, Jcode, Pi, Hermes, Kiro, Antigravity/agy, Gemini CLI, OpenCode,
+Cursor, Oh My Pi (omp — its config tree is ~/.omp and is SEPARATE from Pi's ~/.pi; never treat one as the other).
 For each, record its global instruction file path and its global skills directory path — and
 whether each is currently a real file/directory, a symlink, or absent.
 
@@ -372,6 +377,22 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       (winget install jqlang.jq). If there is no bash, link the skill
                                       anyway and report the selftest as SKIPPED-UNSUPPORTED — do NOT
                                       claim 22/22 you did not run.
+  browser-qa (QA default)             https://github.com/cskwork/browser-qa
+                                      THE DEFAULT QA SKILL for every web/browser QA task on EVERY
+                                      platform. ego-browser stays the macOS browser layer; SuperQA is
+                                      the QA harness on top. Clone the repo and link skills/browser-qa
+                                      as ~/.agents/skills/superqa — the directory name must match the
+                                      frontmatter name:, which is superqa. Requires Python 3.10+;
+                                      after linking run:
+                                        pip3 install textual playwright pyyaml
+                                        python3 -m playwright install chromium
+  SwarmForge Router                   https://github.com/cskwork/swarm-agent-skill
+                                      Multi-agent swarm setup: recommends a 2/4/6-role SwarmForge pack,
+                                      asks before installing, wires a project-local workflow with
+                                      recorded provenance. Clone the repo and link skills/swarm-forge
+                                      as ~/.agents/skills/swarm-forge. Launching a swarm needs zsh +
+                                      tmux; if either is missing, report the prerequisite instead of
+                                      improvising.
   Debug Code                          https://github.com/cskwork/promptbox
                                       Clone the promptbox repo, then link src/content/skills/debug-code
                                       as a skill directory. The skill ships its SKILL.md and two reference
@@ -403,7 +424,7 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       like a missing skill, not a missing interpreter.
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
-  ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
+  ego-browser (macOS browser layer)  https://github.com/citrolabs/ego-lite
     macOS ONLY. This is the browser layer for this kit — see step 5b for the app install.
     On non-macOS, skip both the app and the ego-browser skill and report SKIPPED-UNSUPPORTED.
     Skill-only route (macOS only): npx skills add citrolabs/ego-lite
@@ -531,8 +552,10 @@ of those.
       not apply — verify with Get-FileHash -Algorithm SHA256 against the published .sha256, then
       Expand-Archive into $env:LOCALAPPDATA\\Programs\\ai-memory. THERE IS NO windows-aarch64 BUILD:
       on ARM Windows stop here and report SKIPPED-UNSUPPORTED instead of downloading the x86_64
-      archive. Do NOT symlink into ~/.local/bin — that directory is not on PATH on Windows. Append
-      the install directory to the USER Path instead
+      archive. PROBE BEFORE CHOOSING THE PATH STRATEGY: on many Windows machines ~/.local/bin IS on
+      the user Path (any machine with a Unix-style toolchain), and a copy of ai-memory.exe there is
+      then the simplest route — check the actual user Path, do not assume either way. When it is not
+      on PATH, append the install directory to the USER Path instead
       ([Environment]::SetEnvironmentVariable('Path', <old>+';'+<dir>, 'User')), and remember the
       change only reaches shells started afterwards. IGNORE ai-memory-wrapper.ps1 and
       ai-memory-wrapper.cmd in the release assets. Despite the names they are NOT launchers for the
@@ -555,6 +578,9 @@ of those.
       and in that case there is nothing to stage. Copy the tree ONLY if the rendered config actually
       references a hooks/ path. If it does, copy it to %LOCALAPPDATA%\\ai-memory\\hooks and remember the
       .sh files inside must keep LF endings (section 0b) or the shell shims break.
+      v1.30.0 and later self-stage on Windows: install-hooks --apply verifies and copies the hook
+      scripts into <data-dir>\\hooks\\<agent> itself (log line 'verified N hook script(s) →'). Treat
+      that line as staging DONE — do not copy the tree twice on top of it.
 
  3. INITIALISE ONLY IF NOT ALREADY INITIALISED:   ai-memory init
 
@@ -652,6 +678,13 @@ of those.
       $set = New-ScheduledTaskSettingsSet @opt
       Register-ScheduledTask -TaskName ai-memory -Action $act -Trigger $trg -Principal $pri -Settings $set -Force
       Start-ScheduledTask -TaskName ai-memory
+    REGISTERING AN S4U PRINCIPAL NEEDS AN ELEVATED SHELL — this is the ONE elevated command the whole
+    setup requires. From a plain session Register-ScheduledTask fails with Access denied / 액세스가
+    거부되었습니다; that is the elevation requirement, not a broken command. Write the block above to a
+    .ps1 file and register it elevated exactly once:
+      Start-Process pwsh -Verb RunAs -Wait -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','<that .ps1>'
+    (I approve the single UAC prompt), or print the script and hand it to me. After registration,
+    Start-ScheduledTask, state checks, and repairs all run fine unelevated.
     -LogonType S4U IS THE POINT, NOT A DETAIL. A plain AtLogOn task launches a console executable in my
     interactive session, so a black console window pops up at every single logon and closing it kills
     the server. S4U runs the same task as me, with my profile and my data dir, without an interactive
@@ -732,6 +765,31 @@ of those.
 
 13. DO NOT TOUCH MY REPOSITORIES. This is a machine-level install. Do not insert ai-memory routing
     text into arbitrary AGENTS.md, CLAUDE.md, or README.md files across my projects.
+
+=== 5d. Oh My Pi (omp) — DETECT AND WIRE ONLY; NEVER A DEFAULT INSTALL ===
+
+omp (https://github.com/can1357/oh-my-pi) is a Pi-fork coding agent shipped as one native binary
+with LSP, a real debugger drive, and browser automation built in. It is NOT part of the default
+kit on any platform: this step only detects an EXISTING omp and wires it to the hub. Installing it
+is my decision — if it is absent, report NOT-INSTALLED with the one command that would install it
+  (macOS/Linux: curl -fsSL https://omp.sh/install | sh · Windows: irm https://omp.sh/install.ps1 | iex,
+   bun >= 1.3.14 required) and move on. Never install it just because ai-memory or this kit knows
+its identifier.
+
+ 1. DETECT: omp --version. Absent → report NOT-INSTALLED + the command above; done.
+    Present → repair in place, never reinstall over it. Do NOT remove the standard Pi
+    (@earendil-works/pi-coding-agent) either: omp is a separate agent with a separate config tree.
+ 2. omp DOES NOT READ ~/.pi. Its own tree lives under ~/.omp/agent/. Confirm the actual skills
+    directory from 'omp --help' or its docs instead of assuming a name, then wire it to the hub
+    exactly like every other agent: ~/.agents/skills is the single source, one link per entry (or
+    one directory link) using this platform's link rules — junction, not symlink, when symlink
+    privilege is absent (section 0b).
+ 3. VERIFY SKILL LOADING WITH THE ENGINE, NOT THE FILESYSTEM: start omp, ask it to list its
+    available skills, and confirm hub skills appear. A linked directory omp cannot parse fails
+    silently at startup and looks identical to a missing one in \`ls\`. This engine-level check is
+    mandatory — 'directory exists' was never acceptable proof anywhere in this kit.
+ 4. Wire ai-memory with identifier 'omp' in step 10 (it writes ~/.omp/agent/), and report that omp
+    loads generated extensions only on restart (step 12).
 
 === 6. MCP INTEGRATION ===
 

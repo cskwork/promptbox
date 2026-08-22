@@ -549,6 +549,22 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       (winget install jqlang.jq). If there is no bash, link the skill
                                       anyway and report the selftest as SKIPPED-UNSUPPORTED — do NOT
                                       claim 22/22 you did not run.
+  browser-qa (QA default)             https://github.com/cskwork/browser-qa
+                                      THE DEFAULT QA SKILL for every web/browser QA task on EVERY
+                                      platform. ego-browser stays the macOS browser layer; SuperQA is
+                                      the QA harness on top. Clone the repo and link skills/browser-qa
+                                      as ~/.agents/skills/superqa — the directory name must match the
+                                      frontmatter name:, which is superqa. Requires Python 3.10+;
+                                      after linking run:
+                                        pip3 install textual playwright pyyaml
+                                        python3 -m playwright install chromium
+  SwarmForge Router                   https://github.com/cskwork/swarm-agent-skill
+                                      Multi-agent swarm setup: recommends a 2/4/6-role SwarmForge pack,
+                                      asks before installing, wires a project-local workflow with
+                                      recorded provenance. Clone the repo and link skills/swarm-forge
+                                      as ~/.agents/skills/swarm-forge. Launching a swarm needs zsh +
+                                      tmux; if either is missing, report the prerequisite instead of
+                                      improvising.
   Debug Code                          https://github.com/cskwork/promptbox
                                       Clone the promptbox repo, then link src/content/skills/debug-code
                                       as a skill directory. The skill ships its SKILL.md and two reference
@@ -580,7 +596,7 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       like a missing skill, not a missing interpreter.
   OfficeCLI                           https://github.com/iOfficeAI/OfficeCLI
   Herdr                               https://github.com/ogulcancelik/herdr
-  ego-browser (browser QA + web automation)  https://github.com/citrolabs/ego-lite
+  ego-browser (macOS browser layer)  https://github.com/citrolabs/ego-lite
     macOS ONLY. This is the browser layer for this kit — see step 5b for the app install.
     On non-macOS, skip both the app and the ego-browser skill and report SKIPPED-UNSUPPORTED.
     Skill-only route (macOS only): npx skills add citrolabs/ego-lite
