@@ -45,6 +45,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | **officecli** (11종) | 스킬 + CLI | iOfficeAI/OfficeCLI | docx·xlsx·pptx 생성·분석, 재무모델·피치덱·논문 레이어 |
 | **herdr** | 스킬 + CLI | ogulcancelik/herdr | 코딩 에이전트용 터미널 멀티플렉서 |
 | **rtk** | CLI + 훅 | rtk-ai/rtk | 셸 명령 출력을 압축해 컨텍스트로 들어가는 토큰을 줄인다(git·pytest·docker 등 100종+). MCP가 아니라 `PreToolUse` 훅으로 붙는다 |
+| **omp — oh-my-pi** (Windows 기본) | 에이전트(하네스) | [can1357/oh-my-pi](https://github.com/can1357/oh-my-pi) | 단일 바이너리 올인원 코딩 에이전트(LSP·디버거·브라우저 내장). Windows에서 기본 설치해 허브 스킬을 `~/.omp/agent/`로 연결한다 |
 | **ai-memory** | CLI + 서버 + MCP + 훅 | [akitaonrails/ai-memory](https://github.com/akitaonrails/ai-memory) | 기본 구성에 포함. 설치된 **모든** 에이전트가 공유하는 로컬 메모리 서버 하나. 세션이 끝나면 훅이 남긴 관측을 요약 페이지로 묶고, 다음 에이전트는 첫 프롬프트 전에 "어디까지 했는지"를 받는다. 저장소는 FTS5 SQLite + 마크다운 위키라 `grep`·Obsidian·`rsync`가 그대로 통한다. **임베딩·벡터DB·로컬 LLM·Docker는 기본 구성이 아니다** — 설치하지 않는다 |
 
 > 설치된 CLI 수를 고정하지 않는다. 각 도구가 `~/.agents/skills`를 직접 읽는지 먼저 확인하고, 필요한 어댑터만 만든다.
@@ -195,6 +196,11 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
   띄워서 로그인마다 검은 창이 뜨고, 그 창을 닫으면 서버가 죽는다. `-LogonType S4U`는 같은 계정·같은
   프로필로 창 없이 돈다. SYSTEM이나 `-RunLevel Highest`는 금지 — 데이터 디렉터리가 사용자 프로필
   안이라 빈 기억이 하나 더 생긴다.
+- **omp(oh-my-pi)는 Pi와 별개 에이전트다**: `~/.pi`를 읽지 않고 `~/.omp/agent/` 트리를 쓴다. Windows에서는
+  이 키트가 omp를 기본 설치한다(ego lite가 macOS 전용이라 그 자리를 채운다). 스킬 로딩은 디렉터리 확인이
+  아니라 omp 엔진에 스킬 목록을 직접 물어봐야 검증이다 — 2026-08 Windows 실행에서 "omp 스킬 로딩 미확정"이
+  남은 이유가 정확히 이 검증 생략이었다. 또한 omp의 S4U가 아니라 ai-memory 로그온 작업 등록에는 관리자
+  셸이 필요하다: 일반 셸에서는 액세스 거부로 실패하며, 이게 전체 설치에서 유일한 상승 명령이다.
 - **ai-memory 포트 49374는 임시 포트 대역 안이다**: macOS는 49152–65535를 아무 프로세스에나 먼저
   나눠 준다. 실제로 OpenCode 백그라운드 서비스(`opencode2 serve --service`)가 49374를 잡고 있어
   서버가 못 떴다. 그 프로세스를 죽이면 붙어 있던 세션이 끊기므로 죽이지 말고, `config.toml`의
@@ -338,7 +344,8 @@ that resolve on only one side.
 Detect OS, architecture, Git, Node.js, Python 3.10+, and available package managers. For each
 interpreter record the ABSOLUTE PATH THAT ACTUALLY WORKS IN A NON-INTERACTIVE SHELL.
 
-Identify installed agents: Claude Code, Codex, Jcode, Pi, Hermes, Kiro, Antigravity/agy, Gemini CLI, OpenCode, Cursor.
+Identify installed agents: Claude Code, Codex, Jcode, Pi, Hermes, Kiro, Antigravity/agy, Gemini CLI, OpenCode,
+Cursor, Oh My Pi (omp — its config tree is ~/.omp and is SEPARATE from Pi's ~/.pi; never treat one as the other).
 For each, record its global instruction file path and its global skills directory path — and
 whether each is currently a real file/directory, a symlink, or absent.
 
@@ -701,8 +708,10 @@ of those.
       not apply — verify with Get-FileHash -Algorithm SHA256 against the published .sha256, then
       Expand-Archive into $env:LOCALAPPDATA\Programs\ai-memory. THERE IS NO windows-aarch64 BUILD:
       on ARM Windows stop here and report SKIPPED-UNSUPPORTED instead of downloading the x86_64
-      archive. Do NOT symlink into ~/.local/bin — that directory is not on PATH on Windows. Append
-      the install directory to the USER Path instead
+      archive. PROBE BEFORE CHOOSING THE PATH STRATEGY: on many Windows machines ~/.local/bin IS on
+      the user Path (any machine with a Unix-style toolchain), and a copy of ai-memory.exe there is
+      then the simplest route — check the actual user Path, do not assume either way. When it is not
+      on PATH, append the install directory to the USER Path instead
       ([Environment]::SetEnvironmentVariable('Path', <old>+';'+<dir>, 'User')), and remember the
       change only reaches shells started afterwards. IGNORE ai-memory-wrapper.ps1 and
       ai-memory-wrapper.cmd in the release assets. Despite the names they are NOT launchers for the
@@ -725,6 +734,9 @@ of those.
       and in that case there is nothing to stage. Copy the tree ONLY if the rendered config actually
       references a hooks/ path. If it does, copy it to %LOCALAPPDATA%\ai-memory\hooks and remember the
       .sh files inside must keep LF endings (section 0b) or the shell shims break.
+      v1.30.0 and later self-stage on Windows: install-hooks --apply verifies and copies the hook
+      scripts into <data-dir>\hooks\<agent> itself (log line 'verified N hook script(s) →'). Treat
+      that line as staging DONE — do not copy the tree twice on top of it.
 
  3. INITIALISE ONLY IF NOT ALREADY INITIALISED:   ai-memory init
 
@@ -822,6 +834,13 @@ of those.
       $set = New-ScheduledTaskSettingsSet @opt
       Register-ScheduledTask -TaskName ai-memory -Action $act -Trigger $trg -Principal $pri -Settings $set -Force
       Start-ScheduledTask -TaskName ai-memory
+    REGISTERING AN S4U PRINCIPAL NEEDS AN ELEVATED SHELL — this is the ONE elevated command the whole
+    setup requires. From a plain session Register-ScheduledTask fails with Access denied / 액세스가
+    거부되었습니다; that is the elevation requirement, not a broken command. Write the block above to a
+    .ps1 file and register it elevated exactly once:
+      Start-Process pwsh -Verb RunAs -Wait -ArgumentList '-NoProfile','-ExecutionPolicy','Bypass','-File','<that .ps1>'
+    (I approve the single UAC prompt), or print the script and hand it to me. After registration,
+    Start-ScheduledTask, state checks, and repairs all run fine unelevated.
     -LogonType S4U IS THE POINT, NOT A DETAIL. A plain AtLogOn task launches a console executable in my
     interactive session, so a black console window pops up at every single logon and closing it kills
     the server. S4U runs the same task as me, with my profile and my data dir, without an interactive
@@ -902,6 +921,33 @@ of those.
 
 13. DO NOT TOUCH MY REPOSITORIES. This is a machine-level install. Do not insert ai-memory routing
     text into arbitrary AGENTS.md, CLAUDE.md, or README.md files across my projects.
+
+=== 5d. INSTALL Oh My Pi (omp) — Windows DEFAULT, elsewhere on request ===
+
+omp (https://github.com/can1357/oh-my-pi) is a Pi-fork coding agent shipped as one native binary
+with LSP, a real debugger drive, and browser automation built in — the same binary on every OS.
+On Windows it fills the slot ego lite fills on macOS, so this kit installs it THERE BY DEFAULT;
+on macOS and Linux install it only when I ask or when it is already present (then repair).
+
+ 1. DETECT FIRST: omp --version. Already installed → skip to 3 and repair, never reinstall over it.
+    Do NOT remove the standard Pi (@earendil-works/pi-coding-agent) to make room: omp is a separate
+    agent with a separate config tree; the two coexist.
+ 2. INSTALL via the official route (bun >= 1.3.14 is a hard requirement):
+      macOS/Linux:  curl -fsSL https://omp.sh/install | sh
+      Windows:      irm https://omp.sh/install.ps1 | iex
+    On Windows without bun, install bun first (irm https://bun.sh/install.ps1 | iex) and remember
+    %USERPROFILE%\.bunin only reaches shells started afterwards — open a fresh shell to detect.
+ 3. omp DOES NOT READ ~/.pi. Its own tree lives under ~/.omp/agent/. After install, confirm the
+    actual skills directory from 'omp --help' or its docs instead of assuming a name, then wire it
+    to the hub exactly like every other agent: ~/.agents/skills is the single source, one link per
+    entry (or one directory link) using this platform's link rules — junction, not symlink, when
+    symlink privilege is absent (section 0b).
+ 4. VERIFY SKILL LOADING WITH THE ENGINE, NOT THE FILESYSTEM: start omp, ask it to list its
+    available skills, and confirm hub skills appear. A linked directory omp cannot parse fails
+    silently at startup and looks identical to a missing one in `ls`. This engine-level check is
+    mandatory — 'directory exists' was never acceptable proof anywhere in this kit.
+ 5. Wire ai-memory with identifier 'omp' in step 10 (it writes ~/.omp/agent/), and report that omp
+    loads generated extensions only on restart (step 12).
 
 === 6. MCP INTEGRATION ===
 
