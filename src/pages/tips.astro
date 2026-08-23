@@ -18,40 +18,23 @@ const cmdVerify = `opencode2 --version`;
 const cmdInstallV1 = `# 예전 안정판(v1)을 쓰려면 — 명령 이름은 opencode
 curl -fsSL https://opencode.ai/install | bash
 npm install -g opencode-ai@latest   # 같은 것, Windows는 이쪽`;
-const cmdOmoInstall = `bunx oh-my-opencode-slim@latest install
-
-# Bun이 없으면 npx도 같다:
-npx oh-my-opencode-slim@latest install`;
-const cmdOmoV2 = `# opencode2는 v1과 같은 ~/.config/opencode/opencode.json 을 그대로 읽는다(실측 확인).
-# 아래 내용이 이미 STEP 4의 설치기에 의해 들어가 있으므로, 보통은 아무것도 할 필요 없다:
-{
-  "$schema": "https://opencode.ai/config.json",
-  "plugin": ["oh-my-opencode-slim@latest"]
-}`;
 const cmdAuth = `opencode2 auth login    # 목록에서 zai-coding-plan 선택 → 키 붙여넣기`;
 const cmdModels = `opencode2 models | grep zai-coding-plan    # 내 구독으로 열리는 모델 확인`;
-const cmdPresetOpen = `# macOS / Linux
-open ~/.config/opencode/oh-my-opencode-slim.json
-
-# 또는 에디터로
-code ~/.config/opencode/oh-my-opencode-slim.json`;
-const cmdPreset = `{
-  "$schema": "https://unpkg.com/oh-my-opencode-slim@latest/oh-my-opencode-slim.schema.json",
-  "preset": "glm",
-  "presets": {
-    "glm": {
-      "orchestrator": { "model": "zai-coding-plan/glm-5.3", "skills": ["*"], "mcps": ["*"] },
-      "oracle":       { "model": "zai-coding-plan/glm-5.3", "skills": [], "mcps": [] },
-      "librarian":    { "model": "zai-coding-plan/glm-5-turbo", "skills": [], "mcps": ["context7"] },
-      "explorer":     { "model": "zai-coding-plan/glm-5-turbo", "skills": [], "mcps": [] },
-      "designer":     { "model": "zai-coding-plan/glm-5.3", "skills": [], "mcps": [] },
-      "fixer":        { "model": "zai-coding-plan/glm-5.3", "skills": [], "mcps": [] }
-    }
-  }
-}`;
+const cmdDefaultModel = `python3 - <<'EOF'
+import json, os
+p = os.path.expanduser("~/.config/opencode/opencode.json")
+cfg = json.load(open(p)) if os.path.exists(p) else {}   # 이미 있으면 보존하고 합친다
+cfg["model"] = "zai-coding-plan/glm-5.3"                # 기본 모델
+cfg.setdefault("provider", {}).setdefault("zai-coding-plan", {}) \
+   .setdefault("models", {})["glm-5.3"] = {"options": {"reasoningEffort": "max"}}
+os.makedirs(os.path.dirname(p), exist_ok=True)
+json.dump(cfg, open(p, "w"), indent=2, ensure_ascii=False)
+print("model ->", p)
+EOF`;
 const cmdVisionMcp = `// ~/.config/opencode/opencode.json — v1(opencode)·v2(opencode2) 모두 이 파일을 읽는다
 {
   "$schema": "https://opencode.ai/config.json",
+  "model": "zai-coding-plan/glm-5.3",
   "mcp": {
     "zai-mcp-server": {
       "type": "local",
@@ -63,15 +46,7 @@ const cmdVisionMcp = `// ~/.config/opencode/opencode.json — v1(opencode)·v2(o
     }
   }
 }`;
-const cmdVisionAgent = `// ~/.config/opencode/oh-my-opencode-slim.json — 눈이 필요한 에이전트에만 붙인다
-{
-  "presets": {
-    "glm": {
-      "designer":     { "model": "zai-coding-plan/glm-5.3", "skills": [], "mcps": ["zai-mcp-server"] },
-      "orchestrator": { "model": "zai-coding-plan/glm-5.3", "skills": ["*"], "mcps": ["*"] }
-    }
-  }
-}`;
+const cmdVisionCheck = `opencode2 run "probe.png 안의 글자를 그대로 읽어줘"   # 이미지를 붙여넣지 말고 파일명으로 지목한다`;
 const cmdPerms = `python3 - <<'EOF'
 import json, os
 p = os.path.expanduser("~/.config/opencode/opencode.json")
@@ -136,8 +111,8 @@ cd ~/my-project && prime-agent
 <BaseLayout
   title="Tips & Tricks — promptbox"
   titleKo="Tips & Tricks — promptbox"
-  description="Zero-to-hero beginner tutorial in Korean: get your Z.ai GLM key, install OpenCode and oh-my-opencode-slim, wire up GLM-5.3, and run your first agent team session."
-  descriptionKo="완전 입문자용 튜토리얼: Z.ai GLM API 키 발급부터 OpenCode + oh-my-opencode-slim 설치, GLM-5.3 연결, 첫 세션까지 단계별로."
+  description="Zero-to-hero beginner tutorial in Korean: get your Z.ai GLM key, install OpenCode 2, pin GLM-5.3, add GLM-4.6V vision over MCP, and run your first session."
+  descriptionKo="완전 입문자용 튜토리얼: Z.ai GLM API 키 발급부터 OpenCode 2 설치, GLM-5.3 연결, GLM-4.6V 비전(MCP) 연결, 첫 세션까지 단계별로."
   currentHref={currentHref}
 >
   <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
@@ -152,12 +127,12 @@ cd ~/my-project && prime-agent
       <span data-lang="ko">Tips &amp; Tricks — 코딩 에이전트 0에서 시작하기</span>
     </h1>
     <p class="mt-2 text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
-      <span data-lang="en">A step-by-step beginner tutorial: receive a Z.ai GLM key, install OpenCode 2, add the oh-my-opencode-slim agent team, point it at GLM-5.3, and run your first session. Every command was verified on a real machine (2026-08-19).</span>
-      <span data-lang="ko">Z.ai GLM 키를 받는 순간부터 OpenCode 2를 설치하고, 에이전트 팀 플러그인(oh-my-opencode-slim)을 얹고, GLM-5.3에 연결해 첫 세션을 돌리기까지. 코딩 지식 없이 따라 할 수 있는 단계별 튜토리얼이며, 아래 모든 명령은 실제 머신에서 검증했다(2026-08-19).</span>
+      <span data-lang="en">A step-by-step beginner tutorial: receive a Z.ai GLM key, install OpenCode 2, pin it to GLM-5.3, give it eyes with GLM-4.6V over MCP, and run your first session. Every command was verified on a real machine (2026-08-23).</span>
+      <span data-lang="ko">Z.ai GLM 키를 받는 순간부터 OpenCode 2를 설치하고, 기본 모델을 GLM-5.3으로 고정하고, GLM-4.6V를 MCP(에이전트가 외부 도구를 붙이는 표준 규약)로 붙여 눈을 달고, 첫 세션을 돌리기까지. 코딩 지식 없이 따라 할 수 있는 단계별 튜토리얼이며, 아래 모든 명령은 실제 머신에서 검증했다(2026-08-23).</span>
     </p>
     <p class="mt-3 rounded-lg border border-accent-500/30 bg-accent-500/10 px-3 py-2 text-sm text-ink-700 dark:text-ink-200">
-      <span data-lang="en"><strong class="font-semibold">Default setup</strong>: <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 2</a> + <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/oh-my-opencode-slim/`}>oh-my-opencode-slim</a> + <code class="font-mono text-[0.85em]">glm-5.3</code>. Prefer a single-agent harness? Prime Agent is at the bottom of this page.</span>
-      <span data-lang="ko"><strong class="font-semibold">기본 구성</strong>은 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 2</a> + <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/oh-my-opencode-slim/`}>oh-my-opencode-slim</a> + <code class="font-mono text-[0.85em]">glm-5.3</code>이다. 에이전트 한 명짜리 단순한 구성을 원하면 이 페이지 맨 아래 Prime Agent를 보라.</span>
+      <span data-lang="en"><strong class="font-semibold">Default setup</strong>: <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 2</a> + <code class="font-mono text-[0.85em]">glm-5.3</code> + GLM-4.6V vision over MCP. One agent, one key, no orchestration plugin. Want a different harness? Prime Agent is at the bottom of this page.</span>
+      <span data-lang="ko"><strong class="font-semibold">기본 구성</strong>은 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 2</a> + <code class="font-mono text-[0.85em]">glm-5.3</code> + GLM-4.6V 비전(MCP)이다. 에이전트 한 명, 키 하나, 오케스트레이션 플러그인 없음. 다른 하네스를 보고 싶으면 이 페이지 맨 아래 Prime Agent를 보라.</span>
     </p>
   </header>
 
@@ -208,8 +183,8 @@ cd ~/my-project && prime-agent
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Check Node.js (v22+)</span><span data-lang="ko">Node.js 확인 (v22 이상)</span></h2>
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Both the CLI (STEP 3) and the plugin installer (STEP 4) come through npm — <code class="font-mono text-[0.85em]">npm</code>, <code class="font-mono text-[0.85em]">npx</code>, or <code class="font-mono text-[0.85em]">bunx</code>. Check Node first:</span>
-        <span data-lang="ko">CLI 설치(STEP 3)도, 플러그인 설치기(STEP 4)도 npm을 거친다 — <code class="font-mono text-[0.85em]">npm</code>·<code class="font-mono text-[0.85em]">npx</code>·<code class="font-mono text-[0.85em]">bunx</code>. 먼저 확인:</span>
+        <span data-lang="en">The CLI (STEP 3) and the vision MCP server (STEP 5) both come through npm — <code class="font-mono text-[0.85em]">npm</code> and <code class="font-mono text-[0.85em]">npx</code>. Check Node first:</span>
+        <span data-lang="ko">CLI 설치(STEP 3)도, 비전 MCP 서버(STEP 5)도 npm을 거친다 — <code class="font-mono text-[0.85em]">npm</code>·<code class="font-mono text-[0.85em]">npx</code>. 먼저 확인:</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
         <code id="tip-node-check" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdNodeCheck}</code>
@@ -257,38 +232,6 @@ cd ~/my-project && prime-agent
     <section class="glass-panel rounded-2xl p-5 lg:p-6">
       <div class="mb-2 flex items-baseline gap-2">
         <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 4</span>
-        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Add the agent team (oh-my-opencode-slim)</span><span data-lang="ko">에이전트 팀 얹기 (oh-my-opencode-slim)</span></h2>
-      </div>
-      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">This plugin turns one agent into a team of seven: an Orchestrator that plans and dispatches, plus Explorer (search), Oracle (deep review), Librarian (docs), Designer (UI), Fixer (implementation), and Council (multi-model vote). Specialists run as background tasks in parallel.</span>
-        <span data-lang="ko">이 플러그인은 에이전트 한 명을 일곱 명 팀으로 바꾼다. 계획하고 일을 나눠주는 Orchestrator(지휘자) 아래에 Explorer(코드 탐색), Oracle(깊은 검토), Librarian(문서 조회), Designer(UI), Fixer(구현), Council(여러 모델 동시 판단)이 붙는다. 전문 에이전트는 background task(뒤에서 동시에 도는 작업)로 병렬 실행된다.</span>
-      </p>
-      <div class="mb-3 flex items-stretch gap-2">
-        <code id="tip-omo-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdOmoInstall}</code>
-        <CopyButton target="#tip-omo-install" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
-      </div>
-      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">The installer registers the plugin in <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code> and creates <code class="font-mono text-[0.85em]">~/.config/opencode/oh-my-opencode-slim.json</code>. It only generates <code class="font-mono text-[0.85em]">openai</code> and <code class="font-mono text-[0.85em]">opencode-go</code> presets — STEP 6 replaces that with a GLM one.</span>
-        <span data-lang="ko">설치기가 <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code>에 플러그인을 등록하고 <code class="font-mono text-[0.85em]">~/.config/opencode/oh-my-opencode-slim.json</code>을 만든다. 다만 기본 생성되는 프리셋은 <code class="font-mono text-[0.85em]">openai</code>와 <code class="font-mono text-[0.85em]">opencode-go</code> 둘뿐이라, GLM으로 바꾸는 일은 STEP 6에서 한다.</span>
-      </p>
-      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">v2 sanity check</strong>: an earlier revision of this guide claimed <code class="font-mono text-[0.85em]">opencode2</code> reads host config from a separate <code class="font-mono text-[0.85em]">~/.config/opencode2/</code> directory — that is wrong. Verified against the installed binary (0.0.0-beta-17728): both <code class="font-mono text-[0.85em]">opencode</code> and <code class="font-mono text-[0.85em]">opencode2</code> read the same <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code>. If the installer already registered the plugin there (previous block), you are done — nothing extra to do:</span>
-        <span data-lang="ko"><strong class="font-semibold text-ink-800 dark:text-ink-100">v2 확인 사항</strong>: 이전 판에서는 <code class="font-mono text-[0.85em]">opencode2</code>가 호스트 설정을 별도 디렉터리 <code class="font-mono text-[0.85em]">~/.config/opencode2/</code>에서 읽는다고 적혀 있었는데, 이것은 틀린 정보다. 설치된 바이너리(0.0.0-beta-17728)로 실측한 결과 <code class="font-mono text-[0.85em]">opencode</code>와 <code class="font-mono text-[0.85em]">opencode2</code>는 모두 같은 <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code>을 읽는다. 위 블록에서 설치기가 이미 플러그인을 등록했다면 추가로 할 일은 없다:</span>
-      </p>
-      <div class="mb-3 flex items-stretch gap-2">
-        <code id="tip-omo-v2" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdOmoV2}</code>
-        <CopyButton target="#tip-omo-v2" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
-      </div>
-      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Check it took: <code class="font-mono text-[0.85em]">opencode2 plugin list</code> should print <code class="font-mono text-[0.85em]">oh-my-opencode-slim</code>. Note that v2 has no programmatic MCP registration, so any MCP server the agents use must be declared in this same config file.</span>
-        <span data-lang="ko">제대로 붙었는지는 <code class="font-mono text-[0.85em]">opencode2 plugin list</code>로 확인한다 — 목록에 <code class="font-mono text-[0.85em]">oh-my-opencode-slim</code>이 나와야 한다. v2에는 플러그인이 MCP를 코드로 등록하는 경로가 없으므로, 에이전트가 쓸 MCP 서버는 이 설정 파일에 직접 선언해야 한다.</span>
-      </p>
-    </section>
-
-    <!-- STEP 5 -->
-    <section class="glass-panel rounded-2xl p-5 lg:p-6">
-      <div class="mb-2 flex items-baseline gap-2">
-        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 5</span>
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Connect your Z.ai key</span><span data-lang="ko">Z.ai 키 연결</span></h2>
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
@@ -309,36 +252,24 @@ cd ~/my-project && prime-agent
       </div>
     </section>
 
-    <!-- STEP 6 -->
+    <!-- STEP 5 -->
     <section class="glass-panel rounded-2xl p-5 lg:p-6">
       <div class="mb-2 flex items-baseline gap-2">
-        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 6</span>
-        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Point the team at GLM-5.3</span><span data-lang="ko">팀 전체를 GLM-5.3에 물리기</span></h2>
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 5</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Set GLM-5.3 as the default and give it eyes (GLM-4.6V)</span><span data-lang="ko">기본 모델을 GLM-5.3으로, 그리고 눈 달기 (GLM-4.6V)</span></h2>
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Open the plugin config. Both the host config and this plugin config live under <code class="font-mono text-[0.85em]">~/.config/opencode/</code> — <code class="font-mono text-[0.85em]">opencode2</code> reads the same directory as v1:</span>
-        <span data-lang="ko">플러그인 설정 파일을 연다. 호스트 설정이든 이 플러그인 설정이든 모두 <code class="font-mono text-[0.85em]">~/.config/opencode/</code> 아래에 있다 — <code class="font-mono text-[0.85em]">opencode2</code>는 v1과 같은 디렉터리를 읽는다:</span>
+        <span data-lang="en">Pin the default model once so every new session starts on <code class="font-mono text-[0.85em]">glm-5.3</code> (1,000,000-token context, released 2026-08-14). The snippet merges into the existing host config, so nothing already in it is lost:</span>
+        <span data-lang="ko">새 세션이 항상 <code class="font-mono text-[0.85em]">glm-5.3</code>(컨텍스트 100만 토큰, 2026-08-14 공개)으로 시작하도록 기본 모델을 한 번 고정한다. 아래 스크립트는 기존 호스트 설정에 <em>합치는</em> 방식이라 이미 있는 값은 그대로 살아 있다:</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
-        <code id="tip-preset-open" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdPresetOpen}</code>
-        <CopyButton target="#tip-preset-open" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+        <code id="tip-default-model" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdDefaultModel}</code>
+        <CopyButton target="#tip-default-model" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
       </div>
-      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Replace the contents with this. Heavy thinking goes to <code class="font-mono text-[0.85em]">glm-5.3</code> (1,000,000-token context, released 2026-08-14); the high-volume search and docs lanes go to the cheaper <code class="font-mono text-[0.85em]">glm-5-turbo</code>. This exact JSON validates against the plugin's own schema.</span>
-        <span data-lang="ko">내용을 아래로 바꾼다. 무겁게 판단해야 하는 자리는 <code class="font-mono text-[0.85em]">glm-5.3</code>(컨텍스트 100만 토큰, 2026-08-14 공개), 양이 많고 단순한 탐색·문서 조회 자리는 값싼 <code class="font-mono text-[0.85em]">glm-5-turbo</code>로 나눴다. 아래 JSON은 플러그인이 배포하는 스키마로 검증을 통과했다.</span>
-      </p>
-      <div class="mb-3 flex items-stretch gap-2">
-        <code id="tip-preset" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdPreset}</code>
-        <CopyButton target="#tip-preset" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
-      </div>
-      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Save, restart <code class="font-mono text-[0.85em]">opencode2</code>, and the whole team runs on GLM. To swap presets mid-session, type <code class="font-mono text-[0.85em]">/preset</code>.</span>
-        <span data-lang="ko">저장하고 <code class="font-mono text-[0.85em]">opencode2</code>를 다시 실행하면 팀 전체가 GLM 위에서 돈다. 세션 도중 프리셋을 갈아끼우려면 <code class="font-mono text-[0.85em]">/preset</code>.</span>
-      </p>
 
       <h3 class="mt-5 text-base font-semibold text-ink-900 dark:text-ink-50">
-        <span data-lang="en">Give the team eyes — Vision MCP (GLM-4.6V)</span>
-        <span data-lang="ko">팀에 눈 달기 — Vision MCP (GLM-4.6V)</span>
+        <span data-lang="en">Give it eyes — Vision MCP (GLM-4.6V)</span>
+        <span data-lang="ko">눈 달기 — Vision MCP (GLM-4.6V)</span>
       </h3>
       <p class="mb-3 mt-1 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
         <span data-lang="en">The five chat models on the plan take no image input, but the plan itself <strong class="font-semibold text-ink-800 dark:text-ink-100">does include GLM-4.6V — as an MCP server, not as a model</strong>. Z.ai's official credit table lists <code class="font-mono text-[0.85em]">GLM-4.6V（Vision MCP）</code> at 1.2 input / 0.3 cached / 2.7 output multipliers, billed to the same subscription. Same key, no second account. Put this in your host config:</span>
@@ -349,16 +280,16 @@ cd ~/my-project && prime-agent
         <CopyButton target="#tip-vision-mcp" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Then hand the MCP to whichever agents need eyes. <strong class="font-semibold text-ink-800 dark:text-ink-100">Designer is the obvious one</strong> — two of the eight tools, <code class="font-mono text-[0.85em]">ui_to_artifact</code> (screenshot → code) and <code class="font-mono text-[0.85em]">ui_diff_check</code> (compare two UI shots), are exactly its job:</span>
-        <span data-lang="ko">그다음 눈이 필요한 에이전트에 이 MCP를 준다. <strong class="font-semibold text-ink-800 dark:text-ink-100">Designer가 대표적이다</strong> — 도구 8개 중 <code class="font-mono text-[0.85em]">ui_to_artifact</code>(스크린샷 → 코드)와 <code class="font-mono text-[0.85em]">ui_diff_check</code>(UI 두 장 비교)가 정확히 Designer의 일이다:</span>
+        <span data-lang="en">Restart, then check the tools loaded — the agent running on the <em>non-vision</em> <code class="font-mono text-[0.85em]">glm-5.3</code> now calls <code class="font-mono text-[0.85em]">analyze_image</code> on its own when you name an image file:</span>
+        <span data-lang="ko">재시작한 뒤 도구가 붙었는지 확인한다 — <em>비전이 없는</em> <code class="font-mono text-[0.85em]">glm-5.3</code>으로 도는 에이전트가 이미지 파일 이름만 대면 스스로 <code class="font-mono text-[0.85em]">analyze_image</code>를 호출한다:</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
-        <code id="tip-vision-agent" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdVisionAgent}</code>
-        <CopyButton target="#tip-vision-agent" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+        <code id="tip-vision-check" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdVisionCheck}</code>
+        <CopyButton target="#tip-vision-check" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Verified end-to-end (2026-08-19): with this config, <code class="font-mono text-[0.85em]">@designer</code> running on the <em>non-vision</em> <code class="font-mono text-[0.85em]">glm-5.3</code> called <code class="font-mono text-[0.85em]">analyze_image</code> and read a planted string plus both shapes out of a test PNG. The eight tools are <code class="font-mono text-[0.85em]">ui_to_artifact</code>, <code class="font-mono text-[0.85em]">extract_text_from_screenshot</code>, <code class="font-mono text-[0.85em]">diagnose_error_screenshot</code>, <code class="font-mono text-[0.85em]">understand_technical_diagram</code>, <code class="font-mono text-[0.85em]">analyze_data_visualization</code>, <code class="font-mono text-[0.85em]">ui_diff_check</code>, <code class="font-mono text-[0.85em]">analyze_image</code>, <code class="font-mono text-[0.85em]">analyze_video</code>.</span>
-        <span data-lang="ko">종단 검증했다(2026-08-19). 이 설정에서 <em>비전이 없는</em> <code class="font-mono text-[0.85em]">glm-5.3</code>으로 도는 <code class="font-mono text-[0.85em]">@designer</code>가 <code class="font-mono text-[0.85em]">analyze_image</code>를 호출해, 테스트 PNG에 심어둔 문자열과 도형 2개를 정확히 읽어냈다. 도구는 8개다 — <code class="font-mono text-[0.85em]">ui_to_artifact</code>, <code class="font-mono text-[0.85em]">extract_text_from_screenshot</code>, <code class="font-mono text-[0.85em]">diagnose_error_screenshot</code>, <code class="font-mono text-[0.85em]">understand_technical_diagram</code>, <code class="font-mono text-[0.85em]">analyze_data_visualization</code>, <code class="font-mono text-[0.85em]">ui_diff_check</code>, <code class="font-mono text-[0.85em]">analyze_image</code>, <code class="font-mono text-[0.85em]">analyze_video</code>.</span>
+        <span data-lang="en">Verified end-to-end (2026-08-23, opencode2 + zai-mcp-server): <code class="font-mono text-[0.85em]">glm-5.3</code> read a planted string and both shapes out of a test PNG through the MCP. The eight tools are <code class="font-mono text-[0.85em]">ui_to_artifact</code>, <code class="font-mono text-[0.85em]">extract_text_from_screenshot</code>, <code class="font-mono text-[0.85em]">diagnose_error_screenshot</code>, <code class="font-mono text-[0.85em]">understand_technical_diagram</code>, <code class="font-mono text-[0.85em]">analyze_data_visualization</code>, <code class="font-mono text-[0.85em]">ui_diff_check</code>, <code class="font-mono text-[0.85em]">analyze_image</code>, <code class="font-mono text-[0.85em]">analyze_video</code>.</span>
+        <span data-lang="ko">종단 검증했다(2026-08-23, opencode2 + zai-mcp-server). <code class="font-mono text-[0.85em]">glm-5.3</code>이 MCP를 통해 테스트 PNG에 심어둔 문자열과 도형 2개를 정확히 읽어냈다. 도구는 8개다 — <code class="font-mono text-[0.85em]">ui_to_artifact</code>, <code class="font-mono text-[0.85em]">extract_text_from_screenshot</code>, <code class="font-mono text-[0.85em]">diagnose_error_screenshot</code>, <code class="font-mono text-[0.85em]">understand_technical_diagram</code>, <code class="font-mono text-[0.85em]">analyze_data_visualization</code>, <code class="font-mono text-[0.85em]">ui_diff_check</code>, <code class="font-mono text-[0.85em]">analyze_image</code>, <code class="font-mono text-[0.85em]">analyze_video</code>.</span>
       </p>
       <p class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
         <span data-lang="en">⚠ Don't paste the image into the client — Z.ai's docs note that most clients transcode a pasted image and call the model directly, which bypasses the MCP. Put the file on disk and name it in the prompt: <code class="font-mono text-[0.85em]">probe.png 안의 오류 메시지를 읽어줘</code>. Needs Node.js 22+.</span>
@@ -366,15 +297,15 @@ cd ~/my-project && prime-agent
       </p>
     </section>
 
-    <!-- STEP 7 -->
+    <!-- STEP 6 -->
     <section class="glass-panel rounded-2xl p-5 lg:p-6">
       <div class="mb-2 flex items-baseline gap-2">
-        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 7</span>
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 6</span>
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">One-time setup — skip the approval spam</span><span data-lang="ko">한 번만 하는 설정 — 승인 요청 없이 바로 쓰기</span></h2>
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">OpenCode's default asks for confirmation before <em>every</em> shell command — for a beginner that means an approval popup every few seconds. Paste this block once and most commands run immediately; only genuinely destructive ones (<code class="font-mono text-[0.85em]">rm</code>, <code class="font-mono text-[0.85em]">git reset --hard</code>, force push, …) still ask. It merges into the host config — the same <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code> STEP 4's installer wrote the plugin into — so existing keys like <code class="font-mono text-[0.85em]">plugin</code> are preserved. Rules are last-match-wins: the catch-all <code class="font-mono text-[0.85em]">allow</code> sits first, the <code class="font-mono text-[0.85em]">ask</code> exceptions after it (macOS/Linux; v2 schema — if you picked the v1 <code class="font-mono text-[0.85em]">opencode</code> command in STEP 3, skip this step).</span>
-        <span data-lang="ko">OpenCode 기본값은 셸 명령을 <em>하나하나</em> 승인받게 되어 있다 — 초보자라면 몇 초마다 팝업이 뜨어 대화가 끊긴다. 아래 블록을 한 번 붙여넣으면 대부분의 명령은 즉시 실행되고, 진짜 파괴적인 명령(<code class="font-mono text-[0.85em]">rm</code>, <code class="font-mono text-[0.85em]">git reset --hard</code>, 강제 푸시 등)만 물어본다. 이 스크립트는 호스트 설정 — STEP 4에서 설치기가 플러그인을 등록한 바로 그 <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code> — 에 <em>합치는</em> 방식이라 <code class="font-mono text-[0.85em]">plugin</code> 같은 기존 키는 그대로 살아 있다. 규칙은 나중 것이 이긴다(last-match-wins) — 전체 허용 <code class="font-mono text-[0.85em]">allow</code>를 맨 앞, 파괴적인 <code class="font-mono text-[0.85em]">ask</code> 예외를 그 뒤에 둔 이유다(macOS/Linux 기준, v2 스키마. STEP 3에서 v1 <code class="font-mono text-[0.85em]">opencode</code>를 골랐다면 이 단계는 건너뛴다).</span>
+        <span data-lang="en">OpenCode's default asks for confirmation before <em>every</em> shell command — for a beginner that means an approval popup every few seconds. Paste this block once and most commands run immediately; only genuinely destructive ones (<code class="font-mono text-[0.85em]">rm</code>, <code class="font-mono text-[0.85em]">git reset --hard</code>, force push, …) still ask. It merges into the host config — the same <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code> STEP 5 wrote the model and MCP into — so existing keys are preserved. Rules are last-match-wins: the catch-all <code class="font-mono text-[0.85em]">allow</code> sits first, the <code class="font-mono text-[0.85em]">ask</code> exceptions after it (macOS/Linux; v2 schema — if you picked the v1 <code class="font-mono text-[0.85em]">opencode</code> command in STEP 3, skip this step).</span>
+        <span data-lang="ko">OpenCode 기본값은 셸 명령을 <em>하나하나</em> 승인받게 되어 있다 — 초보자라면 몇 초마다 팝업이 뜨어 대화가 끊긴다. 아래 블록을 한 번 붙여넣으면 대부분의 명령은 즉시 실행되고, 진짜 파괴적인 명령(<code class="font-mono text-[0.85em]">rm</code>, <code class="font-mono text-[0.85em]">git reset --hard</code>, 강제 푸시 등)만 물어본다. 이 스크립트는 호스트 설정 — STEP 5에서 모델과 MCP를 넣은 바로 그 <code class="font-mono text-[0.85em]">~/.config/opencode/opencode.json</code> — 에 <em>합치는</em> 방식이라 기존 키는 그대로 살아 있다. 규칙은 나중 것이 이긴다(last-match-wins) — 전체 허용 <code class="font-mono text-[0.85em]">allow</code>를 맨 앞, 파괴적인 <code class="font-mono text-[0.85em]">ask</code> 예외를 그 뒤에 둔 이유다(macOS/Linux 기준, v2 스키마. STEP 3에서 v1 <code class="font-mono text-[0.85em]">opencode</code>를 골랐다면 이 단계는 건너뛴다).</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
         <code id="tip-perms" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdPerms}</code>
@@ -386,10 +317,10 @@ cd ~/my-project && prime-agent
       </p>
     </section>
 
-    <!-- STEP 8 -->
+    <!-- STEP 7 -->
     <section class="glass-panel rounded-2xl p-5 lg:p-6">
       <div class="mb-2 flex items-baseline gap-2">
-        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 8</span>
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 7</span>
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Run it and talk</span><span data-lang="ko">실행하고 첫 대화</span></h2>
       </div>
       <div class="mb-3 flex items-stretch gap-2">
@@ -397,8 +328,8 @@ cd ~/my-project && prime-agent
         <CopyButton target="#tip-run" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">You are talking to the Orchestrator. Just write what you want, in Korean:</span>
-        <span data-lang="ko">대화 상대는 Orchestrator다. 하고 싶은 일을 한국어로 그대로 쓰면 된다:</span>
+        <span data-lang="en">You are talking to the agent directly. Just write what you want, in Korean:</span>
+        <span data-lang="ko">대화 상대는 에이전트 본인이다. 하고 싶은 일을 한국어로 그대로 쓰면 된다:</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
         <code id="tip-first" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdFirst}</code>
@@ -406,12 +337,12 @@ cd ~/my-project && prime-agent
       </div>
       <ul class="list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-ink-600 dark:text-ink-300 marker:text-accent-500">
         <li>
-          <span data-lang="en"><code class="font-mono text-[0.85em]">/models</code> — switch model. <code class="font-mono text-[0.85em]">/preset</code> — switch the whole team's models at once.</span>
-          <span data-lang="ko"><code class="font-mono text-[0.85em]">/models</code> — 모델 변경. <code class="font-mono text-[0.85em]">/preset</code> — 팀 전체 모델을 한 번에 교체.</span>
+          <span data-lang="en"><code class="font-mono text-[0.85em]">/models</code> — switch model mid-session. The default from STEP 5 is <code class="font-mono text-[0.85em]">glm-5.3</code>; drop to <code class="font-mono text-[0.85em]">glm-5-turbo</code> for cheap bulk work.</span>
+          <span data-lang="ko"><code class="font-mono text-[0.85em]">/models</code> — 세션 도중 모델 변경. STEP 5에서 고정한 기본값은 <code class="font-mono text-[0.85em]">glm-5.3</code>이고, 양이 많고 단순한 작업은 값싼 <code class="font-mono text-[0.85em]">glm-5-turbo</code>로 내리면 된다.</span>
         </li>
         <li>
-          <span data-lang="en"><code class="font-mono text-[0.85em]">@explorer 이 저장소에서 인증 로직 찾아줘</code> — call a specialist directly instead of waiting for the Orchestrator to delegate.</span>
-          <span data-lang="ko"><code class="font-mono text-[0.85em]">@explorer 이 저장소에서 인증 로직 찾아줘</code> — 지휘자를 거치지 않고 전문 에이전트를 직접 부를 수 있다.</span>
+          <span data-lang="en"><code class="font-mono text-[0.85em]">probe.png 안의 오류 메시지를 읽어줘</code> — name an image file and the agent routes it through the vision MCP from STEP 5.</span>
+          <span data-lang="ko"><code class="font-mono text-[0.85em]">probe.png 안의 오류 메시지를 읽어줘</code> — 이미지 파일 이름을 대면 STEP 5의 비전 MCP로 알아서 넘긴다.</span>
         </li>
         <li>
           <span data-lang="en">Put an <code class="font-mono text-[0.85em]">AGENTS.md</code> in the project root and OpenCode loads it at startup as your standing project instructions.</span>
@@ -419,15 +350,15 @@ cd ~/my-project && prime-agent
         </li>
       </ul>
       <p class="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
-        <span data-lang="en">⚠ GLM Coding Plan <em>chat models</em> cannot read images — all five declare no image input, so pasting a screenshot does nothing. Vision comes from the Vision MCP in STEP 6 (same key, same plan) or glm-vision in STEP 9.</span>
-        <span data-lang="ko">⚠ GLM Coding Plan의 <em>채팅 모델</em>은 이미지를 읽지 못한다 — 5개 모두 이미지 입력을 지원하지 않아 스크린샷을 붙여넣어도 소용없다. 눈은 STEP 6의 Vision MCP(같은 키·같은 플랜)나 STEP 9의 glm-vision에서 온다.</span>
+        <span data-lang="en">⚠ GLM Coding Plan <em>chat models</em> cannot read images — all five declare no image input, so pasting a screenshot does nothing. Vision comes from the Vision MCP in STEP 5 (same key, same plan) or glm-vision in STEP 8.</span>
+        <span data-lang="ko">⚠ GLM Coding Plan의 <em>채팅 모델</em>은 이미지를 읽지 못한다 — 5개 모두 이미지 입력을 지원하지 않아 스크린샷을 붙여넣어도 소용없다. 눈은 STEP 5의 Vision MCP(같은 키·같은 플랜)나 STEP 8의 glm-vision에서 온다.</span>
       </p>
     </section>
 
-    <!-- STEP 9 -->
+    <!-- STEP 8 -->
     <section class="glass-panel rounded-2xl p-5 lg:p-6">
       <div class="mb-2 flex items-baseline gap-2">
-        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 9</span>
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 8</span>
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">(Optional) Skill kit &amp; image reading</span><span data-lang="ko">(선택) 스킬 키트와 이미지 읽기</span></h2>
       </div>
       <p class="mb-4 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
@@ -435,8 +366,8 @@ cd ~/my-project && prime-agent
         <span data-lang="ko">이 사이트의 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/prompts/agents-quick-onboarding/`}>퀵 온보딩 프롬프트</a>를 복사해 에이전트에 그대로 붙여넣으면, 공용 <code class="font-mono text-[0.85em]">~/.agents/</code> 구조를 잡고 보유한 모든 CLI에 스킬을 심링크해 준다. OpenCode는 <code class="font-mono text-[0.85em]">~/.config/opencode/skills/</code>에서 스킬을 읽는다.</span>
       </p>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">The <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision plugin</a> covers the blind spot from STEP 8: it sends any image to GLM-4.6V and returns the exact text/tables it reads. Two lines to install:</span>
-        <span data-lang="ko">STEP 8에서 짚은 사각지대를 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision 플러그인</a>이 메운다. 이미지를 GLM-4.6V로 보내 글자·표를 그대로 읽어 돌려준다. 설치는 두 줄:</span>
+        <span data-lang="en">The <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision plugin</a> covers the blind spot from STEP 7: it sends any image to GLM-4.6V and returns the exact text/tables it reads. Two lines to install:</span>
+        <span data-lang="ko">STEP 7에서 짚은 사각지대를 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision 플러그인</a>이 메운다. 이미지를 GLM-4.6V로 보내 글자·표를 그대로 읽어 돌려준다. 설치는 두 줄:</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
         <code id="tip-vision-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdVisionInstall}</code>
@@ -458,13 +389,13 @@ cd ~/my-project && prime-agent
         <span data-lang="ko">왜 이 구성인가?</span>
       </h2>
       <p class="mt-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">OpenCode ships no model of its own, so one Z.ai coding-plan key is the whole cost, and you can swap providers later without changing harness. oh-my-opencode-slim turns that single agent into a team whose members can each run a different model, so the expensive lane and the cheap lane are separate line items. GLM-5.3 carries a 1,000,000-token context, which is what makes "read the whole repo first" realistic.</span>
-        <span data-lang="ko">OpenCode는 자체 모델이 없어서 Z.ai 코딩 플랜 키 하나가 비용의 전부이고, 나중에 하네스를 바꾸지 않고 모델만 갈아끼울 수 있다. oh-my-opencode-slim은 그 한 명을 팀으로 만들되 구성원마다 다른 모델을 물릴 수 있어서, 비싼 자리와 싼 자리를 분리해 쓸 수 있다. GLM-5.3의 컨텍스트는 100만 토큰이라 "저장소 전체를 먼저 읽고 시작하는" 방식이 현실적으로 가능해진다.</span>
+        <span data-lang="en">OpenCode ships no model of its own, so one Z.ai coding-plan key is the whole cost, and you can swap providers later without changing harness. Keeping it to a single agent means one model to reason about, one config file, and no orchestration plugin to keep in sync with the CLI's beta releases. GLM-5.3 carries a 1,000,000-token context, which is what makes "read the whole repo first" realistic — and GLM-4.6V over MCP covers the one thing the chat models cannot do: look at an image.</span>
+        <span data-lang="ko">OpenCode는 자체 모델이 없어서 Z.ai 코딩 플랜 키 하나가 비용의 전부이고, 나중에 하네스를 바꾸지 않고 모델만 갈아끼울 수 있다. 에이전트를 한 명으로 두면 신경 쓸 모델도 하나, 설정 파일도 하나이고, CLI 베타 릴리스마다 오케스트레이션 플러그인 버전을 맞출 일도 없다. GLM-5.3의 컨텍스트는 100만 토큰이라 "저장소 전체를 먼저 읽고 시작하는" 방식이 현실적으로 가능하고, 채팅 모델이 못 하는 단 하나 — 이미지 보기 — 는 MCP로 붙인 GLM-4.6V가 메운다.</span>
       </p>
       <p class="mt-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
         <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 상세 →</a>
         <span class="mx-2 text-ink-400">·</span>
-        <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/oh-my-opencode-slim/`}>oh-my-opencode-slim 상세 →</a>
+        <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision 상세 →</a>
       </p>
     </section>
 
@@ -473,15 +404,15 @@ cd ~/my-project && prime-agent
       <details class="group">
         <summary class="cursor-pointer list-none">
           <span class="text-lg font-semibold text-ink-900 dark:text-ink-50">
-            <span data-lang="en">Alternative — Prime Agent (single-agent harness)</span>
-            <span data-lang="ko">다른 선택지 — Prime Agent (에이전트 한 명짜리 하네스)</span>
+            <span data-lang="en">Alternative — Prime Agent (persistent-kernel harness)</span>
+            <span data-lang="ko">다른 선택지 — Prime Agent (IPython 커널 하네스)</span>
           </span>
           <span class="ml-2 text-sm text-ink-500 group-open:hidden">▸</span>
           <span class="ml-2 hidden text-sm text-ink-500 group-open:inline">▾</span>
         </summary>
         <p class="mt-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-          <span data-lang="en">If a team of seven feels like too much machinery, <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>Prime Agent</a> is the opposite bet: one agent whose only tool is a persistent IPython kernel, so Python variables and loaded data survive across turns. It reads the same <code class="font-mono text-[0.85em]">~/.agents/skills/</code> directory this site installs into, and it takes the same Z.ai key. <strong class="font-semibold text-ink-800 dark:text-ink-100">It sits best on macOS</strong> — the official one-line installer targets macOS/Linux, and Windows needs a bash shell (Git Bash or WSL) before it will run at all.</span>
-          <span data-lang="ko">일곱 명짜리 팀이 과하게 느껴진다면, <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>Prime Agent</a>는 정반대 선택이다. 도구가 영구 IPython 커널(살아 있는 파이썬 환경) 하나뿐인 단일 에이전트라, 변수와 읽어둔 데이터가 턴이 바뀌어도 남아 있다. 이 사이트가 설치하는 <code class="font-mono text-[0.85em]">~/.agents/skills/</code>를 그대로 읽고, Z.ai 키도 같은 것을 쓴다. <strong class="font-semibold text-ink-800 dark:text-ink-100">특히 macOS와 궁합이 좋다</strong> — 공식 한 줄 인스톨러가 macOS·Linux를 대상으로 하고, Windows는 bash 셸(Git Bash 또는 WSL)을 먼저 갖춰야 실행조차 된다.</span>
+          <span data-lang="en">If you want a different single-agent harness, <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>Prime Agent</a> is another option: one agent whose only tool is a persistent IPython kernel, so Python variables and loaded data survive across turns. It reads the same <code class="font-mono text-[0.85em]">~/.agents/skills/</code> directory this site installs into, and it takes the same Z.ai key. <strong class="font-semibold text-ink-800 dark:text-ink-100">It sits best on macOS</strong> — the official one-line installer targets macOS/Linux, and Windows needs a bash shell (Git Bash or WSL) before it will run at all.</span>
+          <span data-lang="ko">단일 에이전트 하네스를 다른 것으로 써보고 싶다면, <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>Prime Agent</a>는 또 다른 선택지다. 도구가 영구 IPython 커널(살아 있는 파이썬 환경) 하나뿐인 단일 에이전트라, 변수와 읽어둔 데이터가 턴이 바뀌어도 남아 있다. 이 사이트가 설치하는 <code class="font-mono text-[0.85em]">~/.agents/skills/</code>를 그대로 읽고, Z.ai 키도 같은 것을 쓴다. <strong class="font-semibold text-ink-800 dark:text-ink-100">특히 macOS와 궁합이 좋다</strong> — 공식 한 줄 인스톨러가 macOS·Linux를 대상으로 하고, Windows는 bash 셸(Git Bash 또는 WSL)을 먼저 갖춰야 실행조차 된다.</span>
         </p>
         <div class="mt-3 flex items-stretch gap-2">
           <code id="tip-prime" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdPrimeInstall}</code>
