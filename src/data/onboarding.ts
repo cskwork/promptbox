@@ -23,6 +23,8 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   { category: 'skills', slug: 'setup-matt-pocock-skills' },
   // set-independent: one keystroke that makes the agent re-explain itself
   { category: 'skills', slug: 'wait-what' },
+  // set-independent: explain anything like you're 5 — picture-book HTML artifact
+  { category: 'skills', slug: 'eli5' },
   // one shared memory every agent reads and writes
   { category: 'tools', slug: 'ai-memory' },
   // orient + plan
@@ -339,6 +341,11 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       skill. Do not link it twice: two directories declaring
                                       'name: wait-what' means only one loads and which one is arbitrary,
                                       which is the duplicate family step 8 archives.
+  eli5                                https://github.com/anthropics/claude-plugins-community
+                                      Clone and link ONLY eli5/skills/eli5 as ~/.agents/skills/eli5.
+                                      /eli5 <topic> turns any subject into a big-picture, few-words HTML
+                                      picture book. User-invoked, no router, no pipeline — cannot conflict
+                                      with the chosen set.
   Context Diet                        https://github.com/cskwork/context-diet-skill
   Autoresearch                        https://github.com/uditgoenka/autoresearch
   Call Agent                          https://github.com/cskwork/call-agent
