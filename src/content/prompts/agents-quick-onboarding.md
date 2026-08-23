@@ -30,6 +30,7 @@ use_case_en: "Set up a new machine, manage shared skills and rules across coding
 | B. Superpowers (선택) | 스킬 | obra/superpowers | 앞단에서 깊게 계획하고 그 뒤는 자율 실행. git worktree 격리 + 태스크마다 새 subagent |
 | C. Matt Pocock Skills (선택, 저장소 전체 35종) | 스킬 | mattpocock/skills | `ask-matt`(설계·디버깅·트레이드오프 판단), `grilling`(한 번에 한 질문으로 요구 캐기), `tdd`, `triage`, `to-spec`, `wayfinder` 등 |
 | **wait-what** (세트와 무관, 항상 설치) | 스킬 | [mattpocock/skills](https://github.com/mattpocock/skills) (`skills/productivity/wait-what`) | 답이 이해가 안 될 때 내가 치는 한 방. 맥락을 붙여서, ASD-STE100 단순화 기술영어로, `CONTEXT.md`의 공통 용어로 **다시 설명하게** 한다. 6줄짜리 스킬이라 파이프라인도 라우터도 없고 어떤 세트와도 충돌하지 않아 **A·B를 골라도 깔린다**. `disable-model-invocation: true`는 의도된 값이니 그대로 둔다 — 내가 헷갈린 그 순간에 내가 부르는 스킬이다 |
+| **eli5** (세트와 무관, 항상 설치) | 스킬 | [anthropics/claude-plugins-community](https://github.com/anthropics/claude-plugins-community) (`eli5/skills/eli5`) | 아무 주제나 5살 그림책으로. `/eli5 <주제>` 한 번이면 외부 의존성 없는 HTML 파일 하나에 큰 그림과 몇 마디 단어로 개념을 보여준다. 파이프라인도 라우터도 없어 어떤 세트와도 충돌하지 않아 **A·B를 골라도 깔린다** |
 | context-diet | 스킬 | cskwork/context-diet-skill | 시스템 프롬프트 비대화 측정·감축 |
 | autoresearch | 스킬 | uditgoenka/autoresearch | 자율 리서치 루프 |
 | call-agent | 스킬 | cskwork/call-agent | codex·agy·kiro·claude·notebooklm로 위임 라우팅 |
@@ -511,6 +512,11 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       skill. Do not link it twice: two directories declaring
                                       'name: wait-what' means only one loads and which one is arbitrary,
                                       which is the duplicate family step 8 archives.
+  eli5                                https://github.com/anthropics/claude-plugins-community
+                                      Clone and link ONLY eli5/skills/eli5 as ~/.agents/skills/eli5.
+                                      /eli5 <topic> turns any subject into a big-picture, few-words HTML
+                                      picture book. User-invoked, no router, no pipeline — cannot conflict
+                                      with the chosen set.
   Context Diet                        https://github.com/cskwork/context-diet-skill
   Autoresearch                        https://github.com/uditgoenka/autoresearch
   Call Agent                          https://github.com/cskwork/call-agent
