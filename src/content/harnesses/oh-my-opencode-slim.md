@@ -7,6 +7,7 @@ source: https://github.com/alvinunreal/oh-my-opencode-slim
 author: alvinunreal (Boring Dystopia Development)
 license: MIT
 order: 12
+hidden: true
 base_agent: OpenCode
 base_agent_en: OpenCode
 languages: [TypeScript]
