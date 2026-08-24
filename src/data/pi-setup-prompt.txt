@@ -1,7 +1,9 @@
 You are setting up the "pi + GLM" coding-agent default on this machine.
-Work autonomously. This task is idempotent: anything already correct must be
-left alone, and you may re-run every step safely. Never overwrite a config
-file wholesale — always read, merge, write back.
+This prompt is cross-platform: it must work on macOS, Linux, and Windows.
+
+Work autonomously. The task is idempotent: anything already correct must be
+left alone, and the whole prompt may be re-run safely as a repair tool. Never
+overwrite a config file wholesale — always read, merge, write back.
 
 Report progress as you go. At the end print a numbered summary of what you
 changed, what was already correct, and anything the user must do by hand.
@@ -15,38 +17,84 @@ changed, what was already correct, and anything the user must do by hand.
   with the remaining independent steps. Do not silently retry forever.
 - Verify each step with a real command and show its real output. Do not claim
   success you did not observe.
+- Use ONE shell family for the whole run and say which in the report. Do not
+  mix PowerShell and bash syntax in a single command.
+
+=== STEP 0 — detect the platform ===
+Determine the OS and the shell you are actually running in. Then fix these
+substitutions for the rest of the run and state them in your first report line:
+
+  HOME      macOS/Linux: $HOME              Windows: $env:USERPROFILE
+                                            (Git Bash: $HOME works too)
+  PI_DIR    <HOME>/.pi/agent
+  SETTINGS  <PI_DIR>/settings.json
+  PERMCFG   <PI_DIR>/extensions/pi-permission-system/config.json
+  SKILLS    <HOME>/.agents/skills
+
+Notes that matter later:
+- On Windows, pi runs its own shell tool through Git Bash. That is pi's
+  internal behavior and does not constrain which shell YOU use here.
+- Write JSON with forward slashes or escaped backslashes. A raw Windows path
+  like C:\Users\me inside JSON is invalid.
+- Do not assume `python3` exists. On Windows it is often absent or a Store
+  stub. Node is guaranteed by STEP 1, so use `node -e` for JSON work.
 
 === STEP 1 — Node.js 22+ ===
-Run `node -v`. If it is missing or below v22, stop and tell the user to install
-Node 22 (macOS: nvm; Windows: the nodejs.org LTS installer). Do not attempt to
-install Node yourself.
+Run `node -v`.
+- If it prints v22 or newer, continue.
+- If it is missing or older, install it with the platform's own tool, then
+  re-check `node -v`:
+    macOS    : `brew install node@22`   (or nvm if the user already has nvm)
+    Windows  : `winget install OpenJS.NodeJS.LTS`
+    Linux    : the distro package manager, or nvm
+  If no package manager is available or the install fails, do NOT improvise.
+  Stop this step, report it, and tell the user to install Node 22 from
+  https://nodejs.org — then continue with nothing else, since every remaining
+  step needs npm.
+- After a fresh install, `node` and `npm` may not be on PATH until a new
+  terminal is opened. If that happens, say so plainly rather than looping.
 
 === STEP 2 — install pi ===
 Run `pi --version`. If pi is missing, install it:
     npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 Then confirm `pi --version` prints a version.
+If `pi` is still not found right after a successful npm install, it is a PATH
+issue: report the npm global bin directory (`npm bin -g` or `npm prefix -g`)
+and tell the user to open a new terminal. Do not try to patch PATH yourself.
+Windows note: the pi.dev shell installer targets macOS/Linux. On Windows use
+the npm command above.
 
 === STEP 3 — Z.ai credentials ===
-Run `pi auth check --provider zai`. 
+Run `pi auth check --provider zai`.
 - If it prints "ready", the key is already stored. Do nothing.
-- Otherwise, check whether the environment variable ZAI_API_KEY is set
-  (test that it is non-empty WITHOUT printing its value).
-- If neither is present, do not guess and do not prompt for the key in chat.
-  Record in the final report that the user must run `pi` and use `/login` →
-  "ZAI Coding Plan (Global)", or export ZAI_API_KEY, and then re-run this
-  setup. Continue with the remaining steps regardless.
+- Otherwise check whether the ZAI_API_KEY environment variable is set, testing
+  that it is non-empty WITHOUT printing its value:
+    bash/zsh   : test -n "$ZAI_API_KEY" && echo set || echo unset
+    PowerShell : if ($env:ZAI_API_KEY) { "set" } else { "unset" }
+- If neither is present, do not guess and do not ask for the key in chat.
+  Record in the final report that the user must run `pi`, use `/login` →
+  "ZAI Coding Plan (Global)", and re-run this setup. Continue with the
+  remaining steps regardless — they do not need the key.
 
 === STEP 4 — default model ===
-Merge into ~/.pi/agent/settings.json (create the file and parent directory if
-absent; preserve every existing key):
+Merge into SETTINGS (create the file and its parent directories if absent;
+preserve every existing key):
     defaultProvider      = "zai"
     defaultModel         = "glm-5.3"
     defaultThinkingLevel = "max"
-Use a JSON-aware merge (python3/node), never a text substitution.
+Use a JSON-aware merge, never a text substitution. A portable way that works
+on every platform, because Node is guaranteed present after STEP 1:
 
-=== STEP 5 — interface + trust ===
-Merge into the same settings file. These are cosmetic defaults: if the user
-already set a different value for any of them, keep theirs and note it.
+    node -e "const fs=require('fs'),os=require('os'),p=require('path');const f=p.join(os.homedir(),'.pi','agent','settings.json');fs.mkdirSync(p.dirname(f),{recursive:true});const c=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};c.defaultProvider='zai';c.defaultModel='glm-5.3';c.defaultThinkingLevel='max';fs.writeFileSync(f,JSON.stringify(c,null,2));console.log('wrote',f)"
+
+`os.homedir()` resolves correctly on all three platforms, which is why this is
+preferred over hardcoding `~` or `%USERPROFILE%`. Mind the quoting: on
+PowerShell wrap the script in single quotes and use double quotes inside, or
+write the script to a temporary .js file and run that.
+
+=== STEP 5 — interface defaults + project trust ===
+Merge into the same settings file. These are cosmetic: if the user already set
+a different value for any of them, keep theirs and note it in the report.
     theme                  = "dark/dark"   (only if theme is not already set)
     tuiMode                = "fullscreen"
     hideThinkingBlock      = true
@@ -59,7 +107,7 @@ the user is not available to answer, leave the key untouched and note it.
 
 === STEP 6 — packages ===
 `pi install` accepts ONE source per call — passing several at once fails with
-"Unexpected argument". Loop over these, one call each:
+"Unexpected argument". Install all sixteen, one call each, in this order:
     npm:glm-vision
     npm:pi-subagents
     npm:pi-lens
@@ -76,16 +124,17 @@ the user is not available to answer, leave the key untouched and note it.
     npm:pi-simplify
     npm:@narumitw/pi-goal
     npm:@narumitw/pi-usage
-Already-installed packages are fine to re-run. Afterwards run `pi list` and
-report how many packages are registered. If any single package fails, report
-which one and keep going — the rest are independent.
+Install the full set without asking. Already-installed packages are fine to
+re-run. Afterwards run `pi list` and report how many packages are registered.
+If any single package fails, report which one and keep going — they are
+independent. Some packages build native modules, so a slow install is normal.
 
 === STEP 7 — subagent gates ===
-Merge into settings.json under subagents.agentOverrides. Every gate keeps any
-keys it already has; only add or update the ones below.
+Merge into SETTINGS under subagents.agentOverrides. Every gate keeps any keys
+it already has; only add or update the ones below.
 Six pipeline gates, each with model "zai/glm-5.3" and thinking "max". Where a
-gate is listed with no skills, omit the "skills" key entirely — do NOT write an
-empty array:
+gate is listed with no skills, omit the "skills" key entirely — do NOT write
+an empty array:
     specifier    — (no skills key)
     coder        — skills: ["test-driven-development"]
     cleaner      — (no skills key)
@@ -104,9 +153,11 @@ Eight skill-only helpers (do NOT set a model or thinking level on these):
 That is 14 entries under agentOverrides in total.
 
 === STEP 8 — permission policy ===
-Write ~/.pi/agent/extensions/pi-permission-system/config.json ONLY if it does
-not already exist. If it exists, leave it and report that it was kept.
-Content:
+Write PERMCFG ONLY if it does not already exist. If it exists, leave it alone
+and report that it was kept. Create parent directories as needed.
+Content (note the last block: keep the "/tmp/*" line on macOS/Linux, and on
+Windows replace it with the temp directory in forward-slash form, for example
+"C:/Users/<you>/AppData/Local/Temp/*"):
 {
   "permission": {
     "*": "allow",
@@ -135,17 +186,18 @@ Content:
 }
 
 === STEP 9 — shared skills directory ===
-Create ~/.agents/skills/ if absent. pi reads skills from there and from
-~/.pi/agent/skills/. Do not clone or install any skills in this step.
+Create SKILLS if absent. pi reads skills from there and from <PI_DIR>/skills.
+Do not clone or install any skills in this step.
 
 === STEP 10 — verify ===
 Run these and show the real output:
   1. `pi --version`
-  2. `pi auth check --provider zai`            (expect: ready — or the STEP 3 note)
-  3. `pi --list-models zai`                     (expect glm-5.3 in the list)
-  4. Confirm settings.json parses as JSON and contains the STEP 4 values.
-  5. `pi list`                                  (package count)
-  6. If and only if step 2 said ready, run:
-     pi -p "reply with exactly: PI-SETUP-OK" --no-session
-     and show what came back.
-Then print the final summary.
+  2. `pi auth check --provider zai`   (expect: ready — or the STEP 3 note)
+  3. `pi --list-models zai`           (expect glm-5.3 in the list)
+  4. Read SETTINGS back, confirm it parses as JSON, and confirm it contains
+     the STEP 4 values and 14 entries under subagents.agentOverrides.
+  5. `pi list`                        (package count; expect 16)
+  6. Only if step 2 said ready, run a live round-trip and show what came back:
+       bash/zsh   : pi -p "reply with exactly: PI-SETUP-OK" --no-session
+       PowerShell : pi -p 'reply with exactly: PI-SETUP-OK' --no-session
+Then print the final summary, including which OS and shell you used.
