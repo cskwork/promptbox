@@ -1,6 +1,9 @@
 ---
 import BaseLayout from '~/layouts/BaseLayout.astro';
 import CopyButton from '~/components/CopyButton.astro';
+// The one-click setup prompt lives in its own file so the payload round-trips
+// byte-for-byte — no template-literal escaping between here and the clipboard.
+import setupPrompt from '~/data/pi-setup-prompt.txt?raw';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const currentHref = `${base}/tips/`;
@@ -166,6 +169,41 @@ const cmdUpdate = `pi update --all     # pi 본체 + 패키지 + 모델 카탈�
   </header>
 
   <div class="space-y-6">
+
+    <!-- 원클릭 설치 프롬프트 -->
+    <section class="glass-panel rounded-2xl border-2 border-accent-500/40 p-5 lg:p-6">
+      <div class="mb-2 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+        <span class="rounded-md bg-accent-500/15 px-2 py-0.5 font-mono text-xs font-bold uppercase tracking-wide text-accent-700 dark:text-accent-400">1-click</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50">
+          <span data-lang="en">Let an agent do all of it</span>
+          <span data-lang="ko">에이전트에게 통째로 시키기</span>
+        </h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Already have any coding agent running — Claude Code, Codex, Cursor, or pi itself? Copy the prompt below, paste it into that agent, and it performs STEP 2 through STEP 10 for you: installs pi, pins <code class="font-mono text-[0.85em]">glm-5.3</code>, adds every package, writes the subagent gates and the permission policy, then verifies the result and reports back. It is idempotent — safe to paste again later to repair a setup. <strong class="font-semibold text-ink-800 dark:text-ink-100">You still need the Z.ai key from STEP 0.</strong></span>
+        <span data-lang="ko">이미 코딩 에이전트가 하나라도 돌고 있다면(Claude Code·Codex·Cursor·또는 pi 자신) 아래 프롬프트를 복사해 그 에이전트에 붙여넣기만 하면 된다. STEP 2부터 STEP 10까지를 대신 해준다 — pi 설치, <code class="font-mono text-[0.85em]">glm-5.3</code> 고정, 패키지 전체 설치, 서브에이전트 관문과 권한 정책 기록, 그리고 결과 검증과 보고까지. 멱등(몇 번을 돌려도 같은 결과)이라 나중에 설정이 깨졌을 때 복구용으로 또 붙여넣어도 된다. <strong class="font-semibold text-ink-800 dark:text-ink-100">Z.ai 키(STEP 0)는 여전히 직접 준비해야 한다.</strong></span>
+      </p>
+      <div class="mb-3 flex flex-wrap items-center gap-2">
+        <CopyButton target="#tip-setup-prompt" labelEn="Copy the setup prompt" labelKo="설치 프롬프트 복사" size="md" variant="primary" />
+        <span class="text-xs text-ink-500">
+          <span data-lang="en">then paste it into your agent's chat</span>
+          <span data-lang="ko">그대로 에이전트 채팅창에 붙여넣기</span>
+        </span>
+      </div>
+      <details class="group">
+        <summary class="cursor-pointer list-none text-sm font-medium text-accent-700 dark:text-accent-400">
+          <span data-lang="en">Read the prompt before you run it</span>
+          <span data-lang="ko">돌리기 전에 프롬프트 읽어보기</span>
+          <span class="ml-1 text-ink-500 group-open:hidden">▸</span>
+          <span class="ml-1 hidden text-ink-500 group-open:inline">▾</span>
+        </summary>
+        <pre id="tip-setup-prompt" class="mt-3 max-h-[28rem] overflow-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.78rem] leading-relaxed text-ink-100">{setupPrompt}</pre>
+      </details>
+      <p class="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+        <span data-lang="en">⚠ This prompt installs software and writes config files as your user account. Read it first — that is what the toggle above is for. It never prints your API key, never deletes a file, and merges into existing config instead of overwriting; if it cannot do a step it reports the step instead of guessing. Prefer to see each command yourself? Skip the button and follow STEP 0-11 by hand.</span>
+        <span data-lang="ko">⚠ 이 프롬프트는 당신 계정 권한으로 소프트웨어를 설치하고 설정 파일을 쓴다. 먼저 읽어보라 — 위의 펼침이 그용도다. API 키를 출력하지 않고, 파일을 지우지 않으며, 기존 설정을 덮어쓰지 않고 합친다. 못 하는 단계는 추측하지 않고 그대로 보고한다. 명령을 하나씩 눈으로 확인하며 가고 싶다면 버튼 대신 아래 STEP 0-11을 손으로 따라가면 된다.</span>
+      </p>
+    </section>
 
     <!-- STEP 0 -->
     <section class="glass-panel rounded-2xl p-5 lg:p-6">
