@@ -45,8 +45,9 @@ absent; preserve every existing key):
 Use a JSON-aware merge (python3/node), never a text substitution.
 
 === STEP 5 — interface + trust ===
-Merge into the same settings file:
-    theme                  = "dark/dark"
+Merge into the same settings file. These are cosmetic defaults: if the user
+already set a different value for any of them, keep theirs and note it.
+    theme                  = "dark/dark"   (only if theme is not already set)
     tuiMode                = "fullscreen"
     hideThinkingBlock      = true
     collapseChangelog      = true
@@ -82,20 +83,25 @@ which one and keep going — the rest are independent.
 === STEP 7 — subagent gates ===
 Merge into settings.json under subagents.agentOverrides. Every gate keeps any
 keys it already has; only add or update the ones below.
-Six pipeline gates, each model "zai/glm-5.3" and thinking "max":
-    specifier    — no extra skills
+Six pipeline gates, each with model "zai/glm-5.3" and thinking "max". Where a
+gate is listed with no skills, omit the "skills" key entirely — do NOT write an
+empty array:
+    specifier    — (no skills key)
     coder        — skills: ["test-driven-development"]
-    cleaner      — no extra skills
-    sw-architect — no extra skills
+    cleaner      — (no skills key)
+    sw-architect — (no skills key)
     hardender    — skills: ["systematic-debugging", "verification-before-completion"]
     qa           — skills: ["browser-qa", "verification-before-completion"]
-Five skill-only helpers (do NOT set a model or thinking level on these):
-    qa-tester     — skills: ["browser-qa", "agent-browser"]
-    qa-auditor    — skills: ["browser-qa", "agent-browser"]
-    agent-browser — skills: ["browser-qa", "agent-browser", "playwright-cli"]
-    verify        — skills: ["verify", "verification-before-completion"]
-    tester        — skills: ["test-driven-development", "e2e-testing"]
-    debugger      — skills: ["systematic-debugging"]
+Eight skill-only helpers (do NOT set a model or thinking level on these):
+    qa-tester              — skills: ["browser-qa", "agent-browser"]
+    qa-auditor             — skills: ["browser-qa", "agent-browser"]
+    agent-browser          — skills: ["browser-qa", "agent-browser", "playwright-cli"]
+    customer-agent         — skills: ["browser-qa", "agent-browser"]
+    persona-product-tester — skills: ["browser-qa", "agent-browser"]
+    verify                 — skills: ["verify", "verification-before-completion"]
+    tester                 — skills: ["test-driven-development", "e2e-testing"]
+    debugger               — skills: ["systematic-debugging"]
+That is 14 entries under agentOverrides in total.
 
 === STEP 8 — permission policy ===
 Write ~/.pi/agent/extensions/pi-permission-system/config.json ONLY if it does
