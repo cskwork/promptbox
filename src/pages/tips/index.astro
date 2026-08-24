@@ -1,0 +1,561 @@
+---
+import BaseLayout from '~/layouts/BaseLayout.astro';
+import CopyButton from '~/components/CopyButton.astro';
+
+const base = import.meta.env.BASE_URL.replace(/\/$/, '');
+const currentHref = `${base}/tips/`;
+
+// ── 검증된 명령 (pi 0.84.3, macOS arm64, 2026-08-25 실측) ──
+const cmdNodeCheck = `node -v    # v22 이상이면 OK. 아무 출력이 없으면 아래로`;
+const cmdNodeInstall = `# macOS (nvm 권장):
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# 터미널 재시작 후:
+nvm install 22 && nvm use 22
+
+# Windows: https://nodejs.org 에서 LTS 인스톨러 설치`;
+const cmdInstall = `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`;
+const cmdInstallAlt = `# 인스톨러를 쓰고 싶다면 (macOS / Linux)
+curl -fsSL https://pi.dev/install.sh | sh`;
+const cmdVerify = `pi --version    # 이 문서는 0.84.3에서 검증했다`;
+const cmdAuthEnv = `export ZAI_API_KEY=여기에_코딩플랜_키_붙여넣기
+pi`;
+const cmdAuthCheck = `pi auth check --provider zai        # ready 가 나오면 연결된 것
+pi --list-models zai                # glm-5.3 이 보이면 구독이 열린 것`;
+const cmdDefaultModel = `python3 - <<'EOF'
+import json, os
+p = os.path.expanduser("~/.pi/agent/settings.json")
+cfg = json.load(open(p)) if os.path.exists(p) else {}   # 이미 있으면 보존하고 합친다
+cfg["defaultProvider"] = "zai"
+cfg["defaultModel"] = "glm-5.3"
+cfg["defaultThinkingLevel"] = "max"
+os.makedirs(os.path.dirname(p), exist_ok=True)
+json.dump(cfg, open(p, "w"), indent=2, ensure_ascii=False)
+print("model ->", p)
+EOF`;
+const cmdModelCheck = `pi -p "reply with exactly: PI-ZAI-OK"   # 기본 모델로 한 번 왕복`;
+const cmdVision = `pi install npm:glm-vision`;
+const cmdVisionUse = `pi -p "read ./probe.png. 안의 글자와 도형을 그대로 알려줘"`;
+const cmdPackages = `# pi install 은 한 번에 하나씩만 받는다 — 그래서 반복문으로 돌린다
+for p in \\
+  npm:pi-subagents \\
+  npm:pi-lens \\
+  npm:pi-web-access \\
+  npm:context-mode \\
+  npm:pi-mcp-adapter \\
+  npm:pi-background-tasks \\
+  npm:@gotgenes/pi-permission-system \\
+  npm:@juicesharp/rpiv-todo \\
+  npm:@juicesharp/rpiv-ask-user-question \\
+  npm:@samfp/pi-memory \\
+  npm:pi-markdown-preview \\
+  npm:pi-powerline-footer \\
+  npm:pi-simplify \\
+  npm:@narumitw/pi-goal \\
+  npm:@narumitw/pi-usage
+do
+  pi install "$p"
+done
+
+pi list      # 설치된 패키지 확인`;
+const cmdSubagents = `python3 - <<'EOF'
+import json, os
+p = os.path.expanduser("~/.pi/agent/settings.json")
+cfg = json.load(open(p)) if os.path.exists(p) else {}
+
+M = {"model": "zai/glm-5.3", "thinking": "max"}          # 6개 게이트 전부 glm-5.3 · thinking max
+gates = {
+    "specifier":    dict(M),
+    "coder":        dict(M, skills=["test-driven-development"]),
+    "cleaner":      dict(M),
+    "sw-architect": dict(M),
+    "hardender":    dict(M, skills=["systematic-debugging", "verification-before-completion"]),
+    "qa":           dict(M, skills=["browser-qa", "verification-before-completion"]),
+    # 아래는 모델은 그대로 두고 스킬만 붙이는 보조 에이전트
+    "qa-tester":    {"skills": ["browser-qa", "agent-browser"]},
+    "qa-auditor":   {"skills": ["browser-qa", "agent-browser"]},
+    "agent-browser":{"skills": ["browser-qa", "agent-browser", "playwright-cli"]},
+    "verify":       {"skills": ["verify", "verification-before-completion"]},
+    "tester":       {"skills": ["test-driven-development", "e2e-testing"]},
+    "debugger":     {"skills": ["systematic-debugging"]},
+}
+ov = cfg.setdefault("subagents", {}).setdefault("agentOverrides", {})
+for name, conf in gates.items():
+    ov.setdefault(name, {}).update(conf)
+
+json.dump(cfg, open(p, "w"), indent=2, ensure_ascii=False)
+print("subagents ->", p)
+EOF`;
+const cmdPerms = `mkdir -p ~/.pi/agent/extensions/pi-permission-system
+cat > ~/.pi/agent/extensions/pi-permission-system/config.json <<'EOF'
+{
+  "permission": {
+    "*": "allow",
+    "path": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "~/.ssh/*": "deny"
+    },
+    "bash": {
+      "*": "allow",
+      "rm *": "ask",
+      "rm -rf *": "deny",
+      "sudo *": "ask"
+    },
+    "external_directory": {
+      "*": "ask",
+      "~/.agents": "allow",
+      "~/.agents/*": "allow",
+      "~/.pi": "allow",
+      "~/.pi/*": "allow",
+      "/tmp/*": "allow"
+    }
+  }
+}
+EOF
+echo "permissions -> ~/.pi/agent/extensions/pi-permission-system/config.json"`;
+const cmdUi = `python3 - <<'EOF'
+import json, os
+p = os.path.expanduser("~/.pi/agent/settings.json")
+cfg = json.load(open(p)) if os.path.exists(p) else {}
+cfg["theme"] = "dark/dark"
+cfg["tuiMode"] = "fullscreen"        # 전체화면 TUI
+cfg["hideThinkingBlock"] = True      # 사고 과정 블록 접기
+cfg["collapseChangelog"] = True
+cfg["enableInstallTelemetry"] = False
+cfg["defaultProjectTrust"] = "always"   # 내 컴퓨터 안 프로젝트를 매번 승인하지 않는다
+json.dump(cfg, open(p, "w"), indent=2, ensure_ascii=False)
+print("ui ->", p)
+EOF`;
+const cmdSkills = `mkdir -p ~/.agents/skills
+git clone https://github.com/cskwork/promptbox ~/promptbox   # 스킬 원본 모음`;
+const cmdRun = `cd ~/my-project     # 작업할 폴더로 이동
+pi                  # 실행`;
+const cmdFirst = `이 폴더의 코드를 읽고 프로젝트 구조를 요약해줘`;
+const cmdSafeTest = `PI_CODING_AGENT_DIR=/tmp/pi-sandbox pi    # 설정을 격리한 채로 실험`;
+const cmdUpdate = `pi update --all     # pi 본체 + 패키지 + 모델 카탈로그`;
+---
+
+<BaseLayout
+  title="Tips & Tricks — promptbox"
+  titleKo="Tips & Tricks — promptbox"
+  description="Zero-to-hero beginner tutorial in Korean: get a Z.ai GLM key, install the pi coding agent, pin GLM-5.3, add vision, packages, subagents, and permissions."
+  descriptionKo="완전 입문자용 튜토리얼: Z.ai GLM 키 발급부터 pi 코딩 에이전트 설치, GLM-5.3 고정, 이미지 읽기, 패키지·서브에이전트·권한 설정, 첫 세션까지."
+  currentHref={currentHref}
+>
+  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
+    <a href={base + '/'} class="hover:text-accent-700 dark:hover:text-accent-400"><span data-lang="en">Home</span><span data-lang="ko">홈</span></a>
+    <span aria-hidden="true">›</span>
+    <span class="text-ink-700 dark:text-ink-200">Tips &amp; Tricks</span>
+  </nav>
+
+  <header class="glass-panel mb-6 rounded-2xl p-5 lg:p-6">
+    <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">
+      <span data-lang="en">Tips &amp; Tricks — zero to coding agent</span>
+      <span data-lang="ko">Tips &amp; Tricks — 코딩 에이전트 0에서 시작하기</span>
+    </h1>
+    <p class="mt-2 text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
+      <span data-lang="en">A step-by-step beginner tutorial: get a Z.ai GLM key, install <strong class="font-semibold">pi</strong>, pin it to GLM-5.3, give it eyes, then layer on the packages, subagents, and permission policy that make it a daily driver. Every command below was run on a real machine (pi 0.84.3, macOS arm64, 2026-08-25).</span>
+      <span data-lang="ko">Z.ai GLM 키를 받는 순간부터 <strong class="font-semibold">pi</strong>를 설치하고, 기본 모델을 GLM-5.3으로 고정하고, 이미지를 읽게 하고, 실제로 매일 쓰는 패키지·서브에이전트·권한 정책까지 얹기까지. 코딩 지식 없이 따라 할 수 있는 단계별 튜토리얼이며, 아래 모든 명령은 실제 머신에서 실행해 확인했다(pi 0.84.3, macOS arm64, 2026-08-25).</span>
+    </p>
+    <p class="mt-3 rounded-lg border border-accent-500/30 bg-accent-500/10 px-3 py-2 text-sm text-ink-700 dark:text-ink-200">
+      <span data-lang="en"><strong class="font-semibold">Default setup</strong>: <strong class="font-semibold">pi</strong> + <code class="font-mono text-[0.85em]">zai/glm-5.3</code> (1M context, thinking <code class="font-mono text-[0.85em]">max</code>) + <code class="font-mono text-[0.85em]">glm-vision</code> for images. One agent, one key. Prefer a different harness? <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/tips/opencode/`}>The OpenCode 2 walkthrough moved here</a>.</span>
+      <span data-lang="ko"><strong class="font-semibold">기본 구성</strong>은 <strong class="font-semibold">pi</strong> + <code class="font-mono text-[0.85em]">zai/glm-5.3</code>(컨텍스트 100만, 사고 수준 <code class="font-mono text-[0.85em]">max</code>) + 이미지용 <code class="font-mono text-[0.85em]">glm-vision</code>이다. 에이전트 하나, 키 하나. 다른 하네스를 원하면 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/tips/opencode/`}>OpenCode 2 안내는 이쪽으로 옮겼다</a>.</span>
+    </p>
+  </header>
+
+  <div class="space-y-6">
+
+    <!-- STEP 0 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 0</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Prepare a Z.ai API key</span><span data-lang="ko">준비물 — Z.ai API 키</span></h2>
+      </div>
+      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">You need one Z.ai GLM key. Two ways to get it:</span>
+        <span data-lang="ko">필요한 것은 딱 하나, Z.ai GLM 키다. 받는 방법은 두 가지다:</span>
+      </p>
+      <ul class="mt-2 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-ink-600 dark:text-ink-300 marker:text-accent-500">
+        <li>
+          <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">Shared key from this console (recommended)</strong>: log in to the <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href="https://zai-coding-plan.vercel.app" target="_blank" rel="noopener">ZAI Plan Console</a> → 「API 키 금고」 → tap 「관리자에게 키 열람 요청」. Once the admin approves, the key appears in the vault — press 열람 to copy it.</span>
+          <span data-lang="ko"><strong class="font-semibold text-ink-800 dark:text-ink-100">이 콘솔에서 공유받기(권장)</strong>: <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href="https://zai-coding-plan.vercel.app" target="_blank" rel="noopener">ZAI Plan Console</a>에 Google 로그인 → 「API 키 금고」 화면 → 「관리자에게 키 열람 요청」 버튼 누르기. 관리자가 승인하면 금고에 공유 키가 나타나고, 「열람」 버튼으로 복사할 수 있다.</span>
+        </li>
+        <li>
+          <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">Your own subscription</strong>: subscribe to the GLM Coding Plan at <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href="https://z.ai" target="_blank" rel="noopener">z.ai</a> and issue an API key from your dashboard.</span>
+          <span data-lang="ko"><strong class="font-semibold text-ink-800 dark:text-ink-100">직접 구독</strong>: <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href="https://z.ai" target="_blank" rel="noopener">z.ai</a>에서 GLM Coding Plan을 구독하고, 대시보드에서 API 키를 발급받는다.</span>
+        </li>
+      </ul>
+      <p class="mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+        <span data-lang="en">⚠ Treat the key like a password. Never paste it in chats or screenshots. If it leaks, ask for rotation immediately.</span>
+        <span data-lang="ko">⚠ 키는 비밀번호다. 채팅·스크린샷에 절대 붙여넣지 말고, 유출되면 즉시 관리자에게 회전(교체)을 요청하라.</span>
+      </p>
+    </section>
+
+    <!-- STEP 1 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 1</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Open the terminal</span><span data-lang="ko">터미널 열기</span></h2>
+      </div>
+      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">macOS: press <kbd class="rounded border border-ink-300 px-1 font-mono text-xs dark:border-ink-700">⌘+Space</kbd>, type <code class="font-mono text-[0.85em]">터미널</code> (or Terminal), Enter. Windows: press the Start key, type <code class="font-mono text-[0.85em]">PowerShell</code>, Enter.</span>
+        <span data-lang="ko">macOS: <kbd class="rounded border border-ink-300 px-1 font-mono text-xs dark:border-ink-700">⌘+스페이스</kbd>를 누르고 <code class="font-mono text-[0.85em]">터미널</code>(또는 Terminal) 입력 후 엔터. Windows: 시작 버튼 → <code class="font-mono text-[0.85em]">PowerShell</code> 검색 → 엔터. 이후 모든 명령은 이 창에 입력한다.</span>
+      </p>
+    </section>
+
+    <!-- STEP 2 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 2</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Check Node.js (v22+)</span><span data-lang="ko">Node.js 확인 (v22 이상)</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">pi itself and every pi package come through npm. Check Node first:</span>
+        <span data-lang="ko">pi 본체도, pi 패키지도 전부 npm을 거친다. 먼저 확인:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-node-check" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdNodeCheck}</code>
+        <CopyButton target="#tip-node-check" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="mb-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">If the version is older or the command is not found, install Node 22:</span>
+        <span data-lang="ko">버전이 더 낮거나 명령이 없다고 나오면 Node 22을 설치한다:</span>
+      </p>
+      <div class="flex items-stretch gap-2">
+        <code id="tip-node-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdNodeInstall}</code>
+        <CopyButton target="#tip-node-install" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+    </section>
+
+    <!-- STEP 3 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 3</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Install pi</span><span data-lang="ko">pi 설치</span></h2>
+      </div>
+      <p class="mb-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">The npm package is <code class="font-mono text-[0.85em]">@earendil-works/pi-coding-agent</code> and the command it installs is <code class="font-mono text-[0.85em]">pi</code>. <code class="font-mono text-[0.85em]">--ignore-scripts</code> skips dependency lifecycle scripts — pi does not need them:</span>
+        <span data-lang="ko">npm 패키지 이름은 <code class="font-mono text-[0.85em]">@earendil-works/pi-coding-agent</code>이고, 설치되는 명령 이름은 <code class="font-mono text-[0.85em]">pi</code>다. <code class="font-mono text-[0.85em]">--ignore-scripts</code>는 의존성 설치 스크립트를 건너뛰는 옵션이며, pi는 그 스크립트가 필요 없다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdInstall}</code>
+        <CopyButton target="#tip-install" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-install-alt" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdInstallAlt}</code>
+        <CopyButton target="#tip-install-alt" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <div class="flex items-stretch gap-2">
+        <code id="tip-verify" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdVerify}</code>
+        <CopyButton target="#tip-verify" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+    </section>
+
+    <!-- STEP 4 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 4</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Connect your Z.ai key</span><span data-lang="ko">Z.ai 키 연결</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Two routes. Inside pi, run <code class="font-mono text-[0.85em]">/login</code> and pick <strong>ZAI Coding Plan (Global)</strong> — the key is saved to <code class="font-mono text-[0.85em]">~/.pi/agent/auth.json</code> under the <code class="font-mono text-[0.85em]">zai</code> entry and reused from then on. Or set the environment variable before launching:</span>
+        <span data-lang="ko">두 가지 길이 있다. pi 안에서 <code class="font-mono text-[0.85em]">/login</code>을 실행하고 <strong>ZAI Coding Plan (Global)</strong>을 고르면 키가 <code class="font-mono text-[0.85em]">~/.pi/agent/auth.json</code>의 <code class="font-mono text-[0.85em]">zai</code> 항목에 저장되고 다음부터 자동으로 쓰인다. 아니면 실행 전에 환경변수로 넣는다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-auth-env" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdAuthEnv}</code>
+        <CopyButton target="#tip-auth-env" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="mb-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Then confirm the subscription actually unlocked the models:</span>
+        <span data-lang="ko">그다음 구독으로 모델이 실제로 열렸는지 확인한다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-auth-check" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdAuthCheck}</code>
+        <CopyButton target="#tip-auth-check" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">The same <code class="font-mono text-[0.85em]">/login</code> screen also takes a Claude Pro/Max, ChatGPT Plus/Pro (Codex), or GitHub Copilot subscription, so one pi install can hold several providers side by side — this guide stays on the single GLM key.</span>
+        <span data-lang="ko">같은 <code class="font-mono text-[0.85em]">/login</code> 화면에서 Claude Pro/Max, ChatGPT Plus/Pro(Codex), GitHub Copilot 구독도 붙일 수 있어서, pi 하나에 여러 공급자를 동시에 둘 수 있다. 이 문서는 GLM 키 하나만으로 진행한다.</span>
+      </p>
+    </section>
+
+    <!-- STEP 5 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 5</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Pin GLM-5.3 as the default</span><span data-lang="ko">기본 모델을 GLM-5.3으로 고정</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">pi reads <code class="font-mono text-[0.85em]">~/.pi/agent/settings.json</code>. Pin the provider, the model, and the thinking level once so every new session starts there. The snippet merges into the existing file, so nothing already in it is lost:</span>
+        <span data-lang="ko">pi는 <code class="font-mono text-[0.85em]">~/.pi/agent/settings.json</code>을 읽는다. 공급자·모델·사고 수준을 한 번 고정해 두면 새 세션이 항상 그 상태로 시작한다. 아래 스크립트는 기존 파일에 <em>합치는</em> 방식이라 이미 있는 값은 그대로 살아 있다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-default-model" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdDefaultModel}</code>
+        <CopyButton target="#tip-default-model" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-model-check" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdModelCheck}</code>
+        <CopyButton target="#tip-model-check" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[34rem] border-collapse text-left text-sm">
+          <thead>
+            <tr class="border-b border-ink-200/70 text-ink-700 dark:border-ink-700/60 dark:text-ink-200">
+              <th class="py-2 pr-3 font-semibold"><span data-lang="en">Model</span><span data-lang="ko">모델</span></th>
+              <th class="py-2 pr-3 font-semibold"><span data-lang="en">Context</span><span data-lang="ko">컨텍스트</span></th>
+              <th class="py-2 font-semibold"><span data-lang="en">Use it for</span><span data-lang="ko">쓰임새</span></th>
+            </tr>
+          </thead>
+          <tbody class="text-ink-600 dark:text-ink-300">
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60">
+              <td class="py-2 pr-3 font-mono text-[0.82rem]">zai/glm-5.3</td>
+              <td class="py-2 pr-3">1,000,000</td>
+              <td class="py-2"><span data-lang="en">Default. Reads a whole repo before it starts.</span><span data-lang="ko">기본값. 저장소 전체를 먼저 읽고 시작할 수 있다.</span></td>
+            </tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60">
+              <td class="py-2 pr-3 font-mono text-[0.82rem]">zai/glm-5.2</td>
+              <td class="py-2 pr-3">1,000,000</td>
+              <td class="py-2"><span data-lang="en">Previous generation.</span><span data-lang="ko">이전 세대 주력.</span></td>
+            </tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60">
+              <td class="py-2 pr-3 font-mono text-[0.82rem]">zai/glm-5-turbo</td>
+              <td class="py-2 pr-3">200,000</td>
+              <td class="py-2"><span data-lang="en">Cheap bulk work — search, summaries, boilerplate.</span><span data-lang="ko">값싼 대량 작업 — 검색·요약·정형 코드.</span></td>
+            </tr>
+            <tr>
+              <td class="py-2 pr-3 font-mono text-[0.82rem]">zai/glm-4.7</td>
+              <td class="py-2 pr-3">204,800</td>
+              <td class="py-2"><span data-lang="en">Older generation.</span><span data-lang="ko">구세대.</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Switch mid-session with <code class="font-mono text-[0.85em]">/model</code> (or <kbd class="rounded border border-ink-300 px-1 font-mono text-xs dark:border-ink-700">Ctrl+L</kbd>). <code class="font-mono text-[0.85em]">glm-5.3</code> maps only three thinking levels — <code class="font-mono text-[0.85em]">low</code>, <code class="font-mono text-[0.85em]">high</code>, <code class="font-mono text-[0.85em]">max</code> — so <code class="font-mono text-[0.85em]">max</code> is the top of that scale, not an exotic setting.</span>
+        <span data-lang="ko">세션 도중 바꾸려면 <code class="font-mono text-[0.85em]">/model</code>(또는 <kbd class="rounded border border-ink-300 px-1 font-mono text-xs dark:border-ink-700">Ctrl+L</kbd>). <code class="font-mono text-[0.85em]">glm-5.3</code>은 사고 수준을 <code class="font-mono text-[0.85em]">low</code>·<code class="font-mono text-[0.85em]">high</code>·<code class="font-mono text-[0.85em]">max</code> 세 단계만 매핑하므로, <code class="font-mono text-[0.85em]">max</code>는 특별한 값이 아니라 그 척도의 맨 위다.</span>
+      </p>
+    </section>
+
+    <!-- STEP 6 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 6</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Give it eyes — glm-vision</span><span data-lang="ko">눈 달기 — glm-vision</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Every GLM Coding Plan chat model is text-only, so a screenshot alone gets you nothing. The <code class="font-mono text-[0.85em]">glm-vision</code> pi package closes that gap: it intercepts image results from the <code class="font-mono text-[0.85em]">read</code> tool while the <code class="font-mono text-[0.85em]">zai</code> provider is active, sends them to a GLM vision model (default <code class="font-mono text-[0.85em]">glm-4.6v</code>), and hands the text description back to your text-only model.</span>
+        <span data-lang="ko">GLM Coding Plan의 채팅 모델은 전부 글자만 받는다. 그래서 스크린샷만으로는 아무것도 안 된다. <code class="font-mono text-[0.85em]">glm-vision</code> 패키지가 이 구멍을 메운다 — <code class="font-mono text-[0.85em]">zai</code> 공급자를 쓰는 동안 <code class="font-mono text-[0.85em]">read</code> 도구가 읽은 이미지를 가로채 GLM 비전 모델(기본 <code class="font-mono text-[0.85em]">glm-4.6v</code>)로 보내고, 그 설명을 글자로 바꿔 지금 쓰는 모델에게 돌려준다.</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-vision" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdVision}</code>
+        <CopyButton target="#tip-vision" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-vision-use" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdVisionUse}</code>
+        <CopyButton target="#tip-vision-use" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Verified end-to-end (2026-08-25, glm-vision 1.4.3, isolated config dir): a text-only <code class="font-mono text-[0.85em]">glm-5.3</code> read the planted string <code class="font-mono text-[0.85em]">PROMPTBOX-PI-9931</code> and both shapes out of a test PNG. In-session controls: <code class="font-mono text-[0.85em]">/glm-vision:status</code>, <code class="font-mono text-[0.85em]">/glm-vision:model</code>, <code class="font-mono text-[0.85em]">/glm-vision:mode</code>, <code class="font-mono text-[0.85em]">/glm-vision:off</code>.</span>
+        <span data-lang="ko">종단 검증했다(2026-08-25, glm-vision 1.4.3, 격리된 설정 디렉터리). 글자만 읽는 <code class="font-mono text-[0.85em]">glm-5.3</code>이 테스트 PNG에 심어둔 문자열 <code class="font-mono text-[0.85em]">PROMPTBOX-PI-9931</code>과 도형 2개를 읽어냈다. 세션 안에서 <code class="font-mono text-[0.85em]">/glm-vision:status</code>, <code class="font-mono text-[0.85em]">/glm-vision:model</code>, <code class="font-mono text-[0.85em]">/glm-vision:mode</code>, <code class="font-mono text-[0.85em]">/glm-vision:off</code>로 제어한다.</span>
+      </p>
+      <p class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+        <span data-lang="en">⚠ Name the file in the prompt so pi's <code class="font-mono text-[0.85em]">read</code> tool opens it. Descriptions come from a vision model, not from pixel measurement — in one of our runs it called a 161×121 rectangle a "square". Ask for exact text, not exact geometry. Default limit is 4 images per turn.</span>
+        <span data-lang="ko">⚠ 프롬프트에서 파일 이름을 지목해 pi의 <code class="font-mono text-[0.85em]">read</code> 도구가 열게 하라. 설명은 비전 모델이 만드는 것이지 픽셀을 재는 것이 아니다 — 실측에서 161×121 직사각형을 "정사각형"이라고 부른 적이 있다. 정확한 <em>글자</em>를 물어라, 정확한 <em>치수</em>를 묻지 마라. 한 번에 처리하는 이미지는 기본 4장까지다.</span>
+      </p>
+    </section>
+
+    <!-- STEP 7 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 7</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">The package set</span><span data-lang="ko">패키지 한 벌</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">pi ships deliberately bare — four tools: <code class="font-mono text-[0.85em]">read</code>, <code class="font-mono text-[0.85em]">write</code>, <code class="font-mono text-[0.85em]">edit</code>, <code class="font-mono text-[0.85em]">bash</code>. Everything else is a package you opt into. This is the exact set behind this site's default setup. <code class="font-mono text-[0.85em]">pi install</code> accepts one source per call, so this loops (verified — passing several at once errors with <em>Unexpected argument</em>):</span>
+        <span data-lang="ko">pi는 일부러 헐겁게 나온다 — 도구는 <code class="font-mono text-[0.85em]">read</code>·<code class="font-mono text-[0.85em]">write</code>·<code class="font-mono text-[0.85em]">edit</code>·<code class="font-mono text-[0.85em]">bash</code> 넷뿐이다. 나머지는 전부 직접 골라 붙이는 패키지다. 아래가 이 사이트 기본 구성의 실제 한 벌이다. <code class="font-mono text-[0.85em]">pi install</code>은 한 번에 하나씩만 받으므로 반복문을 쓴다(실측 — 여러 개를 한 줄에 넣으면 <em>Unexpected argument</em> 오류가 난다):</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-packages" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdPackages}</code>
+        <CopyButton target="#tip-packages" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full min-w-[34rem] border-collapse text-left text-sm">
+          <thead>
+            <tr class="border-b border-ink-200/70 text-ink-700 dark:border-ink-700/60 dark:text-ink-200">
+              <th class="py-2 pr-3 font-semibold"><span data-lang="en">Package</span><span data-lang="ko">패키지</span></th>
+              <th class="py-2 font-semibold"><span data-lang="en">What it adds</span><span data-lang="ko">무엇을 더하나</span></th>
+            </tr>
+          </thead>
+          <tbody class="text-ink-600 dark:text-ink-300">
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">pi-subagents</td><td class="py-2"><span data-lang="en">Child agents — review, scouting, parallel audits, background jobs.</span><span data-lang="ko">자식 에이전트 — 리뷰·정찰·병렬 감사·백그라운드 작업.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">pi-lens</td><td class="py-2"><span data-lang="en">LSP diagnostics, symbol search, module outlines — code intelligence.</span><span data-lang="ko">LSP 진단·심볼 검색·모듈 개요 — 코드 이해 도구.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">pi-web-access</td><td class="py-2"><span data-lang="en">Web search and URL fetching.</span><span data-lang="ko">웹 검색과 URL 가져오기.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">context-mode</td><td class="py-2"><span data-lang="en">Runs code over big outputs in a sandbox so raw bytes never fill the context window.</span><span data-lang="ko">큰 출력을 샌드박스 안에서 코드로 처리해, 원문이 컨텍스트를 잡아먹지 않게 한다.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">pi-mcp-adapter</td><td class="py-2"><span data-lang="en">Connects MCP servers (the standard way agents attach external tools).</span><span data-lang="ko">MCP 서버 연결 — 에이전트가 외부 도구를 붙이는 표준 규약.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">pi-background-tasks</td><td class="py-2"><span data-lang="en">Long-running commands (test suites, dev servers) without blocking the session.</span><span data-lang="ko">테스트·개발 서버처럼 오래 도는 명령을 세션을 막지 않고 실행.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">@gotgenes/pi-permission-system</td><td class="py-2"><span data-lang="en">allow / ask / deny gates over tools, bash, MCP, and paths. STEP 9 configures it.</span><span data-lang="ko">도구·bash·MCP·경로에 allow/ask/deny 관문. 설정은 STEP 9.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">@juicesharp/rpiv-todo</td><td class="py-2"><span data-lang="en">A task list the agent keeps across a multi-step job.</span><span data-lang="ko">여러 단계 작업 동안 에이전트가 유지하는 할 일 목록.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">@juicesharp/rpiv-ask-user-question</td><td class="py-2"><span data-lang="en">Lets the agent ask you structured multiple-choice questions mid-run.</span><span data-lang="ko">작업 도중 에이전트가 객관식으로 물어볼 수 있게 한다.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">@samfp/pi-memory</td><td class="py-2"><span data-lang="en">Persistent facts, preferences, and lessons across sessions.</span><span data-lang="ko">세션을 넘어 남는 사실·선호·교훈 저장소.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">pi-markdown-preview</td><td class="py-2"><span data-lang="en">Export Markdown/LaTeX to PDF, HTML, or PNG.</span><span data-lang="ko">마크다운·LaTeX를 PDF·HTML·PNG로 내보내기.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">pi-powerline-footer</td><td class="py-2"><span data-lang="en">Status footer: model, token usage, cost.</span><span data-lang="ko">하단 상태줄 — 모델·토큰 사용량·비용.</span></td></tr>
+            <tr class="border-b border-ink-200/50 dark:border-ink-800/60"><td class="py-2 pr-3 font-mono text-[0.8rem]">pi-simplify</td><td class="py-2"><span data-lang="en">Trims the built-in prompt surface.</span><span data-lang="ko">기본 프롬프트 표면을 줄인다.</span></td></tr>
+            <tr><td class="py-2 pr-3 font-mono text-[0.8rem]">@narumitw/pi-goal · pi-usage</td><td class="py-2"><span data-lang="en">Goal tracking and usage/budget reporting.</span><span data-lang="ko">목표 추적과 사용량·예산 리포트.</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+        <span data-lang="en">⚠ pi packages run with your full local permissions — extensions are TypeScript that executes, and skills can tell the model to run anything. Install what you can read. Take this list as one worked example, not a mandatory bundle; <code class="font-mono text-[0.85em]">pi-subagents</code> + <code class="font-mono text-[0.85em]">pi-lens</code> + <code class="font-mono text-[0.85em]">glm-vision</code> alone is already a usable setup.</span>
+        <span data-lang="ko">⚠ pi 패키지는 당신의 로컬 권한을 그대로 갖고 실행된다 — 확장은 실제로 도는 TypeScript이고, 스킬은 모델에게 무엇이든 시킬 수 있다. 읽어보고 납득한 것만 설치하라. 이 목록은 강제 세트가 아니라 하나의 완성된 예시다. <code class="font-mono text-[0.85em]">pi-subagents</code> + <code class="font-mono text-[0.85em]">pi-lens</code> + <code class="font-mono text-[0.85em]">glm-vision</code>만으로도 충분히 쓸 만하다.</span>
+      </p>
+    </section>
+
+    <!-- STEP 8 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 8</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Subagents — one model, six gates</span><span data-lang="ko">서브에이전트 — 모델 하나, 관문 여섯</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">With <code class="font-mono text-[0.85em]">pi-subagents</code> installed, the main agent can hand work to child agents that each start with a clean context. Pinning every gate to <code class="font-mono text-[0.85em]">zai/glm-5.3</code> at thinking <code class="font-mono text-[0.85em]">max</code> keeps the whole pipeline on one subscription; the differences between gates come from their <em>skills</em>, not their models:</span>
+        <span data-lang="ko"><code class="font-mono text-[0.85em]">pi-subagents</code>를 깔면 주 에이전트가 자식 에이전트에게 일을 넘길 수 있고, 자식은 각자 깨끗한 컨텍스트에서 시작한다. 모든 관문을 <code class="font-mono text-[0.85em]">zai/glm-5.3</code> · 사고 <code class="font-mono text-[0.85em]">max</code>로 고정하면 파이프라인 전체가 구독 하나 위에서 돈다. 관문끼리의 차이는 모델이 아니라 붙인 <em>스킬</em>에서 나온다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-subagents" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdSubagents}</code>
+        <CopyButton target="#tip-subagents" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">The six gates are <code class="font-mono text-[0.85em]">specifier</code> → <code class="font-mono text-[0.85em]">coder</code> → <code class="font-mono text-[0.85em]">cleaner</code> → <code class="font-mono text-[0.85em]">sw-architect</code> ∥ <code class="font-mono text-[0.85em]">hardender</code> → <code class="font-mono text-[0.85em]">qa</code>. Then just say it in plain language: <em>"use reviewer to review this diff"</em>. If you later add a Claude or ChatGPT subscription, change one <code class="font-mono text-[0.85em]">model</code> line per gate — the rest of the config stays.</span>
+        <span data-lang="ko">여섯 관문은 <code class="font-mono text-[0.85em]">specifier</code> → <code class="font-mono text-[0.85em]">coder</code> → <code class="font-mono text-[0.85em]">cleaner</code> → <code class="font-mono text-[0.85em]">sw-architect</code> ∥ <code class="font-mono text-[0.85em]">hardender</code> → <code class="font-mono text-[0.85em]">qa</code> 순이다. 쓸 때는 그냥 말로 시키면 된다 — <em>"reviewer로 이 diff 리뷰해줘"</em>. 나중에 Claude나 ChatGPT 구독을 붙이면 관문마다 <code class="font-mono text-[0.85em]">model</code> 한 줄만 바꾸면 되고 나머지 설정은 그대로다.</span>
+      </p>
+    </section>
+
+    <!-- STEP 9 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 9</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Permissions &amp; trust — skip the approval spam</span><span data-lang="ko">권한과 신뢰 — 승인 팝업 줄이기</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">The permission package from STEP 7 reads <code class="font-mono text-[0.85em]">~/.pi/agent/extensions/pi-permission-system/config.json</code>. This policy lets ordinary work run uninterrupted, still asks before <code class="font-mono text-[0.85em]">rm</code> or <code class="font-mono text-[0.85em]">sudo</code>, hard-denies <code class="font-mono text-[0.85em]">rm -rf</code>, and blocks reads of <code class="font-mono text-[0.85em]">.env</code> files and <code class="font-mono text-[0.85em]">~/.ssh</code> across every tool at once:</span>
+        <span data-lang="ko">STEP 7의 권한 패키지는 <code class="font-mono text-[0.85em]">~/.pi/agent/extensions/pi-permission-system/config.json</code>을 읽는다. 아래 정책은 평범한 작업은 끊김 없이 통과시키되, <code class="font-mono text-[0.85em]">rm</code>·<code class="font-mono text-[0.85em]">sudo</code>는 물어보고, <code class="font-mono text-[0.85em]">rm -rf</code>는 아예 막고, <code class="font-mono text-[0.85em]">.env</code> 파일과 <code class="font-mono text-[0.85em]">~/.ssh</code> 읽기를 모든 도구에서 한꺼번에 차단한다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-perms" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdPerms}</code>
+        <CopyButton target="#tip-perms" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Separately, pi asks whether to <em>trust</em> a project folder before it loads that project's settings, extensions, or skills. Set the fallback once, along with the interface options this setup uses:</span>
+        <span data-lang="ko">이와 별개로, pi는 프로젝트 폴더의 설정·확장·스킬을 읽기 전에 그 폴더를 <em>신뢰</em>할지 물어본다. 그 기본 동작과 이 구성이 쓰는 화면 설정을 한 번에 정한다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-ui" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdUi}</code>
+        <CopyButton target="#tip-ui" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+        <span data-lang="en">⚠ <code class="font-mono text-[0.85em]">defaultProjectTrust: "always"</code> means a repository you clone can load its own pi settings and run its own extensions without asking you first. That is fine for your own code; leave it at the <code class="font-mono text-[0.85em]">"ask"</code> default if you open other people's repositories. pi has no sandbox — every tool runs as your user account.</span>
+        <span data-lang="ko">⚠ <code class="font-mono text-[0.85em]">defaultProjectTrust: "always"</code>는 새로 클론한 저장소가 자기 pi 설정을 읽고 자기 확장을 실행하는 것을 <em>묻지 않고</em> 허용한다는 뜻이다. 내 코드만 다룬다면 괜찮지만, 남의 저장소를 자주 연다면 기본값 <code class="font-mono text-[0.85em]">"ask"</code>로 두라. pi에는 샌드박스가 없다 — 모든 도구는 당신 계정 권한으로 실행된다.</span>
+      </p>
+    </section>
+
+    <!-- STEP 10 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 10</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Run it and talk</span><span data-lang="ko">실행하고 첫 대화</span></h2>
+      </div>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-run" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdRun}</code>
+        <CopyButton target="#tip-run" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">You are talking to the agent directly. Just write what you want, in Korean:</span>
+        <span data-lang="ko">대화 상대는 에이전트 본인이다. 하고 싶은 일을 한국어로 그대로 쓰면 된다:</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-first" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdFirst}</code>
+        <CopyButton target="#tip-first" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <ul class="list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-ink-600 dark:text-ink-300 marker:text-accent-500">
+        <li><span data-lang="en"><code class="font-mono text-[0.85em]">/model</code> — switch model mid-session. Drop to <code class="font-mono text-[0.85em]">glm-5-turbo</code> for cheap bulk work.</span><span data-lang="ko"><code class="font-mono text-[0.85em]">/model</code> — 세션 도중 모델 변경. 양 많고 단순한 일은 값싼 <code class="font-mono text-[0.85em]">glm-5-turbo</code>로.</span></li>
+        <li><span data-lang="en"><code class="font-mono text-[0.85em]">pi -c</code> resumes the last session, <code class="font-mono text-[0.85em]">pi -r</code> picks one from a list.</span><span data-lang="ko"><code class="font-mono text-[0.85em]">pi -c</code>는 직전 세션 이어가기, <code class="font-mono text-[0.85em]">pi -r</code>는 목록에서 골라 이어가기.</span></li>
+        <li><span data-lang="en"><code class="font-mono text-[0.85em]">pi -p "…"</code> runs one prompt and exits — useful in scripts.</span><span data-lang="ko"><code class="font-mono text-[0.85em]">pi -p "…"</code>는 프롬프트 하나만 처리하고 종료한다 — 스크립트에 쓰기 좋다.</span></li>
+        <li><span data-lang="en">Put an <code class="font-mono text-[0.85em]">AGENTS.md</code> in the project root and pi loads it at startup as your standing project instructions.</span><span data-lang="ko">프로젝트 루트에 <code class="font-mono text-[0.85em]">AGENTS.md</code>를 두면 시작할 때 자동으로 읽어 프로젝트 상시 지시사항으로 삼는다.</span></li>
+      </ul>
+      <p class="mt-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Want to try a risky config without touching your real one? Point pi at a throwaway directory:</span>
+        <span data-lang="ko">지금 설정을 건드리지 않고 위험한 실험을 해보고 싶다면, pi가 볼 디렉터리 자체를 바꿔치면 된다:</span>
+      </p>
+      <div class="mt-2 mb-3 flex items-stretch gap-2">
+        <code id="tip-safe" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdSafeTest}</code>
+        <CopyButton target="#tip-safe" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <div class="flex items-stretch gap-2">
+        <code id="tip-update" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdUpdate}</code>
+        <CopyButton target="#tip-update" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+    </section>
+
+    <!-- STEP 11 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <div class="mb-2 flex items-baseline gap-2">
+        <span class="font-mono text-sm font-bold text-accent-700 dark:text-accent-400">STEP 11</span>
+        <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">(Optional) Skills</span><span data-lang="ko">(선택) 스킬</span></h2>
+      </div>
+      <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">A skill is a folder with a <code class="font-mono text-[0.85em]">SKILL.md</code> that the agent loads on demand. pi reads them from <code class="font-mono text-[0.85em]">~/.pi/agent/skills/</code> and from the shared <code class="font-mono text-[0.85em]">~/.agents/skills/</code> — the same shared directory Claude Code and Codex can point at, so one copy serves every CLI you own.</span>
+        <span data-lang="ko">스킬은 <code class="font-mono text-[0.85em]">SKILL.md</code>가 든 폴더이고, 에이전트가 필요할 때 읽어 들인다. pi는 <code class="font-mono text-[0.85em]">~/.pi/agent/skills/</code>와 공용 <code class="font-mono text-[0.85em]">~/.agents/skills/</code>를 읽는다. 뒤쪽은 Claude Code·Codex도 바라볼 수 있는 공용 디렉터리라, 한 벌만 두고 모든 CLI에서 함께 쓴다.</span>
+      </p>
+      <div class="mb-3 flex items-stretch gap-2">
+        <code id="tip-skills" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdSkills}</code>
+        <CopyButton target="#tip-skills" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
+      </div>
+      <p class="text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">Then paste this site's <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/prompts/agents-quick-onboarding/`}>quick-onboarding prompt</a> to the agent — it lays out the shared <code class="font-mono text-[0.85em]">~/.agents/</code> tree and symlinks skills into each CLI you have. Browse the <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/#catalog`}>catalog</a> for individual skills.</span>
+        <span data-lang="ko">그다음 이 사이트의 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/prompts/agents-quick-onboarding/`}>퀵 온보딩 프롬프트</a>를 에이전트에 붙여넣으면 공용 <code class="font-mono text-[0.85em]">~/.agents/</code> 구조를 잡고 보유한 CLI마다 스킬을 심링크해 준다. 개별 스킬은 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/#catalog`}>카탈로그</a>에서 고르면 된다.</span>
+      </p>
+    </section>
+
+    <!-- 왜 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50">
+        <span data-lang="en">Why this setup?</span>
+        <span data-lang="ko">왜 이 구성인가?</span>
+      </h2>
+      <p class="mt-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <span data-lang="en">pi ships no model and almost no features — four tools and a config file. That sounds like less, and it is exactly the point: everything above is a decision you can read, change, or delete, and none of it is buried in a harness you would have to fork. One Z.ai coding-plan key is the whole cost. GLM-5.3's 1,000,000-token context is what makes "read the repo first, then start" realistic, and <code class="font-mono text-[0.85em]">glm-vision</code> covers the one thing the chat models cannot do: look at an image.</span>
+        <span data-lang="ko">pi는 모델도, 기능도 거의 없이 나온다 — 도구 넷과 설정 파일 하나. 적어 보이지만 그게 핵심이다. 위의 모든 것이 당신이 읽고, 바꾸고, 지울 수 있는 결정이고, 하네스를 포크해야 손댈 수 있는 내부에 묻혀 있지 않다. 비용은 Z.ai 코딩 플랜 키 하나가 전부다. GLM-5.3의 100만 토큰 컨텍스트 덕분에 "저장소를 먼저 읽고 시작하는" 방식이 현실이 되고, 채팅 모델이 못 하는 단 하나 — 이미지 보기 — 는 <code class="font-mono text-[0.85em]">glm-vision</code>이 메운다.</span>
+      </p>
+      <p class="mt-2 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
+        <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href="https://pi.dev" target="_blank" rel="noopener">pi 공식 사이트 →</a>
+        <span class="mx-2 text-ink-400">·</span>
+        <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/plugins/glm-vision/`}>glm-vision 상세 →</a>
+      </p>
+    </section>
+
+    <!-- 다른 하네스 -->
+    <section class="glass-panel rounded-2xl p-5 lg:p-6">
+      <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50">
+        <span data-lang="en">Other harnesses</span>
+        <span data-lang="ko">다른 하네스</span>
+      </h2>
+      <ul class="mt-2 list-disc space-y-1.5 pl-6 text-sm leading-relaxed text-ink-600 dark:text-ink-300 marker:text-accent-500">
+        <li>
+          <span data-lang="en"><a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/tips/opencode/`}>OpenCode 2 (<code class="font-mono text-[0.85em]">opencode2</code>) — full walkthrough</a>: the previous default. Same Z.ai key, LSP-aware editing, vision through Z.ai's MCP server instead of a pi package.</span>
+          <span data-lang="ko"><a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/tips/opencode/`}>OpenCode 2(<code class="font-mono text-[0.85em]">opencode2</code>) — 전체 안내</a>: 직전까지의 기본 구성. 같은 Z.ai 키를 쓰고, LSP로 코드를 이해하며, 이미지는 pi 패키지 대신 Z.ai의 MCP 서버로 읽는다.</span>
+        </li>
+        <li>
+          <span data-lang="en"><a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>Prime Agent</a>: a pi fork whose only tool is a persistent IPython kernel, so Python variables survive across turns. macOS/Linux first.</span>
+          <span data-lang="ko"><a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>Prime Agent</a>: pi를 포크한 하네스로, 도구가 영구 IPython 커널 하나뿐이라 파이썬 변수가 턴을 넘어 살아남는다. macOS·Linux 우선.</span>
+        </li>
+        <li>
+          <span data-lang="en">More in the <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>harnesses catalog</a>.</span>
+          <span data-lang="ko">나머지는 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>harnesses 카탈로그</a>에서.</span>
+        </li>
+      </ul>
+    </section>
+
+  </div>
+</BaseLayout>
