@@ -1,0 +1,145 @@
+You are setting up the "pi + GLM" coding-agent default on this machine.
+Work autonomously. This task is idempotent: anything already correct must be
+left alone, and you may re-run every step safely. Never overwrite a config
+file wholesale — always read, merge, write back.
+
+Report progress as you go. At the end print a numbered summary of what you
+changed, what was already correct, and anything the user must do by hand.
+
+=== HARD RULES ===
+- Never print, echo, or write an API key. Read keys only from the environment
+  or from files the user already created.
+- Never delete a user file. If a value conflicts, keep the user's value and
+  say so in the report.
+- If a command fails, stop that step, report the exact error, and continue
+  with the remaining independent steps. Do not silently retry forever.
+- Verify each step with a real command and show its real output. Do not claim
+  success you did not observe.
+
+=== STEP 1 — Node.js 22+ ===
+Run `node -v`. If it is missing or below v22, stop and tell the user to install
+Node 22 (macOS: nvm; Windows: the nodejs.org LTS installer). Do not attempt to
+install Node yourself.
+
+=== STEP 2 — install pi ===
+Run `pi --version`. If pi is missing, install it:
+    npm install -g --ignore-scripts @earendil-works/pi-coding-agent
+Then confirm `pi --version` prints a version.
+
+=== STEP 3 — Z.ai credentials ===
+Run `pi auth check --provider zai`. 
+- If it prints "ready", the key is already stored. Do nothing.
+- Otherwise, check whether the environment variable ZAI_API_KEY is set
+  (test that it is non-empty WITHOUT printing its value).
+- If neither is present, do not guess and do not prompt for the key in chat.
+  Record in the final report that the user must run `pi` and use `/login` →
+  "ZAI Coding Plan (Global)", or export ZAI_API_KEY, and then re-run this
+  setup. Continue with the remaining steps regardless.
+
+=== STEP 4 — default model ===
+Merge into ~/.pi/agent/settings.json (create the file and parent directory if
+absent; preserve every existing key):
+    defaultProvider      = "zai"
+    defaultModel         = "glm-5.3"
+    defaultThinkingLevel = "max"
+Use a JSON-aware merge (python3/node), never a text substitution.
+
+=== STEP 5 — interface + trust ===
+Merge into the same settings file:
+    theme                  = "dark/dark"
+    tuiMode                = "fullscreen"
+    hideThinkingBlock      = true
+    collapseChangelog      = true
+    enableInstallTelemetry = false
+ASK THE USER before setting defaultProjectTrust. Explain it in one line:
+"always" lets any repository you open load its own pi extensions without
+asking; "ask" (pi's default) prompts each time. Set whichever they choose. If
+the user is not available to answer, leave the key untouched and note it.
+
+=== STEP 6 — packages ===
+`pi install` accepts ONE source per call — passing several at once fails with
+"Unexpected argument". Loop over these, one call each:
+    npm:glm-vision
+    npm:pi-subagents
+    npm:pi-lens
+    npm:pi-web-access
+    npm:context-mode
+    npm:pi-mcp-adapter
+    npm:pi-background-tasks
+    npm:@gotgenes/pi-permission-system
+    npm:@juicesharp/rpiv-todo
+    npm:@juicesharp/rpiv-ask-user-question
+    npm:@samfp/pi-memory
+    npm:pi-markdown-preview
+    npm:pi-powerline-footer
+    npm:pi-simplify
+    npm:@narumitw/pi-goal
+    npm:@narumitw/pi-usage
+Already-installed packages are fine to re-run. Afterwards run `pi list` and
+report how many packages are registered. If any single package fails, report
+which one and keep going — the rest are independent.
+
+=== STEP 7 — subagent gates ===
+Merge into settings.json under subagents.agentOverrides. Every gate keeps any
+keys it already has; only add or update the ones below.
+Six pipeline gates, each model "zai/glm-5.3" and thinking "max":
+    specifier    — no extra skills
+    coder        — skills: ["test-driven-development"]
+    cleaner      — no extra skills
+    sw-architect — no extra skills
+    hardender    — skills: ["systematic-debugging", "verification-before-completion"]
+    qa           — skills: ["browser-qa", "verification-before-completion"]
+Five skill-only helpers (do NOT set a model or thinking level on these):
+    qa-tester     — skills: ["browser-qa", "agent-browser"]
+    qa-auditor    — skills: ["browser-qa", "agent-browser"]
+    agent-browser — skills: ["browser-qa", "agent-browser", "playwright-cli"]
+    verify        — skills: ["verify", "verification-before-completion"]
+    tester        — skills: ["test-driven-development", "e2e-testing"]
+    debugger      — skills: ["systematic-debugging"]
+
+=== STEP 8 — permission policy ===
+Write ~/.pi/agent/extensions/pi-permission-system/config.json ONLY if it does
+not already exist. If it exists, leave it and report that it was kept.
+Content:
+{
+  "permission": {
+    "*": "allow",
+    "path": {
+      "*": "allow",
+      "*.env": "deny",
+      "*.env.*": "deny",
+      "*.env.example": "allow",
+      "~/.ssh/*": "deny"
+    },
+    "bash": {
+      "*": "allow",
+      "rm *": "ask",
+      "rm -rf *": "deny",
+      "sudo *": "ask"
+    },
+    "external_directory": {
+      "*": "ask",
+      "~/.agents": "allow",
+      "~/.agents/*": "allow",
+      "~/.pi": "allow",
+      "~/.pi/*": "allow",
+      "/tmp/*": "allow"
+    }
+  }
+}
+
+=== STEP 9 — shared skills directory ===
+Create ~/.agents/skills/ if absent. pi reads skills from there and from
+~/.pi/agent/skills/. Do not clone or install any skills in this step.
+
+=== STEP 10 — verify ===
+Run these and show the real output:
+  1. `pi --version`
+  2. `pi auth check --provider zai`            (expect: ready — or the STEP 3 note)
+  3. `pi --list-models zai`                     (expect glm-5.3 in the list)
+  4. Confirm settings.json parses as JSON and contains the STEP 4 values.
+  5. `pi list`                                  (package count)
+  6. If and only if step 2 said ready, run:
+     pi -p "reply with exactly: PI-SETUP-OK" --no-session
+     and show what came back.
+Then print the final summary.

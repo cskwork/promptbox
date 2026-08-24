@@ -118,9 +118,12 @@ const items = lists.flatMap((entries, idx) => {
         if (!targetSel) return;
         const el = document.querySelector(targetSel) as HTMLElement | null;
         if (!el) return;
-        // innerText falls back to textContent when the element is not rendered,
-        // so a language-hidden mirror still copies correctly.
-        const text = el.innerText;
+        // innerText is empty for a node that is not rendered (e.g. inside a closed
+        // <details>), so fall back to textContent — which keeps literal newlines in
+        // a <pre>. Verified in Chromium: without this fallback a collapsed payload
+        // copies as an empty string while the button still reports success.
+        const text = el.innerText || el.textContent || '';
+        if (!text.trim()) return;
         const labelEl = btn.querySelector('.pc-copy-label');
         const copyIco = btn.querySelector('.pc-ico-copy');
         const checkIco = btn.querySelector('.pc-ico-check');
