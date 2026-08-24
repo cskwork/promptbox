@@ -3,7 +3,7 @@ import BaseLayout from '~/layouts/BaseLayout.astro';
 import CopyButton from '~/components/CopyButton.astro';
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
-const currentHref = `${base}/tips/`;
+const currentHref = `${base}/tips/opencode/`;
 
 // ── 검증된 명령 (2026-08-19 실측) ──
 const cmdNodeCheck = `node -v    # v22 이상이면 OK. 아무 출력이 없으면 아래로`;
@@ -109,30 +109,32 @@ cd ~/my-project && prime-agent
 ---
 
 <BaseLayout
-  title="Tips & Tricks — promptbox"
-  titleKo="Tips & Tricks — promptbox"
-  description="Zero-to-hero beginner tutorial in Korean: get your Z.ai GLM key, install OpenCode 2, pin GLM-5.3, add GLM-4.6V vision over MCP, and run your first session."
-  descriptionKo="완전 입문자용 튜토리얼: Z.ai GLM API 키 발급부터 OpenCode 2 설치, GLM-5.3 연결, GLM-4.6V 비전(MCP) 연결, 첫 세션까지 단계별로."
+  title="OpenCode 2 setup — promptbox tips"
+  titleKo="OpenCode 2 구성 — promptbox tips"
+  description="Alternative harness walkthrough: get your Z.ai GLM key, install OpenCode 2, pin GLM-5.3, add GLM-4.6V vision over MCP. The default setup on this site is pi."
+  descriptionKo="대안 하네스 안내: Z.ai GLM API 키 발급부터 OpenCode 2 설치, GLM-5.3 연결, GLM-4.6V 비전(MCP) 연결까지. 이 사이트의 기본 구성은 pi다."
   currentHref={currentHref}
 >
   <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
     <a href={base + '/'} class="hover:text-accent-700 dark:hover:text-accent-400"><span data-lang="en">Home</span><span data-lang="ko">홈</span></a>
     <span aria-hidden="true">›</span>
-    <span class="text-ink-700 dark:text-ink-200">Tips &amp; Tricks</span>
+    <a href={base + '/tips/'} class="hover:text-accent-700 dark:hover:text-accent-400">Tips &amp; Tricks</a>
+    <span aria-hidden="true">›</span>
+    <span class="text-ink-700 dark:text-ink-200">OpenCode 2</span>
   </nav>
 
   <header class="glass-panel mb-6 rounded-2xl p-5 lg:p-6">
     <h1 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50 lg:text-3xl">
-      <span data-lang="en">Tips &amp; Tricks — zero to coding agent</span>
-      <span data-lang="ko">Tips &amp; Tricks — 코딩 에이전트 0에서 시작하기</span>
+      <span data-lang="en">OpenCode 2 — alternative harness setup</span>
+      <span data-lang="ko">OpenCode 2 — 대안 하네스 구성</span>
     </h1>
     <p class="mt-2 text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
       <span data-lang="en">A step-by-step beginner tutorial: receive a Z.ai GLM key, install OpenCode 2, pin it to GLM-5.3, give it eyes with GLM-4.6V over MCP, and run your first session. Every command was verified on a real machine (2026-08-23).</span>
       <span data-lang="ko">Z.ai GLM 키를 받는 순간부터 OpenCode 2를 설치하고, 기본 모델을 GLM-5.3으로 고정하고, GLM-4.6V를 MCP(에이전트가 외부 도구를 붙이는 표준 규약)로 붙여 눈을 달고, 첫 세션을 돌리기까지. 코딩 지식 없이 따라 할 수 있는 단계별 튜토리얼이며, 아래 모든 명령은 실제 머신에서 검증했다(2026-08-23).</span>
     </p>
-    <p class="mt-3 rounded-lg border border-accent-500/30 bg-accent-500/10 px-3 py-2 text-sm text-ink-700 dark:text-ink-200">
-      <span data-lang="en"><strong class="font-semibold">Default setup</strong>: <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 2</a> + <code class="font-mono text-[0.85em]">glm-5.3</code> + GLM-4.6V vision over MCP. One agent, one key, no orchestration plugin. Want a different harness? Prime Agent is at the bottom of this page.</span>
-      <span data-lang="ko"><strong class="font-semibold">기본 구성</strong>은 <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 2</a> + <code class="font-mono text-[0.85em]">glm-5.3</code> + GLM-4.6V 비전(MCP)이다. 에이전트 한 명, 키 하나, 오케스트레이션 플러그인 없음. 다른 하네스를 보고 싶으면 이 페이지 맨 아래 Prime Agent를 보라.</span>
+    <p class="mt-3 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-sm text-amber-800 dark:text-amber-200">
+      <span data-lang="en"><strong class="font-semibold">This is not the default setup.</strong> The default is <a class="font-medium underline underline-offset-2" href={`${base}/tips/`}>pi + <code class="font-mono text-[0.85em]">zai/glm-5.3</code></a>. Read on only if you specifically want <a class="font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 2</a> — same Z.ai key, LSP-aware editing, vision through Z.ai's MCP server instead of a pi package.</span>
+      <span data-lang="ko"><strong class="font-semibold">이 페이지는 기본 구성이 아니다.</strong> 기본은 <a class="font-medium underline underline-offset-2" href={`${base}/tips/`}>pi + <code class="font-mono text-[0.85em]">zai/glm-5.3</code></a>이다. <a class="font-medium underline underline-offset-2" href={`${base}/harnesses/opencode/`}>OpenCode 2</a>를 굳이 쓰고 싶을 때만 계속 읽으면 된다 — 같은 Z.ai 키를 쓰고, LSP로 코드를 이해하며, 이미지는 pi 패키지 대신 Z.ai의 MCP 서버로 읽는다.</span>
     </p>
   </header>
 
