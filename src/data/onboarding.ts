@@ -1,4 +1,4 @@
-import type { CategoryKey } from '~/content/config';
+import type { CategoryKey } from "~/content/config";
 
 /**
  * Developer-picked onboarding kit shown on the homepage ("Start here").
@@ -17,53 +17,53 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
   // start here — pick ONE workflow set; its router is installed but never forced
   // by the instruction file (see 4a / step 7). agent-skills is the default; the
   // other two are the alternatives. Never install more than one — the sets collide.
-  { category: 'plugins', slug: 'agent-skills' },
-  { category: 'plugins', slug: 'superpowers' },
-  { category: 'skills', slug: 'ask-matt' },
-  { category: 'skills', slug: 'setup-matt-pocock-skills' },
+  { category: "plugins", slug: "agent-skills" },
+  { category: "plugins", slug: "superpowers" },
+  { category: "skills", slug: "ask-matt" },
+  { category: "skills", slug: "setup-matt-pocock-skills" },
   // set-independent: one keystroke that makes the agent re-explain itself
-  { category: 'skills', slug: 'wait-what' },
+  { category: "skills", slug: "wait-what" },
   // set-independent: explain anything like you're 5 — picture-book HTML artifact
-  { category: 'skills', slug: 'eli5' },
+  { category: "skills", slug: "eli5" },
   // one shared memory every agent reads and writes
-  { category: 'tools', slug: 'ai-memory' },
+  { category: "tools", slug: "ai-memory" },
   // orient + plan
-  { category: 'skills', slug: 'grill-with-docs' },
-  { category: 'skills', slug: 'improve-codebase-architecture' },
+  { category: "skills", slug: "grill-with-docs" },
+  { category: "skills", slug: "improve-codebase-architecture" },
   // multi-agent architectural swarms
-  { category: 'skills', slug: 'swarm-forge' },
-  { category: 'skills', slug: 'triage' },
-  { category: 'skills', slug: 'handoff' },
+  { category: "skills", slug: "swarm-forge" },
+  { category: "skills", slug: "triage" },
+  { category: "skills", slug: "handoff" },
   // build + verify
-  { category: 'skills', slug: 'tdd' },
-  { category: 'skills', slug: 'prototype' },
-  { category: 'skills', slug: 'diagnose' },
-  { category: 'skills', slug: 'verify' },
+  { category: "skills", slug: "tdd" },
+  { category: "skills", slug: "prototype" },
+  { category: "skills", slug: "diagnose" },
+  { category: "skills", slug: "verify" },
   // default QA skill
-  { category: 'skills', slug: 'browser-qa' },
-  { category: 'mcps', slug: 'codebase-memory-mcp' },
+  { category: "skills", slug: "browser-qa" },
+  { category: "mcps", slug: "codebase-memory-mcp" },
   // super* end-to-end suite
-  { category: 'skills', slug: 'supergoal' },
-  { category: 'skills', slug: 'superpm' },
-  { category: 'skills', slug: 'superdesign' },
-  { category: 'skills', slug: 'superoffice' },
-  { category: 'skills', slug: 'superhacker' },
-  { category: 'tools', slug: 'ego-lite' },
+  { category: "skills", slug: "supergoal" },
+  { category: "skills", slug: "superpm" },
+  { category: "skills", slug: "superdesign" },
+  { category: "skills", slug: "superoffice" },
+  { category: "skills", slug: "superhacker" },
+  { category: "tools", slug: "ego-lite" },
   // answer the agent from your own past decisions
-  { category: 'skills', slug: 'prompter' },
+  { category: "skills", slug: "prompter" },
   // build your own
-  { category: 'skills', slug: 'writing-for-agents' },
+  { category: "skills", slug: "writing-for-agents" },
   // design + docs + media
-  { category: 'skills', slug: 'canvas-ui-design' },
-  { category: 'skills', slug: 'hallmark' },
-  { category: 'skills', slug: 'archify' },
-  { category: 'skills', slug: 'gpt-image-2' },
-  { category: 'tools', slug: 'officecli' },
+  { category: "skills", slug: "canvas-ui-design" },
+  { category: "skills", slug: "hallmark" },
+  { category: "skills", slug: "archify" },
+  { category: "skills", slug: "gpt-image-2" },
+  { category: "tools", slug: "officecli" },
   // infra + cost
-  { category: 'tools', slug: 'herdr' },
-  { category: 'skills', slug: 'context-diet' },
+  { category: "tools", slug: "herdr" },
+  { category: "skills", slug: "context-diet" },
   // autonomous loop
-  { category: 'plugins', slug: 'autoresearch' },
+  { category: "plugins", slug: "autoresearch" },
 ];
 
 /**
