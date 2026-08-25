@@ -14,9 +14,9 @@ export interface OnboardingPick {
 }
 
 export const ONBOARDING_PICKS: OnboardingPick[] = [
-  // start here — pick ONE workflow set. Install its WORK skills only; never its
-  // router skill (see 4a). agent-skills is the default; the other two are the
-  // alternatives the install prompt offers. Never install more than one set.
+  // start here — pick ONE workflow set; its router is installed but never forced
+  // by the instruction file (see 4a / step 7). agent-skills is the default; the
+  // other two are the alternatives. Never install more than one — the sets collide.
   { category: 'plugins', slug: 'agent-skills' },
   { category: 'plugins', slug: 'superpowers' },
   { category: 'skills', slug: 'ask-matt' },
@@ -213,11 +213,9 @@ previous run's backup directory. Record the active backup path in ~/.agents/.las
 
 A workflow set is the meta-skill layer that decides HOW the agent works: which phase it is in, which
 skill to load, and when to stop for me. Three sets solve that same problem in incompatible ways, so
-INSTALLING TWO IS A BUG, NOT A BONUS. Their work skills assume different pipelines, so mixing them
-leaks one set's rules into the other. Install exactly one set, and NEVER its router skill
-(using-agent-skills, using-superpowers, ask-matt) — a router forces a skill load before the agent may
-answer anything at all. Skill selection is the model's job: it reads descriptions and loads a skill
-only when one matches.
+INSTALLING TWO IS A BUG, NOT A BONUS. Their routers (using-agent-skills, using-superpowers, ask-matt)
+each claim the same incoming task and send it down a different pipeline; whichever loads first wins,
+arbitrarily, and the other set's rules leak into it.
 
 BEFORE INSTALLING ANY SKILL, SHOW ME THIS TABLE AND ASK WHICH SET I WANT. Present the default, wait
 for my answer, and do not start step 4 until I answer. If I do not answer, or you are running
@@ -276,9 +274,8 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
 
   A. Agent Skills (DEFAULT)           https://github.com/addyosmani/agent-skills
                                       24 skills under skills/<name>/SKILL.md, all of them, no
-                                      hand-picking, EXCEPT the using-agent-skills router — skip that
-                                      one. The lifecycle is DEFINE -> PLAN -> BUILD -> VERIFY ->
-                                      REVIEW -> SHIP.
+                                      hand-picking. Router is using-agent-skills; the lifecycle is
+                                      DEFINE -> PLAN -> BUILD -> VERIFY -> REVIEW -> SHIP.
                                       Clone to ~/.agents/sources/addyosmani-agent-skills and link each
                                       skills/<name>/ directory into ~/.agents/skills/<name>, so Codex and
                                       OpenCode pick them up through the hub with no second install.
@@ -337,7 +334,9 @@ Skills installer ONLY IF it is non-interactive and non-destructive; otherwise cl
                                       enumerate the rest of that repo unless set C was chosen.
                                       LEAVE 'disable-model-invocation: true' ALONE. It is deliberate —
                                       the skill exists for me to invoke at the moment I am confused, and
-                                      a model that can invoke it will re-pitch on its own initiative.
+                                      a model that can invoke it will re-pitch on its own initiative. The
+                                      router normalization further down applies to the chosen set's
+                                      router only, never to this skill.
                                       IF SET C WAS CHOSEN, the full-repo enumeration already links this
                                       skill. Do not link it twice: two directories declaring
                                       'name: wait-what' means only one loads and which one is arbitrary,
@@ -459,12 +458,17 @@ causes it. For each linked skill, after updating its source, confirm <link>/SKIL
 non-empty; if it is not, search the source repo (skills/<name>/, then any SKILL.md within a few
 levels, excluding .git) and retarget the link to the directory that actually holds it.
 
-DO NOT INSTALL THE SET'S ROUTER SKILL (using-agent-skills, using-superpowers, ask-matt). A router
-claims every incoming task and forces a skill load before the agent may answer anything, including a
-one-line question. Install the set's WORK skills and leave routing to the model: it reads each
-skill's description and loads one only when the description actually matches the task. If a router
-skill is already linked, move it to ~/.agents/disabled-skills/ (mv, never delete) and add its name to
-~/.agents/skills-excluded so a relink pass cannot bring it back.
+INSTALL THE CHOSEN SET'S ROUTER SKILL, BUT DO NOT NAME IT IN THE INSTRUCTION FILE (step 7). The
+router is using-agent-skills for set A, using-superpowers for set B, ask-matt for set C. It stays
+available for the model to load when a task matches its description; what it must NOT do is appear
+as a mandatory "route through X" line the agent obeys before it may answer anything at all.
+For set C only, upstream ships ask-matt as user-invoked, so after every clone/update resolve the
+canonical ask-matt SKILL.md through its installed link and flip that one flag:
+  - Back up the file before the first change.
+  - If frontmatter says 'disable-model-invocation: true', change only that value to false.
+  - If it is already false or the field is absent, leave it unchanged.
+  - Do not change this flag for any other skill.
+Sets A and B ship their routers model-invokable already — verify the frontmatter, change nothing.
 
 === 5. INSTALL STANDALONE TOOLS ===
 
@@ -1036,11 +1040,10 @@ A verification script that lies is worse than none, and each language has its ow
     unlinked.
 
 Also verify:
-  - EXACTLY ONE workflow set is live, and ZERO routers. Count using-agent-skills,
-    using-superpowers, and ask-matt in ~/.agents/skills: the count must be 0 (section 4a). The
-    installed work skills must all belong to the set recorded as WORKFLOW_SET. Skills from two sets
-    is the failure mode section 4a exists to prevent, and it produces no broken link, no empty
-    directory, and no error — only inconsistent behaviour.
+  - EXACTLY ONE workflow set is live. Count the routers present in ~/.agents/skills:
+    using-agent-skills, using-superpowers, ask-matt. The count must be 1, and it must be the set
+    recorded as WORKFLOW_SET. Two routers is the failure mode section 4a exists to prevent, and it
+    produces no broken link, no empty directory, and no error — only inconsistent behaviour.
   - The chosen set's skill count matches upstream. Enumerate every directory holding a SKILL.md in
     that set's source and confirm each has a link in ~/.agents/skills. Report the upstream count, the
     linked count, and any name present upstream but missing locally. These must be equal; a smaller
@@ -1048,8 +1051,11 @@ Also verify:
     categories including in-progress. Do not hardcode either number — read the source tree.
   - For set A: the 8 slash commands resolve under ~/.claude/commands/agent-skills/ and the 4 personas
     under ~/.claude/agents/, and the agent-skills SessionStart hook is NOT registered unless I asked.
+  - For set C only: the canonical ask-matt SKILL.md does not contain 'disable-model-invocation: true',
+    and every installed ask-matt link resolves to that same file.
   - The instruction file names no mandatory skill: it must contain no "route through" line and no
-    unconditional skill invocation.
+    unconditional skill invocation. The router is installed and model-invokable; it is simply not
+    forced.
   - Every CLI responds to --version / --help.
   - Every MCP server passes the handshake probe from step 6.3.
   - Instruction-file checksums are identical across all documented agent paths, including Jcode's
@@ -1078,9 +1084,8 @@ Also verify:
     right string is NOT evidence that anything connected.
   - pi, when installed: npm:pi-memory listed by 'pi packages', memory_status reporting the memory
     dir, and NO ai-memory-pi.ts left under ~/.pi/agent/extensions.
-  - NO ROUTER SKILL IS LINKED. using-agent-skills, using-superpowers, and ask-matt must all be
-    absent from ~/.agents/skills and from every agent's skills dir, and no instruction file may say
-    "route through" or otherwise force a skill on every turn.
+  - NO INSTRUCTION FILE FORCES A SKILL. No agent's global instruction file may say "route through"
+    or otherwise require a skill load before the agent answers.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 
