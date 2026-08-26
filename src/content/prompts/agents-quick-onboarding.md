@@ -138,10 +138,11 @@ CLI가 <span class="tip" tabindex="0" data-tip="symlink — 한 파일을 여러
   검증하지 못한 것은 했다고 말하지 않는다.
 - **규칙 분리** — 워크플로는 이 파일에, 환경마다 다른 도메인·안전 규칙은
   `~/.agents/rules/rules.md`에 둔다. 그래서 지시문 파일은 모든 머신에서 동일하게 유지된다.
-- **Skill routing** — `~/.agents/skills/`가 허브이고, 4a에서 고른 세트의
-  <span class="tip" tabindex="0" data-tip="router — 작업을 보고 어떤 스킬을 부를지 정하는 진입 스킬. A는 using-agent-skills, B는 using-superpowers, C는 ask-matt.">라우터</span>가
-  작업을 스킬로 보낸다. 라우터 이름이 설치된 세트와 다르면 에이전트는 없는 스킬을 찾다가
-  **조용히 실패**한다 — 프롬프트가 세트별 이름 치환을 따로 지시하는 이유다.
+- **Skill routing** — `~/.agents/skills/`가 허브다. 4a에서 고른 세트의
+  <span class="tip" tabindex="0" data-tip="router — 작업을 보고 어떤 스킬을 부를지 정하는 진입 스킬. A는 using-agent-skills, B는 using-superpowers, C는 ask-matt.">라우터</span>도
+  설치되지만, 지시문 파일은 **어떤 스킬도 강제하지 않는다** — 스킬 언급은 "의도가 불분명하면
+  X를 돌려라"처럼 조건부로만 쓴다. "항상 X를 거쳐라"를 박아두면 한 줄짜리 질문에도 에이전트가
+  스킬부터 로드해야 하기 때문이다.
 - **8단계 실행 루프** — Orient(파악) → Options(**서로 다른 3안**을 제시하고 사용자가 고른다) →
   Delegate(<span class="tip" tabindex="0" data-tip="subagent — 본체와 별도의 깨끗한 컨텍스트로 도는 보조 에이전트. 큰 결과는 파일로 주고받는다.">서브에이전트</span> 위임) →
   Plan → Adversarial review(<span class="tip" tabindex="0" data-tip="계획에 스스로 구체적인 반론을 내고, 반론을 반영해 고치거나 계획이 살아남는 이유를 적어야 통과하는 게이트.">반론 게이트</span>) →
@@ -686,16 +687,16 @@ causes it. For each linked skill, after updating its source, confirm <link>/SKIL
 non-empty; if it is not, search the source repo (skills/<name>/, then any SKILL.md within a few
 levels, excluding .git) and retarget the link to the directory that actually holds it.
 
-THE CHOSEN SET'S ROUTER MUST BE MODEL-INVOKABLE, or the global rules in step 7 point at a skill the
-agent never loads. The router is using-agent-skills for set A, using-superpowers for set B, ask-matt
-for set C. For set C only, upstream ships ask-matt as user-invoked, so after every clone/update
-resolve the canonical ask-matt SKILL.md through its installed link and flip that one flag:
+INSTALL THE CHOSEN SET'S ROUTER SKILL, BUT DO NOT NAME IT IN THE INSTRUCTION FILE (step 7). The
+router is using-agent-skills for set A, using-superpowers for set B, ask-matt for set C. It stays
+available for the model to load when a task matches its description; what it must NOT do is appear
+as a mandatory "route through X" line the agent obeys before it may answer anything at all.
+For set C only, upstream ships ask-matt as user-invoked, so after every clone/update resolve the
+canonical ask-matt SKILL.md through its installed link and flip that one flag:
   - Back up the file before the first change.
   - If frontmatter says 'disable-model-invocation: true', change only that value to false.
   - If it is already false or the field is absent, leave it unchanged.
   - Do not change this flag for any other skill.
-Treat this normalization as part of installation and repair, so reruns cannot restore the upstream
-user-invoked default and silently hide ask-matt from an agent's available-skills catalog.
 Sets A and B ship their routers model-invokable already — verify the frontmatter, change nothing.
 
 === 5. INSTALL STANDALONE TOOLS ===
@@ -770,10 +771,11 @@ ego lite is the browser both I and the agent drive. There is no Homebrew formula
     Printing 'ego-browser ready' is the only acceptable proof. An app that exists is not proof.
  6. Do not open any site, log into anything, or run any task in my session while verifying.
 
-=== 5c. INSTALL ai-memory (ONE SHARED MEMORY FOR EVERY AGENT) ===
+=== 5c. INSTALL ai-memory (ONE SHARED MEMORY FOR EVERY AGENT EXCEPT pi) ===
 
 ai-memory (https://github.com/akitaonrails/ai-memory) is part of the default kit: one local server
 that every installed agent reads and writes, so what Claude Code worked out, Codex already knows.
+PI IS THE ONE EXCEPTION — it uses its own npm:pi-memory extension instead; see step 11.
 Install it NATIVE. Do NOT install Docker, Ollama, LM Studio, vLLM, an embedding model, or any local
 LLM for it. The default retrieval path is SQLite FTS5 + entities + graph neighbours and needs none
 of those.
@@ -969,8 +971,8 @@ of those.
       ai-memory install-mcp   --client <id> --apply
       ai-memory install-hooks --agent  <id> --project-strategy repo-root --apply
     Identifiers in current releases: claude-code, codex, open-code, cursor, gemini-cli,
-    antigravity-cli, omp, kiro-cli, pi (hooks only), plus kimi-code, grok, devin, command-code,
-    openclaw, and zero when those are installed. Do NOT invent an identifier: read
+    antigravity-cli, omp, kiro-cli, plus kimi-code, grok, devin, command-code,
+    openclaw, and zero when those are installed. DO NOT wire 'pi' — see exception 11. Do NOT invent an identifier: read
     'ai-memory install-mcp --help' and 'ai-memory install-hooks --help' first and use only what the
     installed version lists. Configure ONLY the agents actually present; do not install a new agent
     just because ai-memory supports it.
@@ -981,11 +983,15 @@ of those.
     preserves unrelated MCP servers, hooks, permissions, models, and plugins — verify that by
     diffing against the pre-flight inventory, not by trusting the message.
 
-11. TWO EXCEPTIONS.
-    Pi has no mcp.json. 'install-mcp --client pi' deliberately prints guidance instead of writing an
-    ignored file; the extension written by 'install-hooks --agent pi' carries lifecycle capture AND
-    the MCP bridge. Do not hand-write ~/.pi/agent/mcp.json. Oh My Pi (omp) is a separate target with
-    its own .omp paths — never conflate the two. Respect PI_CODING_AGENT_DIR when it is set.
+11. THREE EXCEPTIONS.
+    PI DOES NOT USE ai-memory. Pi has its own first-party memory extension, so do NOT run
+    'install-hooks --agent pi' or 'install-mcp --client pi', and delete any ai-memory-pi.ts left by
+    an earlier run. Install 'pi install npm:pi-memory' instead (https://pi.dev/packages/pi-memory):
+    plain-markdown memory under ~/.pi/agent/memory/, six tools that work with no server, no port,
+    and no autostart. Optional search: 'npm install -g @tobilu/qmd', after which the collection is
+    created automatically. Verify with the memory_status tool, not by the file existing. Oh My Pi
+    (omp) is a separate target with its own .omp paths — never conflate the two. Respect
+    PI_CODING_AGENT_DIR when it is set.
     Hermes has no first-party installer. Do NOT run 'install-hooks --agent hermes' — that agent
     value does not exist. Merge an HTTP MCP entry into Hermes' own config instead, preferring its
     native command ('hermes mcp add ai-memory --url http://127.0.0.1:<port>/mcp'), preserve every
@@ -993,8 +999,9 @@ of those.
     'hermes mcp test ai-memory'. Do not install the third-party ai-memory-hermes-plugin without
     asking me first.
 
-12. RESTARTS AND TRUST PROMPTS ARE NOT OPTIONAL DETAILS. OpenCode, Pi, and Oh My Pi are wired
-    through a generated TypeScript file and load it only on restart. Codex asks me to trust the new
+12. RESTARTS AND TRUST PROMPTS ARE NOT OPTIONAL DETAILS. OpenCode and Oh My Pi are wired
+    through a generated TypeScript file and load it only on restart; pi-memory likewise takes effect
+    on pi's next start. Codex asks me to trust the new
     hooks on its next start. Report both as actions left for me rather than claiming capture is
     already live.
 
@@ -1087,11 +1094,11 @@ KEEP THIS FILE LEAN. Every agent loads it on every session, so it is the most ex
 setup. State the pipeline as one line of phase-to-command mapping; do not draw the ASCII box diagram
 from the upstream README into it. Diagrams belong in documentation, not in a per-session prompt.
 
-THE ROUTER NAME IN THE "Skill routing" LINE AND IN STEP 1 DEPENDS ON THE SET CHOSEN IN 4a. The text below is written for set A. For
-set B write using-superpowers, for set C write ask-matt, and in step 4 swap interview-me and
-documentation-and-adrs for that set's equivalents (set C: grilling and domain-modeling). A router
-name that does not match the installed set is a silent failure: the agent finds no such skill, skips
-orientation, and nothing in the file reveals why.
+NAME NO MANDATORY SKILL IN THIS FILE. The text below is written for set A; for set B or C swap the
+named skills in step 4 for that set's equivalents (set C: grilling and domain-modeling). Every skill
+mention must stay conditional ("if intent is unclear, run X"), never "always route through X" — a
+file that forces a skill on every turn makes the agent load one before it may answer even a one-line
+question.
 
 # Operating Instructions
 
@@ -1099,9 +1106,9 @@ orientation, and nothing in the file reveals why.
 
 **Domain rules** — Always read `~/.agents/rules/rules.md` (Windows: `%USERPROFILE%\.agents\rules\rules.md`).
 
-**Skill routing** — `~/.agents/skills/` is the skill hub; `using-agent-skills` is the router. Place the task in one phase and drive it with that phase's command: DEFINE `/spec` → PLAN `/plan` → BUILD `/build` → VERIFY `/test` → REVIEW `/review` → SHIP `/ship`. Steps 1–8 below are how a phase is executed, not a second pipeline.
+**Skill routing** — `~/.agents/skills/` is the skill hub. For large work the phase commands are available: DEFINE `/spec` → PLAN `/plan` → BUILD `/build` → VERIFY `/test` → REVIEW `/review` → SHIP `/ship`. Steps 1–8 below are how a phase is executed, not a second pipeline.
 
-**1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Route through `using-agent-skills`. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
+**1. Orient** — Read repo instructions, the domain model and real data shapes, then relevant tests/contracts, and the closest analogous code. Map entry points, callers, dependencies, side effects, and real verification commands. Batch independent reads.
 
 **2. Options** — Right after exploration, before any plan or code, give exactly three genuinely distinct approaches — different in strategy, not in wording. One line each: approach · main tradeoff · cost/risk. Rank them 1/2/3, mark 1 as recommended with one clause of why. Then stop and ask the user to pick. No code, no long prose. Skip only when one approach is obviously the only sane one.
 
@@ -1110,7 +1117,7 @@ Skip delegation only when you already know the exact file and symbol, or the cha
 
 **4. Plan** — State: `task type · goal · files · contracts · verification · assumptions`.
 
-After stating the plan, run `interview-me` — one question at a time until the user's intent is clear and confirmed at ~95% confidence — and record the hard-to-reverse decisions and glossary terms with `documentation-and-adrs`. Do not start implementation before this confirmation. Skip the interview for trivial or unambiguous changes — state assumptions and proceed.
+After stating the plan, if intent is still unclear, run `interview-me` — one question at a time until the user's intent is clear and confirmed at ~95% confidence — and record the hard-to-reverse decisions and glossary terms with `documentation-and-adrs`. Do not start implementation before this confirmation. Skip the interview for trivial or unambiguous changes — state assumptions and proceed.
 
 **5. Adversarial review** — After every plan, challenge:
 
@@ -1275,7 +1282,9 @@ Also verify:
     under ~/.claude/agents/, and the agent-skills SessionStart hook is NOT registered unless I asked.
   - For set C only: the canonical ask-matt SKILL.md does not contain 'disable-model-invocation: true',
     and every installed ask-matt link resolves to that same file.
-  - The router named in step 1 of the instruction file is the router that is actually installed.
+  - The instruction file names no mandatory skill: it must contain no "route through" line and no
+    unconditional skill invocation. The router is installed and model-invokable; it is simply not
+    forced.
   - Every CLI responds to --version / --help.
   - Every MCP server passes the handshake probe from step 6.3.
   - Instruction-file checksums are identical across all documented agent paths, including Jcode's
@@ -1302,6 +1311,10 @@ Also verify:
     tools. Then confirm each wired agent sees it with that agent's own MCP command where one exists
     (claude mcp list, codex mcp list, hermes mcp test ai-memory). A config file that contains the
     right string is NOT evidence that anything connected.
+  - pi, when installed: npm:pi-memory listed by 'pi packages', memory_status reporting the memory
+    dir, and NO ai-memory-pi.ts left under ~/.pi/agent/extensions.
+  - NO INSTRUCTION FILE FORCES A SKILL. No agent's global instruction file may say "route through"
+    or otherwise require a skill load before the agent answers.
   - No git repository outside ~/.agents has new modified or untracked files attributable to this
     run. Check git status in each repo you entered.
 
