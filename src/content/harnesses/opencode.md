@@ -1,7 +1,7 @@
 ---
 title: OpenCode
-summary: "터미널에서 도는 오픈소스 코딩 에이전트(v2 프리뷰 opencode2 권장). 특정 모델 회사에 묶이지 않고 Z.ai·OpenAI·Anthropic 등 어느 공급자든 붙여 쓰며, LSP(코드 분석 서버)로 파일을 이해하고 명령마다 실행 권한을 물어본다. GLM-5.3(컨텍스트 100만 토큰)을 붙이면 구독 하나로 대형 코드베이스를 다룰 수 있다."
-summary_en: "Open-source terminal coding agent (v2 preview, opencode2) that is provider-agnostic by design — plug in Z.ai, OpenAI, or Anthropic, get LSP-aware editing and per-command permission prompts. Paired with GLM-5.3 it gives you a 1M-token context on a single coding-plan subscription."
+summary: "터미널에서 도는 공급자 독립 오픈소스 코딩 에이전트. Z.ai·OpenAI·Anthropic 등을 붙여 쓰며 LSP로 코드를 이해하고 실행 권한을 제어한다. GLM-5.3-Flash를 연결하면 컨텍스트 100만 토큰과 네이티브 이미지 입력을 함께 쓴다."
+summary_en: "A provider-agnostic open-source terminal coding agent with LSP-aware editing and configurable permissions. GLM-5.3-Flash adds a 1M-token context and native image input."
 tags: [harness, opencode, terminal, tui, provider-agnostic, glm, zai-coding-plan, lsp, agents-md]
 source: https://github.com/anomalyco/opencode
 author: anomalyco
@@ -36,7 +36,7 @@ npm install -g @opencode-ai/cli@beta
 opencode2 --version            # 실측: v0.0.0-beta-17595
 
 opencode2 auth login           # 목록에서 zai-coding-plan 선택 → 키 붙여넣기
-opencode2 models | grep zai    # glm-5.3 이 보이면 구독이 열린 것
+opencode2 models | grep zai    # glm-5.3-flash 가 보이면 구독이 열린 것
 
 cd ~/my-project && opencode2
 
@@ -50,15 +50,8 @@ cd ~/my-project && opencode
 
 키는 로컬 `~/.local/share/opencode/auth.json`에 `{"type":"api","key":"..."}` 형태로 저장된다.
 
-에이전트 안에서 `/models`로 모델을 고른다. Z.ai GLM Coding Plan 구독으로 열리는 모델은 다음 5개다(2026-08 카탈로그 실측):
-
-| 모델 ID | 컨텍스트 | 이미지 입력 | 메모 |
-|---|---|---|---|
-| `zai-coding-plan/glm-5.3` | 1,000,000 | ✗ | 2026-08-14 공개. 기본 추천 |
-| `zai-coding-plan/glm-5.2` | — | ✗ | 이전 세대 주력 |
-| `zai-coding-plan/glm-5.2-highspeed` | — | ✗ | 속도 우선 |
-| `zai-coding-plan/glm-5-turbo` | 200,000 | ✗ | 값싼 보조 작업용 |
-| `zai-coding-plan/glm-4.7` | 204,800 | ✗ | 구세대 |
+에이전트 안에서 `/models`로 모델을 고른다. 기본 추천은 `zai-coding-plan/glm-5.3-flash`다.
+컨텍스트 100만 토큰과 텍스트·이미지 입력을 지원한다.
 
 ## 설정 파일
 
@@ -71,7 +64,7 @@ cd ~/my-project && opencode
   "provider": {
     "zai-coding-plan": {
       "models": {
-        "glm-5.3": {
+        "glm-5.3-flash": {
           "options": { "reasoningEffort": "max" }
         }
       }
@@ -89,7 +82,6 @@ cd ~/my-project && opencode
 
 ## 함정
 
-- **GLM Coding Plan의 채팅 모델은 이미지를 못 읽는다 — 하지만 플랜에 비전은 있다.** 카탈로그상 `glm-5.3`을 포함한 5개 모델 전부 `input.image: false`지만, 플랜은 GLM-4.6V를 **Vision MCP 서버**(`@z_ai/mcp-server`)로 제공한다. 같은 키로 붙고 같은 구독에서 차감되며, Z.ai 공식 문서에 OpenCode용 `mcp` 설정 예시가 그대로 실려 있다. 별도 키가 필요한 쪽은 `zai` 일반 API(`https://api.z.ai/api/paas/v4`)의 비전 **모델**(`glm-5v-turbo`·`glm-4.6v`)을 직접 물릴 때다.
 - **패키지 이름과 명령 이름이 어긋난다.** v1은 패키지 `opencode-ai` → 명령 `opencode`, v2는 패키지 `@opencode-ai/cli@beta` → 명령 `opencode2`. `@opencode-ai/cli`의 `latest` 태그는 명령 이름이 `lildax`인 다른 물건이므로 **반드시 `@beta`를 붙인다.**
 - **`--refresh`는 v1 전용이다.** v2의 `opencode2 models`에는 `--refresh` 플래그가 없다.
 - **v2는 프리뷰다.** 버전이 `0.0.0-beta-*`이며, 플러그인이 MCP를 코드로 등록하는 경로가 없어 MCP 서버는 v2 설정에 직접 선언해야 한다.

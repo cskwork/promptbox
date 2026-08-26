@@ -1,203 +1,64 @@
-You are setting up the "pi + GLM" coding-agent default on this machine.
-This prompt is cross-platform: it must work on macOS, Linux, and Windows.
+Set up or refresh my default coding-agent environment from https://github.com/cskwork/pi-setup.
+The default harness is pi. The default Z.ai model is GLM-5.3-Flash, which accepts text and images natively.
 
-Work autonomously. The task is idempotent: anything already correct must be
-left alone, and the whole prompt may be re-run safely as a repair tool. Never
-overwrite a config file wholesale — always read, merge, write back.
+Work autonomously and make the process idempotent. Preserve user-owned files and settings unless the
+pi-setup installer explicitly owns them. Never print credentials. Report real verification output.
 
-Report progress as you go. At the end print a numbered summary of what you
-changed, what was already correct, and anything the user must do by hand.
+1. Detect the operating system and shell.
+   - Supported: macOS, Linux, and Windows.
+   - On Windows, prefer PowerShell for bootstrap commands. pi itself uses Git Bash internally.
 
-=== HARD RULES ===
-- Never print, echo, or write an API key. Read keys only from the environment
-  or from files the user already created.
-- Never delete a user file. If a value conflicts, keep the user's value and
-  say so in the report.
-- If a command fails, stop that step, report the exact error, and continue
-  with the remaining independent steps. Do not silently retry forever.
-- Verify each step with a real command and show its real output. Do not claim
-  success you did not observe.
-- Use ONE shell family for the whole run and say which in the report. Do not
-  mix PowerShell and bash syntax in a single command.
+2. Ensure Node.js 22+ and npm are available.
+   - First run `node -v` and `npm -v`.
+   - If Node is missing or older than 22, use the platform package manager when available.
+   - If no safe package manager is available, stop and tell me to install Node 22 from https://nodejs.org.
 
-=== STEP 0 — detect the platform ===
-Determine the OS and the shell you are actually running in. Then fix these
-substitutions for the rest of the run and state them in your first report line:
+3. Ensure pi is installed.
+   - Check with `pi --version`.
+   - If missing, run:
+     `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`
+   - Re-run `pi --version`. If the command is still missing, report the npm global prefix and ask me to
+     open a new terminal. Do not patch PATH silently.
 
-  HOME      macOS/Linux: $HOME              Windows: $env:USERPROFILE
-                                            (Git Bash: $HOME works too)
-  PI_DIR    <HOME>/.pi/agent
-  SETTINGS  <PI_DIR>/settings.json
-  PERMCFG   <PI_DIR>/extensions/pi-permission-system/config.json
-  SKILLS    <HOME>/.agents/skills
+4. Clone or update pi-setup at `~/pi-setup`.
+   - Canonical remote: `https://github.com/cskwork/pi-setup.git`.
+   - If the directory is absent, clone it.
+   - If it is a clean clone of that remote, run `git pull --ff-only`.
+   - If it has local changes, do not discard them. Report the diff summary and continue with the local tree.
+   - If the path exists but is not that repository, move it to a timestamped backup path before cloning.
+   - Never use `git reset --hard`, `git clean`, or `rm -rf`.
 
-Notes that matter later:
-- On Windows, pi runs its own shell tool through Git Bash. That is pi's
-  internal behavior and does not constrain which shell YOU use here.
-- Write JSON with forward slashes or escaped backslashes. A raw Windows path
-  like C:\Users\me inside JSON is invalid.
-- Do not assume `python3` exists. On Windows it is often absent or a Store
-  stub. Node is guaranteed by STEP 1, so use `node -e` for JSON work.
+5. Validate the checked-out setup before installing.
+   - `models.json` must declare model id `glm-5.3-flash` with input types `text` and `image`.
+   - The configured default model must be `glm-5.3-flash` on provider `zai`.
+   - If any check fails, stop installation and report that pi-setup is stale. Do not invent a local workaround.
 
-=== STEP 1 — Node.js 22+ ===
-Run `node -v`.
-- If it prints v22 or newer, continue.
-- If it is missing or older, install it with the platform's own tool, then
-  re-check `node -v`:
-    macOS    : `brew install node@22`   (or nvm if the user already has nvm)
-    Windows  : `winget install OpenJS.NodeJS.LTS`
-    Linux    : the distro package manager, or nvm
-  If no package manager is available or the install fails, do NOT improvise.
-  Stop this step, report it, and tell the user to install Node 22 from
-  https://nodejs.org — then continue with nothing else, since every remaining
-  step needs npm.
-- After a fresh install, `node` and `npm` may not be on PATH until a new
-  terminal is opened. If that happens, say so plainly rather than looping.
+6. Run the repository installer.
+   - macOS/Linux/Git Bash: `~/pi-setup/install.sh`.
+   - Windows PowerShell: run the documented Windows path from the repository README; do not translate the
+     shell script by guessing.
+   - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.
 
-=== STEP 2 — install pi ===
-Run `pi --version`. If pi is missing, install it:
-    npm install -g --ignore-scripts @earendil-works/pi-coding-agent
-Then confirm `pi --version` prints a version.
-If `pi` is still not found right after a successful npm install, it is a PATH
-issue: report the npm global bin directory (`npm bin -g` or `npm prefix -g`)
-and tell the user to open a new terminal. Do not try to patch PATH yourself.
-Windows note: the pi.dev shell installer targets macOS/Linux. On Windows use
-the npm command above.
+7. Check authentication without exposing a key.
+   - Run `pi auth check --provider zai`.
+   - If it is not ready, tell me to run `pi auth`, log in to Z.ai, restart pi, and rerun this prompt.
+   - Never ask me to paste an API key into chat.
 
-=== STEP 3 — Z.ai credentials ===
-Run `pi auth check --provider zai`.
-- If it prints "ready", the key is already stored. Do nothing.
-- Otherwise check whether the ZAI_API_KEY environment variable is set, testing
-  that it is non-empty WITHOUT printing its value:
-    bash/zsh   : test -n "$ZAI_API_KEY" && echo set || echo unset
-    PowerShell : if ($env:ZAI_API_KEY) { "set" } else { "unset" }
-- If neither is present, do not guess and do not ask for the key in chat.
-  Record in the final report that the user must run `pi`, use `/login` →
-  "ZAI Coding Plan (Global)", and re-run this setup. Continue with the
-  remaining steps regardless — they do not need the key.
+8. Verify the installed setup with real commands.
+   - `pi --version`
+   - `pi auth check --provider zai`
+   - `pi --list-models zai` and confirm `glm-5.3-flash` appears.
+   - Parse `~/.pi/agent/models.json` and confirm `glm-5.3-flash` has both `text` and `image` inputs.
+   - `pi list` and report the installed package count.
+   - If Z.ai auth is ready, run a text round trip:
+     `pi -p "reply with exactly: PI-SETUP-OK" --no-session`
+   - If a local image is available, run one native multimodal probe by asking GLM-5.3-Flash to read it.
+     Do not install an image adapter if no image is available; report that the image probe was skipped.
 
-=== STEP 4 — default model ===
-Merge into SETTINGS (create the file and its parent directories if absent;
-preserve every existing key):
-    defaultProvider      = "zai"
-    defaultModel         = "glm-5.3"
-    defaultThinkingLevel = "max"
-Use a JSON-aware merge, never a text substitution. A portable way that works
-on every platform, because Node is guaranteed present after STEP 1:
-
-    node -e "const fs=require('fs'),os=require('os'),p=require('path');const f=p.join(os.homedir(),'.pi','agent','settings.json');fs.mkdirSync(p.dirname(f),{recursive:true});const c=fs.existsSync(f)?JSON.parse(fs.readFileSync(f,'utf8')):{};c.defaultProvider='zai';c.defaultModel='glm-5.3';c.defaultThinkingLevel='max';fs.writeFileSync(f,JSON.stringify(c,null,2));console.log('wrote',f)"
-
-`os.homedir()` resolves correctly on all three platforms, which is why this is
-preferred over hardcoding `~` or `%USERPROFILE%`. Mind the quoting: on
-PowerShell wrap the script in single quotes and use double quotes inside, or
-write the script to a temporary .js file and run that.
-
-=== STEP 5 — interface defaults + project trust ===
-Merge into the same settings file. These are cosmetic: if the user already set
-a different value for any of them, keep theirs and note it in the report.
-    theme                  = "dark/dark"   (only if theme is not already set)
-    tuiMode                = "fullscreen"
-    hideThinkingBlock      = true
-    collapseChangelog      = true
-    enableInstallTelemetry = false
-ASK THE USER before setting defaultProjectTrust. Explain it in one line:
-"always" lets any repository you open load its own pi extensions without
-asking; "ask" (pi's default) prompts each time. Set whichever they choose. If
-the user is not available to answer, leave the key untouched and note it.
-
-=== STEP 6 — packages ===
-`pi install` accepts ONE source per call — passing several at once fails with
-"Unexpected argument". Install all sixteen, one call each, in this order:
-    npm:glm-vision
-    npm:pi-subagents
-    npm:pi-lens
-    npm:pi-web-access
-    npm:context-mode
-    npm:pi-mcp-adapter
-    npm:pi-background-tasks
-    npm:@gotgenes/pi-permission-system
-    npm:@juicesharp/rpiv-todo
-    npm:@juicesharp/rpiv-ask-user-question
-    npm:@samfp/pi-memory
-    npm:pi-markdown-preview
-    npm:pi-powerline-footer
-    npm:pi-simplify
-    npm:@narumitw/pi-goal
-    npm:@narumitw/pi-usage
-Install the full set without asking. Already-installed packages are fine to
-re-run. Afterwards run `pi list` and report how many packages are registered.
-If any single package fails, report which one and keep going — they are
-independent. Some packages build native modules, so a slow install is normal.
-
-=== STEP 7 — subagent gates ===
-Merge into SETTINGS under subagents.agentOverrides. Every gate keeps any keys
-it already has; only add or update the ones below.
-Six pipeline gates, each with model "zai/glm-5.3" and thinking "max". Where a
-gate is listed with no skills, omit the "skills" key entirely — do NOT write
-an empty array:
-    specifier    — (no skills key)
-    coder        — skills: ["test-driven-development"]
-    cleaner      — (no skills key)
-    sw-architect — (no skills key)
-    hardender    — skills: ["systematic-debugging", "verification-before-completion"]
-    qa           — skills: ["browser-qa", "verification-before-completion"]
-Eight skill-only helpers (do NOT set a model or thinking level on these):
-    qa-tester              — skills: ["browser-qa", "agent-browser"]
-    qa-auditor             — skills: ["browser-qa", "agent-browser"]
-    agent-browser          — skills: ["browser-qa", "agent-browser", "playwright-cli"]
-    customer-agent         — skills: ["browser-qa", "agent-browser"]
-    persona-product-tester — skills: ["browser-qa", "agent-browser"]
-    verify                 — skills: ["verify", "verification-before-completion"]
-    tester                 — skills: ["test-driven-development", "e2e-testing"]
-    debugger               — skills: ["systematic-debugging"]
-That is 14 entries under agentOverrides in total.
-
-=== STEP 8 — permission policy ===
-Write PERMCFG ONLY if it does not already exist. If it exists, leave it alone
-and report that it was kept. Create parent directories as needed.
-Content (note the last block: keep the "/tmp/*" line on macOS/Linux, and on
-Windows replace it with the temp directory in forward-slash form, for example
-"C:/Users/<you>/AppData/Local/Temp/*"):
-{
-  "permission": {
-    "*": "allow",
-    "path": {
-      "*": "allow",
-      "*.env": "deny",
-      "*.env.*": "deny",
-      "*.env.example": "allow",
-      "~/.ssh/*": "deny"
-    },
-    "bash": {
-      "*": "allow",
-      "rm *": "ask",
-      "rm -rf *": "deny",
-      "sudo *": "ask"
-    },
-    "external_directory": {
-      "*": "ask",
-      "~/.agents": "allow",
-      "~/.agents/*": "allow",
-      "~/.pi": "allow",
-      "~/.pi/*": "allow",
-      "/tmp/*": "allow"
-    }
-  }
-}
-
-=== STEP 9 — shared skills directory ===
-Create SKILLS if absent. pi reads skills from there and from <PI_DIR>/skills.
-Do not clone or install any skills in this step.
-
-=== STEP 10 — verify ===
-Run these and show the real output:
-  1. `pi --version`
-  2. `pi auth check --provider zai`   (expect: ready — or the STEP 3 note)
-  3. `pi --list-models zai`           (expect glm-5.3 in the list)
-  4. Read SETTINGS back, confirm it parses as JSON, and confirm it contains
-     the STEP 4 values and 14 entries under subagents.agentOverrides.
-  5. `pi list`                        (package count; expect 16)
-  6. Only if step 2 said ready, run a live round-trip and show what came back:
-       bash/zsh   : pi -p "reply with exactly: PI-SETUP-OK" --no-session
-       PowerShell : pi -p 'reply with exactly: PI-SETUP-OK' --no-session
-Then print the final summary, including which OS and shell you used.
+9. Finish with a numbered report.
+   - State the OS and shell.
+   - State the pi and Node versions.
+   - State whether pi-setup was cloned, updated, or already current.
+   - State whether Z.ai authentication and text/image capability were verified or remain user actions.
+   - State the backup path created by the installer, if any.
+   - Do not commit or push either repository.
