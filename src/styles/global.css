@@ -305,6 +305,36 @@ html[lang='ko'] [data-lang='en'] {
   }
   .prose-pc hr { @apply my-8 border-ink-200/70 dark:border-ink-800/70; }
 
+  /* --- Inline term tooltip: hover/focus gloss on dotted-underline terms.
+         Keep .tip out of overflow containers (tables) — the bubble clips. --- */
+  .tip {
+    @apply relative cursor-help border-b border-dotted border-accent-500/70;
+  }
+  .tip::after {
+    content: attr(data-tip);
+    @apply pointer-events-none absolute left-1/2 z-40 rounded-lg border border-ink-700/60 bg-ink-950 px-3 py-2 text-[0.78rem] font-normal leading-snug text-ink-100 opacity-0 shadow-xl transition-opacity duration-150;
+    bottom: calc(100% + 0.45rem);
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: min(20rem, 78vw);
+    white-space: normal;
+  }
+  .tip:hover::after,
+  .tip:focus::after {
+    @apply opacity-100;
+  }
+
+  /* --- Collapsible blocks in prose (long reference lists) ---------------- */
+  .prose-pc details {
+    @apply my-4 rounded-xl border border-ink-200/70 bg-ink-50/50 px-4 py-3 dark:border-ink-800/70 dark:bg-ink-900/40;
+  }
+  .prose-pc summary {
+    @apply cursor-pointer select-none font-medium text-ink-800 dark:text-ink-100;
+  }
+  .prose-pc details[open] > summary {
+    @apply mb-2;
+  }
+
   /* --- Scroll reveal (only when JS is on, so no-JS shows everything) ----- */
   html.js .reveal {
     opacity: 0;

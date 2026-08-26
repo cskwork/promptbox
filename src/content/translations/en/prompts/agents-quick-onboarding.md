@@ -5,9 +5,11 @@ target: prompts/agents-quick-onboarding
 
 ## In one line
 
-A single setup prompt that gathers shared skills and system instructions under **one `~/.agents/` directory**, then connects them to every installed coding CLI with symlinks (shortcuts that let several paths point to the same files).
+One setup prompt that gathers your everyday skills and shared system instructions under **one `~/.agents/` directory**, then points every installed coding CLI at it with <span class="tip" tabindex="0" data-tip="A symlink is a shortcut that lets several paths point at the same file. Fix the original once and every linked tool sees the change.">symlinks</span>.
 
-It is **idempotent**, so rerunning it is safe. The second run doubles as a repair tool.
+It is <span class="tip" tabindex="0" data-tip="Idempotent: running it again produces the same result. Healthy items are left alone; only missing or broken ones get fixed.">idempotent</span>, so rerunning it is safe — the second run doubles as a repair tool.
+
+> Hover (or tap) any dotted-underline term for a short explanation.
 
 ## What gets installed, at a glance
 
@@ -81,9 +83,48 @@ or in a non-interactive run, it installs **A (Agent Skills)** and says so in its
 7. Finds codebase-indexer MCP servers such as codebase-memory-mcp, lists them for you, and removes them **only after you approve**.
 8. Leaves behind a read-only audit script and an idempotent repair script for future failures.
 
+## Inside the prompt — what actually runs
+
+The code block below is long, but its shape is simple: numbered sections run in order, and each one repeats the same rhythm — check, record, change, re-verify.
+
+| Section | What it does |
+|---|---|
+| 0 · Ground rules | Safety rules that apply everywhere. The big three: "installed" means a readable `SKILL.md` (a directory existing proves nothing), never delete to install (back up and move instead), and pin interpreters to absolute paths |
+| 0b · Platform branch | Resolves macOS vs Windows once; every later command follows only that branch. Linux rides the macOS branch with three substitutions; WSL counts as a separate install |
+| 1–2 · Detection & inventory | Finds the installed CLIs and records the current state in `inventory.tsv` before touching anything — the basis for every later restore |
+| 3 · The hub | Makes `~/.agents/` the single source of truth — rules, skill links, and cloned sources all live there |
+| 4a · Pick a set | Shows the comparison table and asks A/B/C. Installs **exactly one**; switching moves the old set aside instead of stacking |
+| 4 · Install skills | Clones upstream repos and links each skill. After any `git pull`, re-checks the `SKILL.md` behind every link |
+| 5·5b · Tools & browser | Installs officecli, herdr, and rtk. ego lite is macOS-only, and its first-run GUI onboarding is finished by a human |
+| 5c · ai-memory | One shared memory server, installed natively, registered to start at login, and wired to every detected agent |
+| 5d · omp | Wires an existing install; never installs it |
+| 6·6b · MCP | Installs MCP servers and validates them with a real protocol response, not just a running process. Codebase-indexer MCPs are only listed; removal waits for your approval |
+| 7·7b · Instructions | Writes the system prompt below into one canonical file and symlinks every CLI's path to it. `rules.md` is never overwritten |
+| 8–9 · Link & verify | Logs UNCHANGED / REPAIRED / REPLACED per link and gates on **zero empty directories, zero broken links** |
+| 10–11 · Repair & report | Leaves a read-only audit script and reports what changed |
+
+### The embedded system prompt (AGENTS.md) — key clauses
+
+Step 7 writes one shared system prompt into every CLI. Inside the code block it starts at `# Operating Instructions`. Its skeleton:
+
+- **Stance** — understand the domain data first, make the smallest verified change, and never claim anything you did not verify.
+- **Rules split** — the workflow lives in this file; per-machine domain and safety rules live in `~/.agents/rules/rules.md`, so the instruction file stays byte-identical across machines.
+- **Skill routing** — `~/.agents/skills/` is the hub, and the <span class="tip" tabindex="0" data-tip="The router is the entry skill that decides which skill handles a task. Set A: using-agent-skills, B: using-superpowers, C: ask-matt.">router</span> of the set you chose in 4a dispatches work to skills. A router name that does not match the installed set **fails silently** — which is why the prompt spells out the per-set name substitution.
+- **The 8-step loop** — Orient → Options (**three genuinely different approaches**; you pick) → Delegate (fresh-context <span class="tip" tabindex="0" data-tip="A subagent is a helper agent with its own clean context. Large results are passed through files, not chat.">subagents</span>) → Plan → Adversarial review (<span class="tip" tabindex="0" data-tip="The plan passes only after a concrete self-objection is raised and either fixed or convincingly survived.">an objection gate</span>) → Execute → Verify (real commands, real output) → Report (a fixed format).
+- **Keep it lean** — every agent loads this file every session, so it is the most expensive text in the setup; no diagrams, no prose essays.
+
 ## Gotchas the prompt handles
 
-Every item below comes from a failure that occurred in a real setup. The prompt includes a guard for each one.
+Every item below comes from a failure that occurred in a real setup, and the prompt carries a guard for each one. The five that bite most often:
+
+- **A directory existing does not mean the skill is installed** — the only valid proof is <span class="tip" tabindex="0" data-tip="An interrupted installer leaves correctly named but empty directories. 43 symlinks were lost exactly this way; never trust [ -d ... ].">a readable `SKILL.md`</span>.
+- **A single `git pull` can silently kill a skill** — <span class="tip" tabindex="0" data-tip="When upstream moves SKILL.md, the link and the directory both look fine while the skill vanishes. One update killed three skills at once.">re-check the `SKILL.md` behind every link after a pull</span>.
+- **Never trust installer or verification scripts blindly** — <span class="tip" tabindex="0" data-tip="Upstream install scripts have run rm -rf, and scripts that ignore an unimplemented --dry-run flag execute for real.">read them first</span>, and audit with a separate read-only script.
+- **On Windows, check three things before anything else** — <span class="tip" tabindex="0" data-tip="Without symlink rights the one-hub model breaks, without longpaths clones die, and autocrlf=true corrupts hook scripts with CRLF.">Developer Mode (symlink rights), `core.longpaths`, `core.autocrlf`</span>.
+- **ai-memory only remembers while its server is running** — <span class="tip" tabindex="0" data-tip="Hooks fail silently when the server is down and agents keep working with no shared memory. Register autostart, then confirm the port is LISTENing.">register autostart and confirm the port is listening</span>.
+
+<details>
+<summary><strong>The full list</strong> — symptoms, causes, and guards</summary>
 
 - **A directory existing does not mean the skill is installed.** An interrupted installer can leave correctly named but empty directories. Agents then report that the skill is missing even though `ls` shows the directory. Installation must be proven by a readable, non-empty `SKILL.md`, never by `[ -d ... ]` alone.
 - **Upstream installers may run `rm -rf`.** For example, a development-oriented link script can delete an existing real directory before replacing it. The prompt reads installer scripts first and reimplements destructive linking with backup semantics.
@@ -98,5 +139,7 @@ Every item below comes from a failure that occurred in a real setup. The prompt 
 - **A verification script must not mutate the system.** Passing an unsupported `--dry-run` flag to a script can silently execute the real operation. The prompt creates a separate read-only audit script instead of trusting an unverified dry-run mode.
 - **omp (oh-my-pi) is a separate agent from Pi.** It reads `~/.omp/agent/`, not `~/.pi`. It is not part of the default kit: the prompt only detects and wires an existing install. Skill loading must be verified by asking the omp engine itself to list its skills — a directory check proved nothing, which is exactly why one run ended with "omp skill loading unverified". Registering ai-memory's S4U logon task also needs one elevated shell: a plain session fails with Access denied, and that is the single elevated command the whole setup needs.
 - **rtk and codebase-indexer MCP servers pull against each other.** rtk shrinks what enters the context, while an indexer MCP keeps a large tool schema resident and returns long index payloads. The prompt therefore finds the indexers, shows you the list, and waits for your consent before removing anything. Without approval it changes nothing and marks each entry `PENDING-USER-CONSENT`. Approved removals are backed up first, and only the registration is removed — caches, index databases, and binaries stay put.
+
+</details>
 
 The full prompt below is copied verbatim. Use **Copy prompt** to place the entire payload on the clipboard without selecting it manually.
