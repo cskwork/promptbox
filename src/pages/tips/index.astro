@@ -130,9 +130,9 @@ cfg["defaultProjectTrust"] = "always"   # 내 컴퓨터 안 프로젝트를 매�
 json.dump(cfg, open(p, "w"), indent=2, ensure_ascii=False)
 print("ui ->", p)
 EOF`;
-const cmdSkills = `git clone https://github.com/cskwork/pi-setup.git ~/pi-setup 2>/dev/null || \
-  git -C ~/pi-setup pull --ff-only
-~/pi-setup/install.sh`;
+const cmdSkills = `git clone https://github.com/cskwork/pi-setup-public.git ~/pi-setup-public 2>/dev/null || \
+  git -C ~/pi-setup-public pull --ff-only
+~/pi-setup-public/install.sh`;
 const cmdRun = `cd ~/my-project     # 작업할 폴더로 이동
 pi                  # 실행`;
 const cmdFirst = `이 폴더의 코드를 읽고 프로젝트 구조를 요약해줘`;
@@ -159,8 +159,8 @@ const cmdUpdate = `pi update --all     # pi 본체 + 패키지 + 모델 카탈�
       <span data-lang="ko">Tips &amp; Tricks — 코딩 에이전트 0에서 시작하기</span>
     </h1>
     <p class="mt-2 text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
-      <span data-lang="en">A step-by-step beginner tutorial: get a Z.ai key, install <strong class="font-semibold">pi</strong>, synchronize <code class="font-mono text-[0.85em]">cskwork/pi-setup</code>, and use GLM-5.3-Flash for both code and images.</span>
-      <span data-lang="ko">Z.ai 키를 준비하고 <strong class="font-semibold">pi</strong>를 설치한 뒤 <code class="font-mono text-[0.85em]">cskwork/pi-setup</code> 정본을 동기화해, GLM-5.3-Flash로 코드와 이미지를 함께 다루는 단계별 튜토리얼이다.</span>
+      <span data-lang="en">A step-by-step beginner tutorial: get a Z.ai key, install <strong class="font-semibold">pi</strong>, synchronize <code class="font-mono text-[0.85em]">cskwork/pi-setup-public</code>, and use GLM-5.3-Flash for both code and images.</span>
+      <span data-lang="ko">Z.ai 키를 준비하고 <strong class="font-semibold">pi</strong>를 설치한 뒤 <code class="font-mono text-[0.85em]">cskwork/pi-setup-public</code> 정본을 동기화해, GLM-5.3-Flash로 코드와 이미지를 함께 다루는 단계별 튜토리얼이다.</span>
     </p>
     <p class="mt-3 rounded-lg border border-accent-500/30 bg-accent-500/10 px-3 py-2 text-sm text-ink-700 dark:text-ink-200">
       <span data-lang="en"><strong class="font-semibold">Default setup</strong>: <strong class="font-semibold">pi</strong> + <code class="font-mono text-[0.85em]">zai/glm-5.3-flash</code> (1M context, native text + image input, thinking <code class="font-mono text-[0.85em]">max</code>). Prefer a different harness? <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/tips/opencode/`}>The OpenCode 2 walkthrough is here</a>.</span>
@@ -181,8 +181,8 @@ const cmdUpdate = `pi update --all     # pi 본체 + 패키지 + 모델 카탈�
         <span class="rounded-md border border-ink-300/60 px-1.5 py-0.5 font-mono text-[0.7rem] text-ink-500 dark:border-ink-700/60">macOS · Linux · Windows</span>
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en">Already have any coding agent running? Paste the prompt below. It installs pi when needed, clones or fast-forwards <code class="font-mono text-[0.85em]">cskwork/pi-setup</code>, runs its installer, and verifies GLM-5.3-Flash text and image capability. The repository is the source of truth; this page does not reimplement its package list.</span>
-        <span data-lang="ko">이미 코딩 에이전트가 하나라도 돌고 있다면 아래 프롬프트를 붙여넣는다. 필요한 경우 pi를 설치하고, <code class="font-mono text-[0.85em]">cskwork/pi-setup</code>을 클론하거나 fast-forward한 뒤 공식 설치기를 실행하고, GLM-5.3-Flash의 텍스트·이미지 입력을 검증한다. 패키지 목록을 이 페이지에 복제하지 않고 저장소를 정본으로 쓴다.</span>
+        <span data-lang="en">Already have any coding agent running? Paste the prompt below. It installs pi when needed, clones or fast-forwards <code class="font-mono text-[0.85em]">cskwork/pi-setup-public</code>, runs its installer, and verifies GLM-5.3-Flash text and image capability. The repository is the source of truth; this page does not reimplement its package list.</span>
+        <span data-lang="ko">이미 코딩 에이전트가 하나라도 돌고 있다면 아래 프롬프트를 붙여넣는다. 필요한 경우 pi를 설치하고, <code class="font-mono text-[0.85em]">cskwork/pi-setup-public</code>을 클론하거나 fast-forward한 뒤 공식 설치기를 실행하고, GLM-5.3-Flash의 텍스트·이미지 입력을 검증한다. 패키지 목록을 이 페이지에 복제하지 않고 저장소를 정본으로 쓴다.</span>
       </p>
       <div class="mb-3 flex flex-wrap items-center gap-2">
         <CopyButton target="#tip-setup-prompt" labelEn="Copy the setup prompt" labelKo="설치 프롬프트 복사" size="md" variant="primary" />
@@ -536,8 +536,8 @@ const cmdUpdate = `pi update --all     # pi 본체 + 패키지 + 모델 카탈�
         <h2 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">Sync the full pi-setup</span><span data-lang="ko">pi-setup 전체 동기화</span></h2>
       </div>
       <p class="mb-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
-        <span data-lang="en"><code class="font-mono text-[0.85em]">cskwork/pi-setup</code> is the source of truth for settings, agents, skills, model declarations, and packages. Clone it once; later runs fast-forward the same checkout and rerun the idempotent installer.</span>
-        <span data-lang="ko"><code class="font-mono text-[0.85em]">cskwork/pi-setup</code>이 설정·에이전트·스킬·모델 선언·패키지의 정본이다. 한 번 클론한 뒤에는 같은 체크아웃을 fast-forward하고 멱등 설치기를 다시 실행하면 된다.</span>
+        <span data-lang="en"><code class="font-mono text-[0.85em]">cskwork/pi-setup-public</code> is the source of truth for settings, agents, skills, model declarations, and packages. Clone it once; later runs fast-forward the same checkout and rerun the idempotent installer.</span>
+        <span data-lang="ko"><code class="font-mono text-[0.85em]">cskwork/pi-setup-public</code>이 설정·에이전트·스킬·모델 선언·패키지의 정본이다. 한 번 클론한 뒤에는 같은 체크아웃을 fast-forward하고 멱등 설치기를 다시 실행하면 된다.</span>
       </p>
       <div class="mb-3 flex items-stretch gap-2">
         <code id="tip-skills" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{cmdSkills}</code>

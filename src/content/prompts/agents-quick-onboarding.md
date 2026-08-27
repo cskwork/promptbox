@@ -1,26 +1,26 @@
 ---
 title: pi 온보딩 한 방 설치
 title_en: One-shot pi setup
-summary: "pi를 기본 코딩 에이전트로 설치하고, cskwork/pi-setup을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
-summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup repository, restores its settings, agents, skills, and model profiles, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
+summary: "pi를 기본 코딩 에이전트로 설치하고, cskwork/pi-setup-public을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
+summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup-public repository, restores its settings, agents, skills, and model profiles, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
 tags: [onboarding, pi, pi-setup, glm-5.3-flash, multimodal, dotfiles, idempotent]
-source: https://github.com/cskwork/pi-setup
+source: https://github.com/cskwork/pi-setup-public
 author: cskwork
 order: 1
-use_case: "새 머신에서 pi 환경을 복원하거나, 현재 설정을 cskwork/pi-setup 정본과 다시 동기화할 때."
-use_case_en: "Restore pi on a new machine or resync an existing installation from the canonical cskwork/pi-setup repository."
+use_case: "새 머신에서 pi 환경을 복원하거나, 현재 설정을 cskwork/pi-setup-public 정본과 다시 동기화할 때."
+use_case_en: "Restore pi on a new machine or resync an existing installation from the canonical cskwork/pi-setup-public repository."
 ---
 
 ## 한 줄
 
 기본 하네스(에이전트를 실행하는 틀)는 **pi**다. 아래 프롬프트 하나가 Node.js와 pi를 확인하고,
-[`cskwork/pi-setup`](https://github.com/cskwork/pi-setup)을 `~/pi-setup`에 동기화한 뒤 공식
+[`cskwork/pi-setup-public`](https://github.com/cskwork/pi-setup-public)을 `~/pi-setup-public`에 동기화한 뒤 공식
 `install.sh`로 설정 전체를 복원한다.
 
 ## 무엇을 하는가
 
 1. Node.js 22+와 `pi`를 확인하고, 빠졌을 때만 설치한다.
-2. `~/pi-setup`을 정본 저장소와 `git pull --ff-only`로 동기화한다.
+2. `~/pi-setup-public`을 정본 저장소와 `git pull --ff-only`로 동기화한다.
 3. `models.json`에서 `glm-5.3-flash`가 `text`와 `image` 입력을 모두 선언했는지 확인한다.
 4. 설치기를 실행해 `~/.pi/agent/` 설정·에이전트·스킬·프로파일을 연결한다.
 5. 인증, 모델 목록, 패키지, 텍스트 왕복, 가능한 경우 이미지 입력까지 실제 명령으로 검증한다.
@@ -34,7 +34,7 @@ use_case_en: "Restore pi on a new machine or resync an existing installation fro
 아래 프롬프트를 실행 중인 코딩 에이전트 채팅창에 그대로 붙여넣으세요.
 
 ```text
-Set up or refresh my default coding-agent environment from https://github.com/cskwork/pi-setup.
+Set up or refresh my default coding-agent environment from https://github.com/cskwork/pi-setup-public.
 The default harness is pi. The default Z.ai model is GLM-5.3-Flash, which accepts text and images natively.
 
 Work autonomously and make the process idempotent. Preserve user-owned files and settings unless the
@@ -56,8 +56,8 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - Re-run `pi --version`. If the command is still missing, report the npm global prefix and ask me to
      open a new terminal. Do not patch PATH silently.
 
-4. Clone or update pi-setup at `~/pi-setup`.
-   - Canonical remote: `https://github.com/cskwork/pi-setup.git`.
+4. Clone or update pi-setup at `~/pi-setup-public`.
+   - Canonical remote: `https://github.com/cskwork/pi-setup-public.git`.
    - If the directory is absent, clone it.
    - If it is a clean clone of that remote, run `git pull --ff-only`.
    - If it has local changes, do not discard them. Report the diff summary and continue with the local tree.
@@ -70,7 +70,7 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - If any check fails, stop installation and report that pi-setup is stale. Do not invent a local workaround.
 
 6. Run the repository installer.
-   - macOS/Linux/Git Bash: `~/pi-setup/install.sh`.
+   - macOS/Linux/Git Bash: `~/pi-setup-public/install.sh`.
    - Windows PowerShell: run the documented Windows path from the repository README; do not translate the
      shell script by guessing.
    - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.

@@ -1,4 +1,4 @@
-Set up or refresh my default coding-agent environment from https://github.com/cskwork/pi-setup.
+Set up or refresh my default coding-agent environment from https://github.com/cskwork/pi-setup-public.
 The default harness is pi. The default Z.ai model is GLM-5.3-Flash, which accepts text and images natively.
 
 Work autonomously and make the process idempotent. Preserve user-owned files and settings unless the
@@ -20,8 +20,8 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - Re-run `pi --version`. If the command is still missing, report the npm global prefix and ask me to
      open a new terminal. Do not patch PATH silently.
 
-4. Clone or update pi-setup at `~/pi-setup`.
-   - Canonical remote: `https://github.com/cskwork/pi-setup.git`.
+4. Clone or update pi-setup at `~/pi-setup-public`.
+   - Canonical remote: `https://github.com/cskwork/pi-setup-public.git`.
    - If the directory is absent, clone it.
    - If it is a clean clone of that remote, run `git pull --ff-only`.
    - If it has local changes, do not discard them. Report the diff summary and continue with the local tree.
@@ -34,7 +34,7 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - If any check fails, stop installation and report that pi-setup is stale. Do not invent a local workaround.
 
 6. Run the repository installer.
-   - macOS/Linux/Git Bash: `~/pi-setup/install.sh`.
+   - macOS/Linux/Git Bash: `~/pi-setup-public/install.sh`.
    - Windows PowerShell: run the documented Windows path from the repository README; do not translate the
      shell script by guessing.
    - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.
