@@ -1,4 +1,4 @@
-# promptbox — agent instructions
+# promptbox agent instructions
 
 Static collection site (Astro 5 + Tailwind 3 + Content Collections) hosted at
 <https://cskwork.github.io/promptbox/>. It catalogs prompts, skills, plugins, harnesses,
@@ -7,20 +7,20 @@ they land on `main`.
 
 > **If a user gives you a URL or paste and says "add to promptbox" / "save as skill" /
 > "add this prompt", carry out the One-shot add workflow at the bottom of this file
-> end-to-end. Do not re-ask for category, schema, or commit message — they are all
-> derivable from the artifact.**
+> end-to-end. Do not ask for the category, schema, or commit message again.
+> Derive them from the artifact.**
 
 ## Categories
 
-- `prompts/` — reusable LLM prompts (system prompts, transformation templates)
-- `skills/` — single-purpose Claude Code / Codex / Hermes `SKILL.md` definitions
-- `plugins/` — **collections of skills** packaged as a coding-agent plugin / marketplace entry
-- `harnesses/` — **the coding agent itself** (or a workflow layer on top): Codex CLI add-ons, alternative agents, harness builders. Anything that defines *how the agent runs*, not what skill it loads.
-- `hooks/` — lifecycle hook scripts (`PreToolUse` / `PostToolUse` / `Stop`) that gate or augment tool calls. One repo / many scripts in `hooks/` directory + `settings.json` snippet.
-- `configs/` — whole-file agent system prompts (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`)
-- `mcps/` — MCP server install/usage snippets
-- `tools/` — **standalone CLIs and binaries** a developer installs and runs directly (`orca`, `herdr`, `officecli`, `ai-memory`). It may also expose an MCP endpoint or ship skills; what puts it here is that the deliverable is a program you run.
-- `apps/` — **end-user applications**, usually self-hosted or GUI (`docmost`, `plane`, `meetily`). Something you deploy and open, not something an agent loads.
+- `prompts/`: reusable LLM prompts such as system prompts and transformation templates
+- `skills/`: single-purpose Claude Code, Codex, or Hermes `SKILL.md` definitions
+- `plugins/`: **collections of skills** packaged as a coding-agent plugin or marketplace entry
+- `harnesses/`: **the coding agent itself** or a workflow layer on top. Examples include Codex CLI add-ons, alternative agents, and harness builders. These items define how the agent runs, not which skill it loads.
+- `hooks/`: lifecycle hook scripts such as `PreToolUse`, `PostToolUse`, and `Stop`. These scripts gate or augment tool calls. A repository often contains several scripts under `hooks/` and a `settings.json` snippet.
+- `configs/`: whole-file agent system prompts such as `CLAUDE.md`, `AGENTS.md`, and `.cursorrules`
+- `mcps/`: MCP server installation or usage snippets
+- `tools/`: **standalone CLIs and binaries** that developers install and run directly, such as `orca`, `herdr`, `officecli`, and `ai-memory`. A tool may also expose an MCP endpoint or ship skills. Its main deliverable is still a program you run.
+- `apps/`: **end-user applications**, usually self-hosted or graphical, such as `docmost`, `plane`, and `meetily`. You deploy and open an app. An agent does not load it.
 
 ### Category routing rules
 
@@ -30,13 +30,13 @@ they land on `main`.
 | **One** skill definition with `name:` / `description:` / trigger logic | `skills/` |
 | **Multiple** skills bundled as a plugin (`/plugin install …`, `gemini extensions install …`, `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/` layouts) | `plugins/` |
 | A **coding agent itself**, or a workflow/runtime layer (`oh-my-codex`-like) wrapping one, or a harness builder (`Archon`-like) | `harnesses/` |
-| Lifecycle hook scripts — PreToolUse / PostToolUse / Stop / etc., usually shipped as a `hooks/` directory + `settings.json` snippet | `hooks/` |
+| Lifecycle hook scripts such as PreToolUse, PostToolUse, and Stop. Usually shipped as a `hooks/` directory plus a `settings.json` snippet | `hooks/` |
 | A whole-file agent system prompt (`CLAUDE.md`, `AGENTS.md`, `.cursorrules`) | `configs/` |
 | MCP server install snippet or `mcpServers` JSON config, and that snippet is the whole item | `mcps/` |
 | A CLI / binary you install and run yourself, even if it also serves MCP or ships hooks | `tools/` |
 | A self-hosted or GUI application you deploy and open | `apps/` |
 
-Tie-breaker: **match the artifact's filename / packaging**. A `SKILL.md` goes in
+When categories overlap, **match the artifact's filename and packaging**. A `SKILL.md` goes in
 `skills/`; a repo with `.claude-plugin/` + `skills/<many>/` goes in `plugins/`;
 a repo whose entry point is `omx`/`omp`/`archon` CLI (and the skills are
 secondary) goes in `harnesses/`; a repo whose primary deliverable is
@@ -46,7 +46,7 @@ secondary) goes in `harnesses/`; a repo whose primary deliverable is
 answer is "a JSON snippet pointing at something someone else runs", it is
 `mcps/`; if you download a binary and run it, it is `tools/` even when MCP is
 how agents talk to it. `ai-memory` ships a Rust binary, a server, hooks, and an
-MCP endpoint — it lives in `tools/ai-memory.md`. **Slugs are unique across
+MCP endpoint. It lives in `tools/ai-memory.md`. **Slugs are unique across
 categories**; there is no entry filed under two of them, so move rather than
 copy.
 
@@ -57,8 +57,8 @@ detail page's "원문 복사" yields a directly drop-in `SKILL.md`. Example patt
 
 ## Frontmatter schema
 
-Shared base fields (every category — see `src/content/config.ts` for the
-authoritative Zod schema):
+These base fields apply to every category. `src/content/config.ts` is the
+authoritative Zod schema:
 
 ```yaml
 title: string            # display name (sidebar + card heading)
@@ -93,7 +93,7 @@ platforms?: string[]     # supported OS / runtime (["macOS", "Linux", "Windows",
 install?: string         # primary install one-liner
 
 # hooks/
-event?: string           # "PreToolUse" | "PostToolUse" | "Stop" | "SessionStart" — pick the dominant one
+event?: string           # "PreToolUse" | "PostToolUse" | "Stop" | "SessionStart"; pick the dominant one
 matcher?: string         # e.g. "Bash · WebSearch"
 scope?: 'project' | 'global' | 'both'
 deps?: string[]          # required binaries (["bash", "python3", "xmllint"])
@@ -122,19 +122,19 @@ The body is both the on-page documentation **and** the clipboard payload (the "�
 button copies `entry.body`). So:
 
 - Lead with 1–3 short H2 sections in Korean: *한 줄 / 언제 쓰는가 / 무엇을 하는가 / 함정*.
-- Gloss each English jargon term once on first use in those KO sections — e.g.
-  `seam(테스트를 끼워 넣는 이음새)`, `repro(재현)`, `deterministic(매번 같은 결과)` — so a
-  beginner who relied on the friendly summary can still read the body. The fenced payload is exempt.
+- Gloss each English jargon term once when it first appears in those Korean sections. For example,
+  use `seam(테스트를 끼워 넣는 이음새)`, `repro(재현)`, or `deterministic(매번 같은 결과)`.
+  This keeps the body readable for beginners. The fenced payload is exempt.
 - Then a fenced code block containing the verbatim original (a `SKILL.md`, a JSON
   snippet, a prompt template). Use the right language tag (`markdown`, `json`, `text`, `yaml`).
 - **Do not paraphrase the original.** Port it exactly so users can paste it back into
   their tools without surprise.
-- If the original has its own YAML frontmatter (skills, configs), wrap the whole thing
-  in the code block — frontmatter included — so the copy round-trips.
+- If the original has YAML frontmatter, wrap the whole artifact in the code block,
+  including the frontmatter, so the copy round-trips.
 - Use ` ```` ` (four backticks) for the outer fence when the inner content also contains
   triple-backtick code blocks. Match the pattern in `src/content/skills/clone-personalize.md`.
 
-## Global install — make promptbox available from every session
+## Global install
 
 `CLAUDE.md` and `AGENTS.md` at the repo root are the *agent contract* for this
 project. Symlink them into each CLI agent's global config so the agent in **any**
@@ -152,20 +152,20 @@ mkdir -p ~/.claude && ln -sf ~/promptbox/CLAUDE.md ~/.claude/CLAUDE.md
 # OpenAI Codex CLI
 mkdir -p ~/.codex && ln -sf ~/promptbox/AGENTS.md ~/.codex/AGENTS.md
 
-# Google Gemini CLI — Gemini's default context file is GEMINI.md, not AGENTS.md
+# Google Gemini CLI: the default context file is GEMINI.md, not AGENTS.md
 # (to use the AGENTS.md name instead, add "context":{"fileName":["AGENTS.md","GEMINI.md"]} to ~/.gemini/settings.json)
 mkdir -p ~/.gemini && ln -sf ~/promptbox/AGENTS.md ~/.gemini/GEMINI.md
 
 # OpenCode
 mkdir -p ~/.config/opencode && ln -sf ~/promptbox/AGENTS.md ~/.config/opencode/AGENTS.md
 
-# Google Antigravity — reads per-project AGENTS.md
+# Google Antigravity reads per-project AGENTS.md
 ln -sf ~/promptbox/AGENTS.md /path/to/your/repo/AGENTS.md
 
-# Cursor / Windsurf — per-repo AGENTS.md
+# Cursor / Windsurf use per-repo AGENTS.md
 ln -sf ~/promptbox/AGENTS.md /path/to/your/repo/AGENTS.md
 
-# Any other CLI that follows the agents.md spec — same pattern:
+# Any other CLI that follows the agents.md spec uses the same pattern:
 ln -sf ~/promptbox/AGENTS.md <agent-config-dir>/AGENTS.md
 ```
 
@@ -183,15 +183,15 @@ After this:
 
 - Any session can say *"add this URL to promptbox as a skill"* and the agent already
   knows where the repo lives, the categories, the schema, and the deploy flow.
-- Editing one file (`~/promptbox/CLAUDE.md` or `AGENTS.md`) updates the contract
-  everywhere — no per-tool drift.
+- Editing one file, either `~/promptbox/CLAUDE.md` or `AGENTS.md`, updates the contract
+  everywhere. This avoids drift between tools.
 
 ## One-shot add workflow (memorize this)
 
 Given a source URL or pasted artifact, do this end-to-end without asking the user
 for any of the steps:
 
-1. `cd ~/promptbox` (or wherever the repo lives — `git rev-parse --show-toplevel`)
+1. `cd ~/promptbox`, or find the repository with `git rev-parse --show-toplevel`
 2. `git clone --depth=1 <url> .tmp-sources/<slug>` (or save the paste to a temp file)
 3. Read the source's `SKILL.md` / `README.md` / config to:
    - decide the **category** using the routing table above
@@ -240,7 +240,7 @@ There is no test suite. The build is the validation step.
   `['prompts', 'skills', 'plugins', 'harnesses', 'hooks', 'configs', 'mcps', 'tools', 'apps']`.
   `src/pages/index.astro`, `src/pages/[category]/[...slug].astro`, and
   `src/layouts/BaseLayout.astro` all derive their list from `CATEGORY_ORDER`
-  (`[...CATEGORY_ORDER]`) — do **not** hand-edit a `COLLECTIONS` array in them; there
+  (`[...CATEGORY_ORDER]`). Do **not** hand-edit a `COLLECTIONS` array in them; there
   isn't one to edit. `translations/` is a real collection but not a category: it holds
   full-body EN translations and never appears in navigation.
 - Don't rewrite layout/components for a single item. Adjust schema or body content first.
@@ -272,7 +272,7 @@ There is no test suite. The build is the validation step.
 Live URL: <https://cskwork.github.io/promptbox/>. Reachable ~60s after the workflow
 turns green.
 
-## Response & documentation style
+## Response and documentation style
 
 - Lead with the decision or answer. Then the *why* in one short clause.
 - Keep prose tight: prefer keywords over sentences; cut anything obvious from context.
