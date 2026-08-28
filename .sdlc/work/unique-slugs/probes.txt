@@ -1,0 +1,43 @@
+## Probe A: Negative proof — .md duplicate
+
+Temp file created: src/content/apps/agents-quick-onboarding.md (duplicate of prompts/)
+
+Build output (trimmed to error):
+Error: Duplicate slug "agents-quick-onboarding" across categories: apps (src/content/apps/agents-quick-onboarding.md), prompts (src/content/prompts/agents-quick-onboarding.md). Slugs are unique across categories — move rather than copy (promptbox AGENTS.md).
+
+Exit code: 1 (FAIL as required)
+
+Verification: ✓ Error message contains slug "agents-quick-onboarding", both categories (apps, prompts), and both file paths.
+
+Temp file deleted after probe.
+
+---
+
+## Probe B: Negative proof — .mdx variant
+
+Temp file created: src/content/apps/agents-quick-onboarding.mdx (duplicate of prompts/)
+
+Build output (trimmed to error):
+Error: Duplicate slug "agents-quick-onboarding" across categories: apps (src/content/apps/agents-quick-onboarding.mdx), prompts (src/content/prompts/agents-quick-onboarding.md). Slugs are unique across categories — move rather than copy (promptbox AGENTS.md).
+
+Exit code: 1 (FAIL as required)
+
+Verification: ✓ Error message contains slug "agents-quick-onboarding", both categories (apps, prompts), and both file types (.mdx and .md).
+
+Temp file deleted after probe.
+
+---
+
+## Clean build after probes
+
+After deleting both temp files:
+
+Build output (tail):
+19:37:25 ✓ Completed in 275ms.
+19:37:25 [@astrojs/sitemap] `sitemap-index.xml` created at `dist`
+19:37:25 [build] 118 page(s) built in 1.47s
+19:37:25 [build] Complete!
+
+Exit code: 0 (PASS as required)
+
+Verification: ✓ Clean build passes without any duplicate slug errors.

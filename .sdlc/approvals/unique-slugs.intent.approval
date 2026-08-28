@@ -1,0 +1,6 @@
+stage: intent
+artifact: .sdlc/work/unique-slugs/intent.md
+sha256: 413e95dbf682dcd1500236d5c72c3d5f6dabfbec21d5f65b6645cab33f5ec5a6
+approved_by: danny
+approved_at: 2026-08-28T10:18:53Z
+mode: delegated-chat (agent-run on explicit human instruction)

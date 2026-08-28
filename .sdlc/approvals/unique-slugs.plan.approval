@@ -1,0 +1,6 @@
+stage: plan
+artifact: .sdlc/work/unique-slugs/plan.md
+sha256: a232e394c1d4601879ef76a177061cdf5631c59ba8442cd4cb0bf6a7a4a8b912
+approved_by: danny
+approved_at: 2026-08-28T10:35:13Z
+mode: delegated-chat (agent-run on explicit human instruction)

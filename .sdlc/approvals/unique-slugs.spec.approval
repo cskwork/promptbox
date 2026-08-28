@@ -1,0 +1,6 @@
+stage: spec
+artifact: .sdlc/work/unique-slugs/spec.md
+sha256: 619483d419d3f4aa468b1a18aec7f5f878cd9a5c0794201c98027fe24d6c42ae
+approved_by: danny
+approved_at: 2026-08-28T10:43:30Z
+mode: delegated-chat (agent-run on explicit human instruction)
