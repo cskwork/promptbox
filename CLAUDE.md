@@ -25,7 +25,7 @@ they land on `main`.
 ### Category routing rules
 
 | If the item is… | Put it in |
-|---|---|
+| --- | --- |
 | Plain-text prompt template a user pastes into an LLM chat | `prompts/` |
 | **One** skill definition with `name:` / `description:` / trigger logic | `skills/` |
 | **Multiple** skills bundled as a plugin (`/plugin install …`, `gemini extensions install …`, `.claude-plugin/`, `.codex-plugin/`, `.cursor-plugin/` layouts) | `plugins/` |
@@ -206,11 +206,13 @@ for any of the steps:
 5. Validate: `MSYS_NO_PATHCONV=1 BASE_PATH=/promptbox npx astro build` (on Windows Git Bash;
    plain `npm run build` on macOS/Linux/PowerShell)
 6. Commit and push:
+
    ```bash
    git add src/content/<category>/<slug>.md
    git commit -m "feat(<category>): add <slug>"
    git push
    ```
+
 7. ~60s later the item is live at `https://cskwork.github.io/promptbox/<category>/<slug>/`.
 
 If the user added **multiple** items in one request, batch them into a single commit:
@@ -226,6 +228,7 @@ npm run build
 ```
 
 Fails on:
+
 - frontmatter that doesn't match the Zod schema in `src/content/config.ts`
 - broken internal links
 - markdown that breaks Astro / MDX parsing
