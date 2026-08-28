@@ -1,0 +1,5 @@
+state: shipped
+reason: live at 3669a81; slug uniqueness enforced at build time
+closed_by: danny
+closed_at: 2026-08-28T11:55:15Z
+mode: delegated-chat (agent-run on explicit human instruction)
