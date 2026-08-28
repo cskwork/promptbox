@@ -1,0 +1,6 @@
+stage: ship
+artifact: .sdlc/work/unique-slugs/evidence.md
+sha256: e7161b91c5c6486b1abc6c39bf1d45fcf9171fa7d1498ed7d6ec0501c3ba8543
+approved_by: danny
+approved_at: 2026-08-28T10:59:36Z
+mode: delegated-chat (agent-run on explicit human instruction)
