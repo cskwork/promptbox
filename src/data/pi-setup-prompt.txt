@@ -39,26 +39,44 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
      shell script by guessing.
    - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.
 
-7. Check authentication without exposing a key.
+7. Share the operating instructions with every coding agent on this machine.
+   - `~/pi-setup-public/AGENTS.md` is the operating contract: orient, options, delegate, plan, adversarial
+     review, execute, verify, report. Plan confirmation is the last human gate; the agent runs the rest on
+     its own and stops only for data loss, public APIs, security, or migrations.
+   - The installer already links it into `~/.pi/agent/AGENTS.md`. Link the same file into each other agent
+     you use, and skip any directory whose agent is not installed:
+     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.claude/CLAUDE.md`
+     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.codex/AGENTS.md`
+     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.gemini/GEMINI.md`
+     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.config/opencode/AGENTS.md`
+   - If a target is an existing regular file rather than a symlink, move it to a timestamped backup first
+     and report the path. Never overwrite my own instructions in place.
+   - On Windows, symlinks need Developer Mode or an admin terminal. Copy the file instead and tell me the
+     copy will drift.
+
+8. Check authentication without exposing a key.
    - Run `pi auth check --provider zai`.
    - If it is not ready, tell me to run `pi auth`, log in to Z.ai, restart pi, and rerun this prompt.
    - Never ask me to paste an API key into chat.
 
-8. Verify the installed setup with real commands.
+9. Verify the installed setup with real commands.
    - `pi --version`
    - `pi auth check --provider zai`
    - `pi --list-models zai` and confirm `glm-5.3-flash` appears.
    - Parse `~/.pi/agent/models.json` and confirm `glm-5.3-flash` has both `text` and `image` inputs.
+   - Resolve every operating-instruction link from step 7 and confirm each one points at
+     `~/pi-setup-public/AGENTS.md`.
    - `pi list` and report the installed package count.
    - If Z.ai auth is ready, run a text round trip:
      `pi -p "reply with exactly: PI-SETUP-OK" --no-session`
    - If a local image is available, run one native multimodal probe by asking GLM-5.3-Flash to read it.
      Do not install an image adapter if no image is available; report that the image probe was skipped.
 
-9. Finish with a numbered report.
+10. Finish with a numbered report.
    - State the OS and shell.
    - State the pi and Node versions.
    - State whether pi-setup was cloned, updated, or already current.
+   - State which agents now read the operating instructions, and which were skipped because they are absent.
    - State whether Z.ai authentication and text/image capability were verified or remain user actions.
    - State the backup path created by the installer, if any.
    - Do not commit or push either repository.
