@@ -40,9 +40,9 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.
 
 7. Share the operating instructions with every coding agent on this machine.
-   - `~/pi-setup-public/AGENTS.md` is the operating contract: orient, options, delegate, plan, adversarial
-     review, execute, verify, report. Plan confirmation is the last human gate; the agent runs the rest on
-     its own and stops only for data loss, public APIs, security, or migrations.
+   - `~/pi-setup-public/AGENTS.md` is the operating contract: orient, options, delegate, plan, execute,
+     verify, report. Plan confirmation is the last human gate; the agent runs the rest on its own and
+     stops only for data loss, public APIs, security, or migrations.
    - The installer already links it into `~/.pi/agent/AGENTS.md`. Link the same file into each other agent
      you use, and skip any directory whose agent is not installed:
      `ln -sfn ~/pi-setup-public/AGENTS.md ~/.claude/CLAUDE.md`
