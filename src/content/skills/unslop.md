@@ -2,7 +2,7 @@
 title: unslop
 title_en: Unslop
 summary: "AI 냄새(AI tell)가 나는 글버릇 31가지를 이름 붙여 잡아내고 고치는 스킬. em dash 금지, 굵은 글씨 남용 금지, '단순히 X가 아니라 Y' 금지처럼 규칙이 구체적이라 판단이 아니라 체크리스트로 돌아간다. 패턴 제거로 끝내지 않고 의견·리듬·구체성을 다시 넣어 목소리를 살린다."
-summary_en: "Names 31 specific AI writing tells and fixes them. The rules are concrete enough to run as a checklist rather than a judgment call: no em dashes, no bolded proper nouns, no 'not just X, but Y.' It also puts voice back in, because stripping the patterns alone leaves prose that reads just as machine-made."
+summary_en: "Names 31 AI writing tells and says how to fix each one. The rules are concrete enough to run as a checklist rather than a judgment call: no em dashes, no bolded proper nouns, no 'not just X, but Y.' It also puts voice back in, because stripping the patterns alone leaves prose that reads just as machine-made."
 tags: [skill, writing, editing, ai-slop, prose, style-guide, pstack, cursor]
 source: https://github.com/cursor/plugins/tree/main/pstack/skills/unslop
 author: Lauren Tan (poteto)
@@ -39,12 +39,11 @@ LLM이 쓴 글에서 나는 특유의 냄새를 31개 항목으로 이름 붙이
 
 - **패턴 제거만 하면 실패한다.** 스킬 본문이 직접 경고한다. 특징을 다 지운 무미건조한 글도 똑같이
   AI 티가 난다. "Adding soul" 절의 의견 갖기, 문장 길이 섞기, 1인칭 허용을 같이 적용해야 한다.
-- **em dash 금지는 괄호로 우회하는 것까지 막는다.** 13번이 명시적으로 괄호, en dash, 하이픈 대체를
-  전부 닫는다. 생각을 나누고 싶으면 문장을 끝내거나 쉼표를 쓴다.
+- **em dash 금지는 괄호로 우회하는 것까지 막는다.** 13번이 괄호, en dash, 하이픈 대체를 전부 닫는다.
+  생각을 나누고 싶으면 문장을 끝내거나 쉼표를 쓴다.
 - **16번은 굵은 글씨 리드인을 전부 금지하지 않는다.** 문제는 라벨이 뒤 문장을 그대로 반복하는 경우다.
   `**Performance:** 성능이 좋아졌다`는 걸리고, 새 정보가 뒤따르는 리드인은 통과한다.
-- 한국어 글에는 어휘 목록(7번)이 그대로 적용되지 않는다. 구조 규칙(9, 10, 13, 16, 27~31)이 실제로
-  효과가 있는 부분이다.
+- 한국어 글에는 어휘 목록(7번)이 적용되지 않는다. 남는 것은 구조 규칙 9, 10, 13, 16, 27~31이다.
 
 ```markdown
 ---

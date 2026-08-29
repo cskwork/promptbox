@@ -1,7 +1,7 @@
 ---
 title: create-verification-skill
 title_en: Create verification skill
-summary: "레포를 인터뷰해서 그 프로젝트 전용 검증 스킬을 생성하는 메타 스킬. 앱을 실제로 띄우고, 사용자가 하듯 기능 하나를 조작하고, 증거를 남기는 절차를 .cursor/skills/verify-<app>/에 써 준다. 생성기가 스스로 한 번 돌려보고 통과해야 인도하며, 돌려보지 않은 결과물은 초안으로 취급한다."
+summary: "레포를 인터뷰해서 그 프로젝트 전용 검증 스킬을 생성하는 메타 스킬. 앱을 실제로 띄우고, 사용자가 하듯 기능 하나를 조작하고, 증거를 남기는 절차를 레포의 스킬 디렉터리에 써 준다. 생성기가 스스로 한 번 돌려보고 통과해야 인도하며, 돌려보지 않은 결과물은 초안으로 취급한다."
 summary_en: "A meta-skill that interviews the repo and writes a verification skill tailored to it: how to launch the real app, drive one feature the way a user would, and capture proof. The generator must run its own output end to end before handing it over, and a skill that was never executed counts as a draft."
 tags: [skill, verification, qa, meta-skill, feature-map, evidence, pstack, cursor]
 source: https://github.com/cursor/plugins/tree/main/pstack/skills/create-verification-skill
@@ -14,9 +14,9 @@ install: "/add-plugin pstack (Cursor). references/feature-map-example/ 3개 파�
 
 ## 한 줄
 
-검증 절차를 직접 실행하는 스킬이 아니라, **검증 스킬을 써 주는 스킬**이다. 레포를 읽어 표면(웹 UI,
-CLI, 서비스, 데스크톱)과 실행 방법과 조작 수단을 파악한 뒤, `.cursor/skills/verify-<app>/`에 그
-프로젝트 전용 스킬과 기능 지도를 생성한다.
+검증 절차를 직접 실행하는 스킬이 아니라, 검증 스킬을 써 주는 스킬이다. 레포를 읽어 표면(웹 UI,
+CLI, 서비스, 데스크톱)과 실행 방법과 조작 수단을 파악한 뒤, `verify-<app>/` 아래에 그 프로젝트
+전용 스킬과 기능 지도를 생성한다. 원문은 이 경로를 `.cursor/skills/`로 고정한다.
 
 ## 언제 쓰는가
 
@@ -39,15 +39,14 @@ CLI, 서비스, 데스크톱)과 실행 방법과 조작 수단을 파악한 뒤
 ## 함정
 
 - **읽는 대상이 사람이 아니라 다음 에이전트다.** 스킬 본문이 명시한다. 앱을 한 번도 본 적 없는
-  에이전트가 작업 중간에 차갑게 읽는다는 전제로 써야 한다.
+  에이전트가 작업 도중에 이 문서 하나만 열고 바로 실행한다는 전제로 써야 한다.
 - **정리가 증거를 먹으면 실패다.** Cleanup은 인스턴스와 임시 상태만 지우고 증명 산출물은 남긴다.
   프로세스 이름으로 kill하지 말고 자기가 띄운 것만 죽인다.
-- **dry-run을 이름만 믿지 않는다.** 무엇을 정말 건너뛰는지 파일·네트워크·git ref를 관측해서 확인
-  하라고 요구한다. 어떤 dry-run은 여전히 네트워크를 치거나 브라우저를 연다.
-- **frontmatter 없으면 스킬이 등록조차 안 된다.** 생성물에 `name: verify-<app>`과 description을
-  반드시 넣는다.
-- **`disable-model-invocation: true`.** 모델이 알아서 부르지 않는다. 사용자가 명시적으로 호출해야
-  한다.
+- **dry-run을 이름만 믿지 않는다.** 무엇을 건너뛰는지 파일·네트워크·git ref를 관측해서 확인하라고
+  요구한다. 어떤 dry-run은 여전히 네트워크를 치거나 브라우저를 연다.
+- **frontmatter 없으면 스킬이 등록조차 안 된다.** 생성물에 `name: verify-<app>`과 description을 넣는다.
+- **자동 호출이 꺼져 있다.** `disable-model-invocation: true`라서 모델이 알아서 부르지 않는다.
+  사용자가 이름으로 호출해야 한다.
 - **생성 경로가 원문에서는 Cursor 고정(`.cursor/skills/`)이다.** 아래 "하네스 중립으로 쓰기" 참고.
 - 유지보수는 짝 스킬 `/maintain-verification-skill`이 맡는다. 앱이 바뀌면 기능 지도가 먼저 낡는다.
   pstack 플러그인 전체를 설치하지 않았다면 이 짝 스킬은 없다.
