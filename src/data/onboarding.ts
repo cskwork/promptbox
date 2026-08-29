@@ -14,6 +14,8 @@ export const ONBOARDING_PICKS: OnboardingPick[] = [
  // Useful catalog entries after the base environment is running.
  { category: "skills", slug: "browser-qa" },
  { category: "skills", slug: "verify" },
+ { category: "skills", slug: "create-verification-skill" },
+ { category: "skills", slug: "unslop" },
  { category: "skills", slug: "diagnose" },
  { category: "skills", slug: "tdd" },
  { category: "skills", slug: "domain-modeling" },
