@@ -1,9 +1,9 @@
 ---
 title: pi 온보딩 한 방 설치
 title_en: One-shot pi setup
-summary: "pi를 기본 코딩 에이전트로 설치하고, cskwork/pi-setup-public을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
-summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup-public repository, restores its settings, agents, skills, and model profiles, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
-tags: [onboarding, pi, pi-setup, glm-5.3-flash, multimodal, dotfiles, idempotent]
+summary: "pi를 기본 코딩 에이전트로 설치하고, cskwork/pi-setup-public을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하며, 운영 지침 AGENTS.md를 모든 에이전트에 연결하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
+summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup-public repository, restores its settings, agents, skills, and model profiles, wires the same AGENTS.md operating contract into every coding agent on the machine, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
+tags: [onboarding, pi, pi-setup, agents-md, glm-5.3-flash, multimodal, dotfiles, idempotent]
 source: https://github.com/cskwork/pi-setup-public
 author: cskwork
 order: 1
@@ -23,11 +23,15 @@ use_case_en: "Restore pi on a new machine or resync an existing installation fro
 2. `~/pi-setup-public`을 정본 저장소와 `git pull --ff-only`로 동기화한다.
 3. `models.json`에서 `glm-5.3-flash`가 `text`와 `image` 입력을 모두 선언했는지 확인한다.
 4. 설치기를 실행해 `~/.pi/agent/` 설정·에이전트·스킬·프로파일을 연결한다.
-5. 인증, 모델 목록, 패키지, 텍스트 왕복, 가능한 경우 이미지 입력까지 실제 명령으로 검증한다.
+5. `AGENTS.md`(운영 지침)를 Claude Code·Codex·Gemini·OpenCode 설정 경로에 심링크해, 어느 에이전트로
+   들어가도 같은 계약을 읽게 만든다.
+6. 인증, 모델 목록, 패키지, 텍스트 왕복, 가능한 경우 이미지 입력까지 실제 명령으로 검증한다.
 
 ## 함정
 
 - 로컬 수정이 있으면 버리지 않는다. 프롬프트는 `reset --hard`, `git clean`, `rm -rf`를 금지한다.
+- 운영 지침 심링크 대상이 이미 일반 파일이면 덮어쓰지 않는다. 타임스탬프 백업으로 옮긴 뒤 경로를 보고한다.
+  Windows는 심링크에 개발자 모드나 관리자 터미널이 필요하고, 복사본은 시간이 지나면 드리프트(원본과 어긋남)한다.
 - API 키는 채팅에 붙이지 않는다. 인증이 없으면 사용자가 `pi auth`를 직접 실행하도록 멈춘다.
 - Windows에서는 저장소 README가 제공하는 경로만 따른다. bash 스크립트를 PowerShell로 임의 번역하지 않는다.
 
@@ -75,26 +79,44 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
      shell script by guessing.
    - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.
 
-7. Check authentication without exposing a key.
+7. Share the operating instructions with every coding agent on this machine.
+   - `~/pi-setup-public/AGENTS.md` is the operating contract: orient, options, delegate, plan, adversarial
+     review, execute, verify, report. Plan confirmation is the last human gate; the agent runs the rest on
+     its own and stops only for data loss, public APIs, security, or migrations.
+   - The installer already links it into `~/.pi/agent/AGENTS.md`. Link the same file into each other agent
+     you use, and skip any directory whose agent is not installed:
+     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.claude/CLAUDE.md`
+     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.codex/AGENTS.md`
+     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.gemini/GEMINI.md`
+     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.config/opencode/AGENTS.md`
+   - If a target is an existing regular file rather than a symlink, move it to a timestamped backup first
+     and report the path. Never overwrite my own instructions in place.
+   - On Windows, symlinks need Developer Mode or an admin terminal. Copy the file instead and tell me the
+     copy will drift.
+
+8. Check authentication without exposing a key.
    - Run `pi auth check --provider zai`.
    - If it is not ready, tell me to run `pi auth`, log in to Z.ai, restart pi, and rerun this prompt.
    - Never ask me to paste an API key into chat.
 
-8. Verify the installed setup with real commands.
+9. Verify the installed setup with real commands.
    - `pi --version`
    - `pi auth check --provider zai`
    - `pi --list-models zai` and confirm `glm-5.3-flash` appears.
    - Parse `~/.pi/agent/models.json` and confirm `glm-5.3-flash` has both `text` and `image` inputs.
+   - Resolve every operating-instruction link from step 7 and confirm each one points at
+     `~/pi-setup-public/AGENTS.md`.
    - `pi list` and report the installed package count.
    - If Z.ai auth is ready, run a text round trip:
      `pi -p "reply with exactly: PI-SETUP-OK" --no-session`
    - If a local image is available, run one native multimodal probe by asking GLM-5.3-Flash to read it.
      Do not install an image adapter if no image is available; report that the image probe was skipped.
 
-9. Finish with a numbered report.
+10. Finish with a numbered report.
    - State the OS and shell.
    - State the pi and Node versions.
    - State whether pi-setup was cloned, updated, or already current.
+   - State which agents now read the operating instructions, and which were skipped because they are absent.
    - State whether Z.ai authentication and text/image capability were verified or remain user actions.
    - State the backup path created by the installer, if any.
    - Do not commit or push either repository.
