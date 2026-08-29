@@ -2,7 +2,7 @@
 title: pi 온보딩 한 방 설치
 title_en: One-shot pi setup
 summary: "pi를 기본 코딩 에이전트로 설치하고, cskwork/pi-setup-public을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하며, 운영 지침 AGENTS.md를 모든 에이전트에 연결하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
-summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup-public repository, restores its settings, agents, skills, and model profiles, wires the same AGENTS.md operating contract into every coding agent on the machine, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
+summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup-public repository, and restores its settings, agents, skills, and model profiles. It also links the same AGENTS.md operating contract into every coding agent on the machine, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
 tags: [onboarding, pi, pi-setup, agents-md, glm-5.3-flash, multimodal, dotfiles, idempotent]
 source: https://github.com/cskwork/pi-setup-public
 author: cskwork

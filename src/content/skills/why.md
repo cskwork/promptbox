@@ -2,7 +2,7 @@
 title: why
 title_en: Why
 summary: "코드가 왜 이 모양인지를 7개 증거 출처(git, 이슈 트래커, 장문 문서, 팀 채팅, 인프라 관측, 에러 추적, 제품 분석 웨어하우스)에서 병렬로 캐내는 조사 스킬. 확신 등급을 분리해 '증거로 확인한 것'과 '추론한 것'을 절대 섞지 않고, 아무것도 못 찾은 출처도 결과로 보고한다."
-summary_en: "Answers why code looks the way it does by querying seven evidence categories in parallel: git, issue tracker, long-form docs, team chat, infra observability, error tracking, and the analytics warehouse. It keeps what the evidence says strictly apart from what it infers, and reports the sources that came back empty as findings in their own right."
+summary_en: "Answers why code looks the way it does by querying seven evidence categories in parallel: git, issue tracker, long-form docs, team chat, infra observability, error tracking, and the analytics warehouse. It keeps what the evidence says apart from what it infers, and reports the sources that came back empty, because an untracked decision is itself an answer."
 tags: [skill, code-archaeology, design-rationale, mcp, parallel-agents, postmortem, citations, pstack, cursor]
 source: https://github.com/cursor/plugins/tree/main/pstack/skills/why
 author: Lauren Tan (poteto)
@@ -35,8 +35,8 @@ install: "/add-plugin pstack (Cursor). references/ 하위 파일이 필요하므
 3. **합성.** 별도 서브에이전트가 확신 등급(epistemics)에 따라 출력을 나눈다. 확인된 증거, 합리적
    추론, 경쟁 가설, 모르는 것, 조사한 출처 목록.
 
-기본값이 최소가 아니라 **커버리지**라는 점이 설계의 핵심이다. 이슈 트래커에서 아무것도 안 나온
-것은 "그 결정이 티켓으로 남지 않았다"는 사실이고, 그것 자체가 보고할 증거다.
+기본값이 최소 조사가 아니라 전수 조사다. 이슈 트래커에서 아무것도 안 나온 것은 "그 결정이 티켓으로
+남지 않았다"는 사실이고, 그것 자체가 보고할 증거다.
 
 ## 함정
 
