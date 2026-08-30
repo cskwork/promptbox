@@ -1,7 +1,7 @@
 ---
 title: sdlc-kit
-summary: Anthropic AI-Native SDLC 플레이북을 하네스 중립으로 옮긴 파일 기반 SDLC 프레임워크 — 의도 심문, 기록형 승인 게이트(lazymode 0-4), 적대적 리뷰, 티켓 크기별 트랙(micro/map), 종결 아카이브, 교훈 메모리
-summary_en: Anthropic's AI-Native SDLC playbook made harness-neutral — intent grilling, on-the-record approval gates with lazymode 0-4, fresh-context adversarial review, size-aware tracks (micro/map), archive-on-close, and bounded lessons memory, all as plain files + shell.
+summary: Anthropic AI-Native SDLC 플레이북을 하네스 중립으로 옮긴 파일 기반 SDLC 프레임워크 — 의도 심문, 기록형 승인 게이트(lazymode 0-4), 적대적 리뷰, 티켓 크기별 트랙(micro/map), 루프 상한, 종결 아카이브, 교훈 메모리
+summary_en: Anthropic's AI-Native SDLC playbook made harness-neutral — intent grilling, on-the-record approval gates with lazymode 0-4, fresh-context adversarial review, size-aware tracks (micro/map), capped loops, archive-on-close, and bounded lessons memory, all as plain files + shell.
 tags: [sdlc, workflow, approval-gates, adversarial-review, spec-driven, memory]
 source: https://github.com/cskwork/sdlc-kit
 author: cskwork
@@ -29,7 +29,8 @@ Anthropic의 AI-Native SDLC 플레이북(intent → spec → plan → build → 
 - **신선한 컨텍스트 역할 + 단계 위임**: verifier(검증) · adversary(적대적 리뷰) · researcher(탐사)가 순수 프롬프트 파일로 제공되고, 각 단계 작업 자체도 서브에이전트로 위임해 오케스트레이터 컨텍스트를 아낀다. plan·ship의 adversary 리뷰는 lazymode와 무관하게 무조건 돈다 — plan은 비가역 작업의 승인 지점, ship은 푸시 전 마지막 보안 리뷰라서다. 서브에이전트가 없는 하네스는 새 세션에 붙여넣으면 된다.
 - **티켓 크기별 트랙(v0.7)**: 기본은 6단계 full 트랙. 정말 사소한 티켓(오타·문구·한 줄 가드)만 micro 트랙으로 spec/plan을 건너뛰고(intent → build → ship, ship 적대 리뷰는 유지), 한 번에 파악 안 되는 티켓은 `map.md`(목적지·정한 것·모르는 것·안 할 것)로 세션마다 미결 하나씩 푼다.
 - **수천 티켓 스케일(v0.7)**: close가 곧 아카이브 — 닫힌 피처와 승인 기록이 `.sdlc/archive/<slug>/`로 이동해 `status.sh`/`stats.sh` 기본 출력이 항상 유한하다(`--all`도 최신 20건 상한). 공유 메모리(INDEX/DOMAIN/lessons)는 close 단계만 쓰는 single-writer — 루프 중 후보는 피처의 `harvest.md`에 쌓인다. 사람이 선언한 하드 룰은 `POLICY.md`에 전사되고 위반은 차단 사유다.
-- **함정(gotcha)**: 게이트는 잠금장치가 아니라 기록이다 — git 이력이 감사 추적이다. `.sdlc/config.md`의 빌드/테스트 명령을 채우지 않으면 증거 단계가 공허해진다. 슬러그는 일회용이라(아카이브와 충돌 거부) 티켓 키나 날짜 접두를 붙여라.
+- **모든 루프에 상한(v0.7.1)**: 심문 8질문, 적대 리뷰 2라운드, fix loop 3라운드, 재게이트 단계당 2회, 작은 deviation 5개, map 6세션 — 초과는 무한 반복 대신 사람 승격 또는 교훈 남긴 dead-end close로 끝난다. 카운터는 에이전트 컨텍스트가 아니라 아티팩트 파일에 산다. 메모리 병합은 최신 우선(recency wins) — 모순되는 후보가 날짜 달린 `[verified]`로 옛 항목을 교체한다.
+- **함정(gotcha)**: 게이트는 잠금장치가 아니라 기록이다 — git 이력이 감사 추적이다. `.sdlc/config.md`의 빌드/테스트 명령을 채우지 않으면 증거 단계가 공허해진다. 선택 항목 `qa:`에 선호 브라우저/QA 도구를 적으면 verifier가 그걸 쓰고, 비우면 하네스 가용 도구로 폴백한다(v0.7.3). intent.md의 `Refs:` 줄에 지라 티켓 키를 남겨라. 슬러그는 일회용이라(아카이브와 충돌 거부) 티켓 키나 날짜 접두를 붙여라.
 
 ## 구조
 
