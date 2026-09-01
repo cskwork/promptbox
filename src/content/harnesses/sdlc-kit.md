@@ -25,13 +25,14 @@ Anthropic의 AI-Native SDLC 플레이북(intent → spec → plan → build → 
 
 - **6단계 스킬**: 각 단계가 아티팩트 하나를 만들고, 사람 승인이 다음 단계를 연다. 6단계(maintain)는 장애를 진단해 새 `intent.md`를 쓴다 — 루프가 스스로를 먹여 살린다.
 - **의도 심문(grill)**: 1단계는 한 번에 한 질문으로 사용자를 심문하고, 모든 주장에 `[verified]`/`[assumed]` 라벨을 붙인다. 사용자가 틀릴 수 있다는 전제로 researcher 서브에이전트가 코드로 반증한다.
-- **기록형 게이트 + lazymode**: `approve.sh`가 단계·아티팩트·시각·모드를 평문으로 기록하고, `check-gate.sh`는 기록이 없으면 다음 단계를 막는다. `lazymode: 0-4`로 어떤 게이트를 사람이 쥘지 고른다(기본 1: intent·spec·ship은 사람). 승인 기록은 기능 슬러그별로 격리되고 ship에서 코드와 함께 커밋된다.
+- **기록형 게이트 + lazymode**: `approve.sh`가 단계·아티팩트·시각·모드를 평문으로 기록하고, `check-gate.sh`는 기록이 없으면 다음 단계를 막는다. `lazymode: 0-4`로 어떤 게이트를 사람이 쥘지 고른다(기본 1: intent·spec·ship은 사람). 승인 기록은 기능 슬러그별로 격리되어 `.sdlc/approvals/`에 디스크 기록으로 남는다(v0.8.0부터 gitignore).
 - **신선한 컨텍스트 역할 + 단계 위임**: verifier(검증) · adversary(적대적 리뷰) · researcher(탐사)가 순수 프롬프트 파일로 제공되고, 각 단계 작업 자체도 서브에이전트로 위임해 오케스트레이터 컨텍스트를 아낀다. plan·ship의 adversary 리뷰는 lazymode와 무관하게 무조건 돈다 — plan은 비가역 작업의 승인 지점, ship은 푸시 전 마지막 보안 리뷰라서다. 서브에이전트가 없는 하네스는 새 세션에 붙여넣으면 된다.
 - **티켓 크기별 트랙(v0.7)**: 기본은 6단계 full 트랙. 정말 사소한 티켓(오타·문구·한 줄 가드)만 micro 트랙으로 spec/plan을 건너뛰고(intent → build → ship, ship 적대 리뷰는 유지), 한 번에 파악 안 되는 티켓은 `map.md`(목적지·정한 것·모르는 것·안 할 것)로 세션마다 미결 하나씩 푼다.
 - **수천 티켓 스케일(v0.7)**: close가 곧 아카이브 — 닫힌 피처와 승인 기록이 `.sdlc/archive/<slug>/`로 이동해 `status.sh`/`stats.sh` 기본 출력이 항상 유한하다(`--all`도 최신 20건 상한). 공유 메모리(INDEX/DOMAIN/lessons)는 close 단계만 쓰는 single-writer — 루프 중 후보는 피처의 `harvest.md`에 쌓인다. 사람이 선언한 하드 룰은 `POLICY.md`에 전사되고 위반은 차단 사유다.
 - **모든 루프에 상한(v0.7.1)**: 심문 8질문, 적대 리뷰 2라운드, fix loop 3라운드, 재게이트 단계당 2회, 작은 deviation 5개, map 6세션 — 초과는 무한 반복 대신 사람 승격 또는 교훈 남긴 dead-end close로 끝난다. 카운터는 에이전트 컨텍스트가 아니라 아티팩트 파일에 산다. 메모리 병합은 최신 우선(recency wins) — 모순되는 후보가 날짜 달린 `[verified]`로 옛 항목을 교체한다.
 - **하트비트(v0.7.4)**: 매 단계가 `.sdlc/work/<slug>/progress.md`를 항상 한 줄로 덮어쓴다(`build 3/7 · fetcher.ts에 retry 배선 · <시각>`). `status.sh`가 `now →` 줄로 나이와 함께 보여주고 30분 넘으면 STALE 표시 — 조용한 것과 죽은 루프를 사람이 구분할 수 있다. gitignore 대상이라 기록이 아니라 신호다; `watch -n5 cat`으로 실시간 추적.
-- **함정(gotcha)**: 게이트는 잠금장치가 아니라 기록이다 — git 이력이 감사 추적이다. `.sdlc/config.md`의 빌드/테스트 명령을 채우지 않으면 증거 단계가 공허해진다. 선택 항목 `qa:`에 선호 브라우저/QA 도구를 적으면 verifier가 그걸 쓰고, 비우면 하네스 가용 도구로 폴백한다(v0.7.3). intent.md의 `Refs:` 줄에 지라 티켓 키를 남겨라. 슬러그는 일회용이라(아카이브와 충돌 거부) 티켓 키나 날짜 접두를 붙여라.
+- **커밋되는 것과 안 되는 것(v0.8.0)**: `init.sh`가 `.gitignore`에 16줄을 쓴다. git에 남는 결정 기록은 `config.md`·`memory/`·피처별 `intent.md`·`plan.md`·`map.md`·아카이브의 `CLOSED`뿐. `approvals/`·`spec.md`·`baseline.txt`·`deviations.md`·`evidence.md`·`harvest.md`·`scratch/`·`progress.md`는 디스크에만 남고 스크립트는 거기서 읽으므로 게이트·status·재승인 카운트는 그대로다. 대가는 내구성 — fresh clone엔 승인이 없어서 피처 도중 다시 clone하면 재승인해야 한다. 구버전 kit으로 시드한 프로젝트는 `init.sh`가 이미 추적 중인 경로를 알려주고 `git rm --cached` 명령을 출력한다.
+- **함정(gotcha)**: 게이트는 잠금장치가 아니라 기록이다 — 감사 추적은 git 이력이 아니라 디스크의 `.sdlc/approvals/` 파일과 에이전트 규칙이다. `.sdlc/config.md`의 빌드/테스트 명령을 채우지 않으면 증거 단계가 공허해진다. 선택 항목 `qa:`에 선호 브라우저/QA 도구를 적으면 verifier가 그걸 쓰고, 비우면 하네스 가용 도구로 폴백한다(v0.7.3). intent.md의 `Refs:` 줄에 지라 티켓 키를 남겨라. 슬러그는 일회용이라(아카이브와 충돌 거부) 티켓 키나 날짜 접두를 붙여라.
 
 ## 구조
 
