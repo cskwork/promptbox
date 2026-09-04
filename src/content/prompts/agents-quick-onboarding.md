@@ -1,9 +1,9 @@
 ---
 title: pi 온보딩 한 방 설치
 title_en: One-shot pi setup
-summary: "pi를 기본 코딩 에이전트로 설치하고, cskwork/pi-setup-public을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하며, 운영 지침 AGENTS.md를 모든 에이전트에 연결하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
-summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup-public repository, and restores its settings, agents, skills, and model profiles. It also links the same AGENTS.md operating contract into every coding agent on the machine, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
-tags: [onboarding, pi, pi-setup, agents-md, glm-5.3-flash, multimodal, dotfiles, idempotent]
+summary: "pi를 기본 코딩 에이전트로 설치하고, cskwork/pi-setup-public을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하며, 기본 시스템 프롬프트 cskwork/THE-SYSTEM-PROMPT를 `~/.agents/AGENTS.md`로 받아 모든 에이전트에 연결하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
+summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup-public repository, and restores its settings, agents, skills, and model profiles. It also fetches the default system prompt from cskwork/THE-SYSTEM-PROMPT into `~/.agents/AGENTS.md` and links that one file into every coding agent on the machine, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
+tags: [onboarding, pi, pi-setup, agents-md, system-prompt, glm-5.3-flash, multimodal, dotfiles, idempotent]
 source: https://github.com/cskwork/pi-setup-public
 author: cskwork
 order: 1
@@ -23,8 +23,9 @@ use_case_en: "Restore pi on a new machine or resync an existing installation fro
 2. `~/pi-setup-public`을 정본 저장소와 `git pull --ff-only`로 동기화한다.
 3. `models.json`에서 `glm-5.3-flash`가 `text`와 `image` 입력을 모두 선언했는지 확인한다.
 4. 설치기를 실행해 `~/.pi/agent/` 설정·에이전트·스킬·프로파일을 연결한다.
-5. `AGENTS.md`(운영 지침)를 Claude Code·Codex·Gemini·OpenCode 설정 경로에 심링크해, 어느 에이전트로
-   들어가도 같은 계약을 읽게 만든다.
+5. 기본 시스템 프롬프트를 [`cskwork/THE-SYSTEM-PROMPT`](https://github.com/cskwork/THE-SYSTEM-PROMPT)에서
+   `~/.agents/AGENTS.md`로 받고, 그 한 파일을 Claude Code·Codex·Gemini·OpenCode·pi 설정 경로에 심링크한다.
+   어느 에이전트로 들어가도 같은 계약을 읽는다.
 6. 인증, 모델 목록, 패키지, 텍스트 왕복, 가능한 경우 이미지 입력까지 실제 명령으로 검증한다.
 
 ## 함정
@@ -79,16 +80,23 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
      shell script by guessing.
    - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.
 
-7. Share the operating instructions with every coding agent on this machine.
-   - `~/pi-setup-public/AGENTS.md` is the operating contract: orient, options, delegate, plan, execute,
-     verify, report. Plan confirmation is the last human gate; the agent runs the rest on its own and
-     stops only for data loss, public APIs, security, or migrations.
-   - The installer already links it into `~/.pi/agent/AGENTS.md`. Link the same file into each other agent
-     you use, and skip any directory whose agent is not installed:
-     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.claude/CLAUDE.md`
-     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.codex/AGENTS.md`
-     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.gemini/GEMINI.md`
-     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.config/opencode/AGENTS.md`
+7. Install the default system prompt and share it with every coding agent on this machine.
+   - Canonical source: https://github.com/cskwork/THE-SYSTEM-PROMPT, file `AGENTS.md`. It is the
+     operating contract: orient, options, delegate, plan, execute, verify, report. Plan confirmation is
+     the last human gate; the agent runs the rest on its own and stops only for data loss, public APIs,
+     security, or migrations.
+   - Keep one canonical local copy at `~/.agents/AGENTS.md`:
+     `mkdir -p ~/.agents`
+     `curl -fsSL https://raw.githubusercontent.com/cskwork/THE-SYSTEM-PROMPT/main/AGENTS.md -o ~/.agents/AGENTS.md`
+     If that file already exists and differs, move it to a timestamped backup first and report the path.
+   - Link the one file into each agent you use, and skip any directory whose agent is not installed:
+     `ln -sfn ~/.agents/AGENTS.md ~/.claude/CLAUDE.md`
+     `ln -sfn ~/.agents/AGENTS.md ~/.codex/AGENTS.md`
+     `ln -sfn ~/.agents/AGENTS.md ~/.gemini/GEMINI.md`
+     `ln -sfn ~/.agents/AGENTS.md ~/.config/opencode/AGENTS.md`
+     `ln -sfn ~/.agents/AGENTS.md ~/.pi/agent/AGENTS.md`
+   - The pi installer points `~/.pi/agent/AGENTS.md` at the pi-setup copy of the same contract. Relinking
+     it here keeps one source of truth; the pi-setup copy stays a mirror.
    - If a target is an existing regular file rather than a symlink, move it to a timestamped backup first
      and report the path. Never overwrite my own instructions in place.
    - On Windows, symlinks need Developer Mode or an admin terminal. Copy the file instead and tell me the
@@ -105,7 +113,7 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - `pi --list-models zai` and confirm `glm-5.3-flash` appears.
    - Parse `~/.pi/agent/models.json` and confirm `glm-5.3-flash` has both `text` and `image` inputs.
    - Resolve every operating-instruction link from step 7 and confirm each one points at
-     `~/pi-setup-public/AGENTS.md`.
+     `~/.agents/AGENTS.md`.
    - `pi list` and report the installed package count.
    - If Z.ai auth is ready, run a text round trip:
      `pi -p "reply with exactly: PI-SETUP-OK" --no-session`
