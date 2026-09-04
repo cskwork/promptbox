@@ -39,16 +39,23 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
      shell script by guessing.
    - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.
 
-7. Share the operating instructions with every coding agent on this machine.
-   - `~/pi-setup-public/AGENTS.md` is the operating contract: orient, options, delegate, plan, execute,
-     verify, report. Plan confirmation is the last human gate; the agent runs the rest on its own and
-     stops only for data loss, public APIs, security, or migrations.
-   - The installer already links it into `~/.pi/agent/AGENTS.md`. Link the same file into each other agent
-     you use, and skip any directory whose agent is not installed:
-     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.claude/CLAUDE.md`
-     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.codex/AGENTS.md`
-     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.gemini/GEMINI.md`
-     `ln -sfn ~/pi-setup-public/AGENTS.md ~/.config/opencode/AGENTS.md`
+7. Install the default system prompt and share it with every coding agent on this machine.
+   - Canonical source: https://github.com/cskwork/THE-SYSTEM-PROMPT, file `AGENTS.md`. It is the
+     operating contract: orient, options, delegate, plan, execute, verify, report. Plan confirmation is
+     the last human gate; the agent runs the rest on its own and stops only for data loss, public APIs,
+     security, or migrations.
+   - Keep one canonical local copy at `~/.agents/AGENTS.md`:
+     `mkdir -p ~/.agents`
+     `curl -fsSL https://raw.githubusercontent.com/cskwork/THE-SYSTEM-PROMPT/main/AGENTS.md -o ~/.agents/AGENTS.md`
+     If that file already exists and differs, move it to a timestamped backup first and report the path.
+   - Link the one file into each agent you use, and skip any directory whose agent is not installed:
+     `ln -sfn ~/.agents/AGENTS.md ~/.claude/CLAUDE.md`
+     `ln -sfn ~/.agents/AGENTS.md ~/.codex/AGENTS.md`
+     `ln -sfn ~/.agents/AGENTS.md ~/.gemini/GEMINI.md`
+     `ln -sfn ~/.agents/AGENTS.md ~/.config/opencode/AGENTS.md`
+     `ln -sfn ~/.agents/AGENTS.md ~/.pi/agent/AGENTS.md`
+   - The pi installer points `~/.pi/agent/AGENTS.md` at the pi-setup copy of the same contract. Relinking
+     it here keeps one source of truth; the pi-setup copy stays a mirror.
    - If a target is an existing regular file rather than a symlink, move it to a timestamped backup first
      and report the path. Never overwrite my own instructions in place.
    - On Windows, symlinks need Developer Mode or an admin terminal. Copy the file instead and tell me the
@@ -65,7 +72,7 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - `pi --list-models zai` and confirm `glm-5.3-flash` appears.
    - Parse `~/.pi/agent/models.json` and confirm `glm-5.3-flash` has both `text` and `image` inputs.
    - Resolve every operating-instruction link from step 7 and confirm each one points at
-     `~/pi-setup-public/AGENTS.md`.
+     `~/.agents/AGENTS.md`.
    - `pi list` and report the installed package count.
    - If Z.ai auth is ready, run a text round trip:
      `pi -p "reply with exactly: PI-SETUP-OK" --no-session`
