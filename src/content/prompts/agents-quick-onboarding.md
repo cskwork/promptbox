@@ -82,9 +82,9 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
 
 7. Install the default system prompt and share it with every coding agent on this machine.
    - Canonical source: https://github.com/cskwork/THE-SYSTEM-PROMPT, file `AGENTS.md`. It is the
-     operating contract: orient, options, delegate, plan, execute, verify, report. Plan confirmation is
-     the last human gate; the agent runs the rest on its own and stops only for data loss, public APIs,
-     security, or migrations.
+     operating contract: understand the intended outcome, resolve uncertainty from evidence, agree on
+     scope and observable success, then work autonomously and verify before claiming completion. It asks
+     again only for data loss, public API changes, security consequences, or migrations.
    - Keep one canonical local copy at `~/.agents/AGENTS.md`:
      `mkdir -p ~/.agents`
      `curl -fsSL https://raw.githubusercontent.com/cskwork/THE-SYSTEM-PROMPT/main/AGENTS.md -o ~/.agents/AGENTS.md`
