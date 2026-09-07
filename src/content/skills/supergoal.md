@@ -37,155 +37,140 @@ install: 'git clone https://github.com/cskwork/supergoal-skill && ln -s "$(pwd)/
 ````markdown
 ---
 name: supergoal
-description: Run one objective through a gated build/debug/legacy workflow with expert subagents, Human Feedback approval before implementation, adversarial verification, and a delivery gate. Use for "/supergoal", "supergoal", "build X end to end", "fix this bug", or "add this feature".
-argument-hint: "<objective: an app idea, a bug to fix, or a feature to add>"
-level: 4
+description: Route objective-driven development, verification, planning, "teach/explain", codebase learning, and skill evaluation through the Supergoal workflow. Use when Supergoal is requested or an autonomous delivery workflow is needed.
 ---
 
-# /supergoal
+# About
 
-One objective in, a verified result out. The skill is the **conductor**: it never writes
-production code itself — it decomposes the objective, dispatches **expert subagents** through a
-**forward-only pipeline**, and refuses to declare success until a **machine-checkable gate** passes.
+One objective -> smallest correct change -> verified against ground truth. If invoked, run this skill's
+contract instead of downgrading to an inline shortcut. `SKILL.md` is the router; `reference/` carries procedure.
+Unless explicitly invoked, pure brainstorming and user-driven step-by-step work use normal direct collaboration.
 
-The design is a set of gated lanes over a single shared vault, with an untrusted `claims.md`
-re-verified by an adversary and a literal-bash delivery gate that is never edited to pass —
-everything runs in-session through your harness's sub-agent mechanism (Claude Code: the `Task`/`Agent`
-tool; other CLIs: their sub-task equivalent), with role personas bundled in `agents/`, so there is
-nothing to install. (A plain `git worktree` is still used as the clean-state sandbox for Verify and
-parallel Build — git is already present.)
+**Standing rules (read first, every mode).** Before classifying the mode, read
+`.supergoal/rules/RULES.md` if present. Honor it across phases as top-priority preference, but rules never
+weaken safety gates. Create/edit it only when the user explicitly asks (`reference/rules.md`). Check only
+the repo root (`.supergoal/rules/RULES.md`), and skip the check entirely in an
+ephemeral single-task workspace (auto-LIGHT tier; see role-loop `## Tier selection`).
 
-## Why this exists
+## Core principles
 
-A single agent given a big objective drifts: it skips validation, trusts its own "done", and leaves
-unverified claims. `/supergoal` imposes the discipline a senior team would: validate before
-building, separate the builder from the verifier, prove every claim by re-running it, and gate
-delivery on evidence — not on the agent's own say-so.
+- Ground truth beats proxy: re-run REAL tests, re-read request/docs, and do not optimize to self-grading.
+- Exact proof beats review; implementation is delegated to a builder subagent.
+- LIGHT tier substitutes in-context equivalents for vault artifacts, gate scripts, the Z file, and the builder dispatch; its approval rule and commit bar live in `reference/role-loop.md` `## Tier selection`.
+- Smallest correct change; match surrounding code. Scope-minimalism governs code surface area, not UI
+  quality: polished user-facing UI is baseline correctness.
+- GREENFIELD / DEBUG / LEGACY code changes use Before/After Eval before Build: prove before, target after, and delta with trusted commands (`reference/delivery-gate.md`).
+- Ask only when genuinely ambiguous; resolve code-answerable questions by reading the code.
+- Report for humans: outcome first, Simplified Technical English prose, the project's own vocabulary (`reference/reporting.md`); machine-checked markers stay verbatim.
+- Docs language: for persistent repo docs (`docs/**`, run vaults, `.domain-agent/**`, ADR/spec/changelog), match the target repo's dominant prose language; mixed/none -> the user's language. Keep identifiers, paths, commands, and machine-checked anchors in canonical English so checks keep matching.
+- DEBUG done-bar: a green reported-repro is NOT done. Before commit, print three literal lines and
+  satisfy them - `GATE.owner=` the invariant-owning frame (for a raised exception: the frame that RAISES
+  it via the traceback, not where it surfaces; for recursion: inside the enumerated cycle),
+  `GATE.alt_repro=` a structurally different second repro now passing, `GATE.conformance=`
+  raw-literal returns reachable through the patched path (and its symmetric sibling methods) converted to
+  the module's canonical forms (`S.One` over `1`). Full rules: role-loop "DEBUG hidden-contract gate".
+- Hard stops: a destructive or irreversible step (drop data, force-push, external publish) needs explicit consent; if the real tests cannot pass, report it - never fake a pass.
 
-## Use when
+## Run isolation (GREENFIELD / DEBUG / LEGACY that edits code)
 
-- "/supergoal build a habit-tracker app and ship it"
-- "/supergoal the checkout page hangs intermittently in production — fix it"
-- "/supergoal add SSO to our legacy Django monolith"
-- The user hands off a whole objective and wants the full process run autonomously.
+After mode detection, resolve the source/base branch and target/integration branch (repo policy, else
+ask). Verify both refs before mutating files, then create a run worktree from the source/base branch. Do
+all code work there. Do not mutate the original checkout. Commit or merge only into the verified
+target/integration branch after verification and user acceptance. Commit is hard-gated by the Commit gate
+(`reference/delivery-gate.md`, backstop `templates/commit-gate.sh`): non-green means fix/ask, never commit
+on assumption. Full contract: `reference/role-loop.md`.
 
-## Do NOT use when
+## Mode (classify, state it in one line)
 
-- A single, well-scoped edit ("rename this variable") — do it directly.
-- Pure brainstorming with no intent to build — use `brainstorming`.
-- The user wants to drive each step themselves — use `ultrawork`.
-
-## Step 0 — Mode detection (ALWAYS do this first)
-
-Read the objective and classify it. State the detected mode to the user in one line before proceeding.
-
-| Signal in the objective | Mode | Pipeline (see `reference/pipeline.md`) |
+| Signal in the objective | Mode | Route |
 |---|---|---|
-| "build / make / ship / launch a new app/product/site/tool" | **GREENFIELD** | Intake → **Validate** → Plan → **Human Feedback** → Build → Verify → QA → Deliver |
-| "fix / broken / failing / crash / hang / regression / why does" | **DEBUG** | Intake → Reproduce → Diagnose → **Human Feedback** → Fix → Verify → Deliver |
-| "add / integrate X into existing/legacy codebase" — or "improve / refactor / decouple / clean up / make testable" existing code | **LEGACY** | Intake → Explore → Plan → **Human Feedback** → Build → Verify → QA → Deliver |
-| "explain / understand / teach me / how does X work" (learn, no code change) | **LEARN** | Intake → Source → **Bridge** → Teach loop → **Check (explain-back)** → Journal |
+| build / make / ship a new app/tool | GREENFIELD | default loop; broad/foggy builds first use a `wayfinder/` Frontier Map inside the run vault, then deliver one selected frontier ticket |
+| fix / broken / failing / crash / why does | DEBUG | default loop; observe live symptom, then failing-test repro (`reference/debugging.md`, driver persona `agents/debugger.md`); web: `reference/qa.md`, `reference/agent-browser.md` |
+| add / integrate / refactor existing code | LEGACY | default loop; map first (`agents/explore.md`, `reference/domain-context.md`); optional DB evidence (`reference/db-access.md`); existing API: capture its exact behavior first as a preserve-baseline; shared code/state changes: characterization baseline (`reference/qa.md`) |
+| spec / requirements first / break down / tickets / roadmap / big vague effort / frontier / what should we do first | WAYFINDER | map the destination, optional ticket-depth requirements, ticket graph, blockers, and next frontier; no product code by default (`reference/wayfinder.md`) |
+| prototype / spike / try variants / prove approach before build | PROTOTYPE | throwaway proof that answers one question, then delete/quarantine or route to delivery (`reference/prototype.md`) |
+| explain / teach / how does X work (no code) | TEACH | stateful `teach/<topic>/` workspace (`reference/teach.md`); use an Archify diagram by default for structure/flow; lessons must pass `node templates/teach-lesson-gate.mjs` |
+| learn / onboard / map this codebase (persist a wiki) | LEARN-DOMAIN | Survey -> Map -> Ground -> Onboard a `.domain-agent/` wiki (`reference/learn-domain.md`; gate `templates/learn-grounding-gate.mjs`) |
+| QA / verify / 검증만 / compare data (no code) | QA-ONLY | Impact Matrix QA (`reference/qa-only.md`; gate `templates/qa-only-gate.sh`) |
+| review / audit this code/diff/PR (no fixes) | REVIEW-ONLY | `reference/review-only.md` |
+| improve the architecture / find refactoring opportunities / 구조 개선 / draw · diagram · 그려 (arch·flow·sequence·state) | ARCHITECTURE | draw-only ask: render self-contained HTML via `reference/archify.md`, deliver the `.html`, stop. Else friction survey -> candidates -> grill the pick -> route to LEGACY/WAYFINDER (`reference/arch.md`) |
+| test harness/skill effectiveness / with vs without / does the skill help / measure skill lift | HARNESS-EVAL | `reference/harness-eval.md` |
+| turn repeated work into a reusable skill | SKILL-MINE | `reference/skill-mine.md` |
 
-If ambiguous, ask ONE clarifying question, then proceed. Mode picks the pipeline; the gates and the
-vault are identical across modes.
+**Tier (code modes; state it with the mode line).** GREENFIELD / DEBUG / LEGACY also declare
+LIGHT / STANDARD / DEEP per `reference/role-loop.md` `## Tier selection`. User words
+"quick"/"light" or "thorough"/"deep" override detection; upgrade is one-way, never downgrade.
 
-LEARN is the exception: it writes no code and skips the implementation gates — it runs the teach-and-check flow in `reference/learn.md` and journals to `learn/`.
+The no-code/utility/planning modes - **QA-ONLY**, REVIEW-ONLY, ARCHITECTURE, WAYFINDER, PROTOTYPE, TEACH,
+LEARN-DOMAIN, HARNESS-EVAL, SKILL-MINE - write no product code by default and confirm before installing
+anything. PROTOTYPE may write throwaway sandbox code; it cannot ship until routed back through delivery.
 
-**Topology rule** (the research thesis — task shape, not preference, picks the architecture):
-fan out parallel subagents only for *wide-and-shallow* work (Validate research, scaffolding several
-modules). Keep a *single driving agent* for *deep-and-narrow* work — so **DEBUG and LEGACY default to
-single-driver** with isolated helpers only for independent probes. **All modes require Human
-Feedback approval before the first implementation write**. Details in `reference/pipeline.md`.
+**UI/UX overlay (any mode shipping user-facing UI).** Load `reference/ui-ux.md` at Frame; apply the
+Expressive/polished baseline by default (`reference/taste-skill-v2.md` is the authority for ALL
+user-facing UI), through Build and Verify. GREENFIELD frontend: always; LEGACY: only new UI (else reuse
+the existing design system); non-visual work (lib, API, backend, CLI): skip.
 
-**Domain routing** (advisory): right after mode detection, route the objective through the
-`ten-rules` skill and distill **≤10 abstract priority rules** for the detected domain(s). Record them
-once in the run's `README.md` (`## Priority Rules`) and carry them into every phase. They shape
-Plan/Build/Review quality; they never replace or override the hard gates. Mechanism:
-`reference/domain-rules.md`.
+**Board overlay (optional).** If the live dashboard is enabled, the conductor calls `sg-emit` at each
+phase transition; it observes only, never gates (`reference/observability.md`).
 
-**UI/UX overlay**: if the objective ships user-facing visual UI (landing page, redesign, "make it
-look good", frontend look-and-feel), load `reference/ui-ux.md` — it makes the vendored taste-skill v2
-(`reference/taste-skill-v2.md`) the design authority and adds a Designer role + a pre-flight QA gate.
-Loaded on demand only; modes and gates are unchanged.
+## Default loop (GREENFIELD / DEBUG / LEGACY) - five gates, fresh context per gate
 
-**Plan grounding**: in the Plan phase, before `plan.md` freezes, the planner grounds it against the
-project's own domain/architecture — agent-run, no human round-trip (the human's one approval stays
-the later Human Feedback gate). Feature/novel work self-runs a `grill-with-docs`-style design-tree
-grill, **answering each challenge itself** from the explored docs; "improve / refactor" objectives
-self-run an `improve-codebase-architecture`-style deepening pass. Method: `reference/plan-grounding.md`.
+Load and follow `reference/role-loop.md`; it is the sole detailed authority for run setup, vault
+lifecycle, role inputs/outputs, retries, verification, and finalization. Invoking `supergoal` for these
+modes is explicit authorization to use its fresh-context subagents; ask again only for normal safety or
+permission gates. Red-green evidence is required, plus DB evidence when persisted data is load-bearing.
 
-## The non-negotiable gates
+Mandatory core: Frame -> Plan approval -> Build -> Exact Verify/QA -> Finalize. Use one builder + one
+auditor verifier per iteration; browser/CLI proof adds one evidence-only qa-tester before the auditor.
+Only a named, recorded escalation trigger permits the conditional plan attack. Frame writes `GOAL.md`
+first and freezes a self-sufficient `PLAN.md`; Build starts only after approval and runs in a separate
+fresh-context builder from that plan; `qa-tester` captures the promised browser/CLI evidence, then a
+fresh adversarial verifier (`qa-auditor`) reruns REAL tests, audits the promised E2E/live/API/browser
+proof, and owns the final verdict, GOAL ticks, and R-LOOP.
+Finalize requires every criterion green, the completion marker, user acceptance, and the commit gate.
+Exact verification outranks review.
 
-These are the spine. Never weaken or skip them; never edit a gate to make it pass
-(`reference/quality-gates.md`).
+Roles -> personas: builder/improver=`agents/executor.md`, evidence-only browser/CLI tester=
+`agents/qa-tester.md`, final verifier for every default-loop path=`agents/qa-auditor.md`, escalation
+reviewer=`agents/code-reviewer.md`, security=`agents/security-reviewer.md` (others in
+`agents/<role>.md`).
 
-1. **Validate-before-build** (GREENFIELD): Build won't open until `templates/validate-gate.sh <vault>` exits 0 (requires `Decision: GO` in `brief.md`). Details: `reference/quality-gates.md`.
-2. **Plan freezes scope**: `plan.md` is written once and frozen; Build/Fix implements it, does not redesign.
-3. **Human Feedback before implementation**: after the brief, reproduction/diagnosis, and plan are ready, pause for explicit human approval. `plan.md` must contain a top plain-language brief and a lower technical novice-dev brief; `templates/human-feedback-gate.mjs <vault> <Build|Fix>` must pass before Build/Fix opens.
-4. **Builder ≠ Verifier**: the agent that writes code does not get to approve it. A fresh **adversarial
-   Verify** agent re-runs every `run-to-prove` command in `claims.md` from a clean state — a fresh
-   `git worktree` at the build commit, never the builder's dirty tree. Before the GREEN verdict, a
-   **completeness critic** names what the claim set omits, and **high-severity claims get a ≥3-lens
-   verifier panel** (majority RED → RED). `reference/quality-gates.md`.
-5. **Multi-expert review before deliver**: architect + security-reviewer + code-reviewer run in parallel; ALL must approve (`reference/experts.md`).
-6. **Literal delivery gate**: `templates/delivery-gate.sh` must exit 0 — required artifacts present, aggregate `verdict: GREEN`, a **`## Coverage` map with `Not covered:` + `Regression tests:` lines** (completeness contract — a GREEN verdict means *every enumerated claim re-verified*, NOT *safe*), `Decision: GO` for greenfield, project tests pass. Skill cannot announce "done" otherwise.
-7. **Bounded retry + circuit breaker**: max 5 fix cycles per phase; the same normalized error signature 3x trips `templates/circuit-breaker.mjs` → stop, root-cause to user. Mechanism: `reference/vault.md`.
-
-## The vault (only cross-phase state)
-
-Every run creates `docs/changelog/<date>-<slug>/` in the target repo — the single blackboard every
-phase reads from and writes to, committed as the run's permanent changelog. Phases run as fresh
-subagent contexts, so the vault is how they communicate. Full contract in `reference/vault.md`.
-Six files: `README.md`, `brief.md`, `plan.md`, `claims.md`, `verification.md`, `state.json`. Per-file contracts: `reference/vault.md`.
-
-## Expert roster
-
-Roles are dispatched as subagents, each a fresh context with the minimum vault read-set. Each role's persona is a **bundled file in `agents/<role>.md`** (the system prompt to spawn), so dispatch is **harness-agnostic** — Claude Code, Codex, agy, or any CLI: select the file, spawn a fresh sub-context with it (or run it as an isolated pass where no sub-agent mechanism exists), collect only its summary. The Claude Code plugin wrapper is optional ergonomics, never a dependency. Verifier is `allowedTools`-scoped to `claims.md` + source only where the harness enforces it (`reference/experts.md`). See `reference/experts.md` for the full dispatch table, the harness-agnostic dispatch procedure, and parallel-wave rules. UI/UX jobs add a **Designer** role bound to `reference/taste-skill-v2.md` (see `reference/ui-ux.md`).
-
-## Reference map (progressive disclosure — load only what the current phase needs)
+## Reference map (load only what the current phase needs)
 
 | Read this | When |
 |---|---|
-| `reference/pipeline.md` | Always — the phase definitions and exit gates for the detected mode |
-| `reference/experts.md` | When dispatching any phase — role → persona-file → model-tier map + the harness-agnostic dispatch procedure |
-| `agents/<role>.md` | When dispatching a role — the bundled persona (system prompt) to spawn; one file per role, harness-agnostic |
-| `reference/vault.md` | At Intake (create vault) and whenever a phase passes state |
-| `reference/domain-rules.md` | At Intake — route the objective to its `ten-rules` domain(s); distill the ≤10 priority rules carried through the run |
-| `reference/market-research.md` | GREENFIELD Validate phase — demand-validation methods |
-| `reference/quality-gates.md` | Verify, Review, and Deliver phases — what "production-ready" means |
-| `reference/debugging.md` | DEBUG mode Diagnose phase — runs the `diagnose` skill's feedback-loop method |
-| `reference/learn.md` | LEARN mode — the teach/check flow + journaling pointer |
-| `reference/plan-grounding.md` | Plan phase (GREENFIELD/LEGACY) — agent-run domain/architecture grounding before the plan freezes |
-| `reference/qa.md` | QA phase — drive the running web/CLI app (agent-browser via subagent), record as-is/to-be evidence |
-| `reference/ui-ux.md` | When the objective ships visual UI — the taste-skill v2 overlay (Plan/Build/QA) |
-| `reference/taste-skill-v2.md` | Designer Build + QA pre-flight on UI/UX jobs — vendored design authority (large; load only then) |
+| `reference/role-loop.md` | default loop + run isolation contract |
+| `agents/<role>.md` | dispatch a role persona |
+| `reference/domain-rules.md` | Frame: distill <=10 priority rules |
+| `reference/rules.md` | read project standing rules (`.supergoal/rules/RULES.md`) first, before any mode |
+| `reference/domain-context.md` | repo-local Domain Brief |
+| `reference/debugging.md` | DEBUG: hypothesis-ledger diagnose loop |
+| `reference/interview.md` | interview: ambiguity (what) + blast-radius confirm (approach, tiered) |
+| `reference/reporting.md` | any user-facing message: plan/spec presentation, interview questions, verdicts, final report |
+| `reference/delivery-gate.md`, `templates/GOAL.md`, `templates/PLAN.md`, `templates/QA.md`, `templates/R-LOOP.md`, `templates/Z-DONE.md`, `templates/run-state.json`, `templates/commit-gate.sh` | run vault file set + Before/After Eval + resumable run state + commit gate for GREENFIELD / DEBUG / LEGACY code changes |
+| `reference/wayfinder.md` | WAYFINDER: issue map -> vertical tickets -> optional EARS/user-story depth -> blockers -> next frontier; also GREENFIELD internal Frontier Map for broad/foggy new builds |
+| `reference/research.md` | WAYFINDER research-needed tickets; docs/API/source facts that need high-trust cited evidence |
+| `reference/prototype.md` | PROTOTYPE: throwaway logic/UI proof -> capture answer -> delete/quarantine or route to delivery; UI/interaction prototypes must also load the installed `superdesign` skill |
+| `reference/vercel-host.md` | PROTOTYPE: after explicit approval, publish an isolated browser prototype to a public Vercel URL and verify anonymous access |
+| `reference/plan-grounding.md` | ground the approach before committing |
+| `reference/db-access.md`, `templates/db-access/` | read-only DB evidence (required when persisted data is load-bearing) |
+| `reference/qa.md`, `qa-only.md`, `agent-browser.md`, `playwright-cli.md` | QA / no-code verify; agent-browser default, playwright-cli fallback |
+| `reference/review-only.md` | REVIEW-ONLY: findings, no fixes |
+| `reference/arch.md` | ARCHITECTURE: friction survey -> route out |
+| `reference/archify.md`, `templates/archify/` | diagrams as self-contained HTML (typed JSON IR -> validated render): ARCHITECTURE reports, TEACH lessons, and LEARN-DOMAIN onboarding |
+| `reference/teach.md`, `learn-domain.md` | teach a human / onboard the agent |
+| `reference/ui-ux.md`, `taste-skill-v2.md`, `functional-ui.md`, `taste-aesthetics.md`, `engagement.md` | user-facing UI tier |
+| `reference/harness-eval.md`, `templates/harness-eval-runner.mjs`, `templates/harness-eval-external/deepswe/run-default-suite.mjs` | HARNESS-EVAL; the runner is the DEFAULT portable eval driver (adapters + preflight + fallback + retry, serial by default). Difficult SWE/harness-effectiveness claims default to the forced five-task DeepSWE suite (measured-difficult tasks) - use it, don't hand-roll a single-CLI run.mjs |
+| `reference/skill-mine.md` | SKILL-MINE |
+| `reference/market-research.md` | GREENFIELD: validate demand (optional) |
+| `reference/observability.md`, `tui/` | Board: opt-in live dashboard |
 
-### Template scripts (referenced by the gates above)
-
-| Script | Gate |
-|---|---|
-| `templates/delivery-gate.sh` | Deliver — hard exit-0 check for artifacts + tests |
-| `templates/validate-gate.sh <vault>` | GREENFIELD Validate — machine-checks `Decision: GO` in `brief.md` before Build opens |
-| `templates/human-feedback-gate.mjs <vault> <Build\|Fix>` | Human Feedback — checks the two approval briefs and recorded human approval before Build/Fix opens |
-| `templates/circuit-breaker.mjs <state.json> <sig>` | Each failed fix cycle — trips at 3 identical normalized error signatures |
-
-## Escalation & stop conditions
-
-- Circuit breaker tripped (`circuit-breaker.mjs` exits 1) → stop, root-cause to user.
-- Validate phase finds no demand evidence (GREENFIELD) → stop, report; do not build on spec.
-- Human rejects or changes the plan → do not Build/Fix; re-open Plan/Diagnose, update the vault, and ask again.
-- Delivery gate cannot pass after fixes → report exactly which check fails; never fake the gate.
-- Destructive or irreversible step needed (drop data, force-push, external publish) → ask first.
-
-## Final checklist (before claiming done)
-
-- [ ] Mode stated and correct pipeline run
-- [ ] Plan grounded (`reference/plan-grounding.md`, agent-answered) before the plan froze
-- [ ] Human Feedback stage produced the plain-language and technical briefs, and approval was recorded before Build/Fix
-- [ ] Every `claims.md` entry has a GREEN verdict in `verification.md` from the adversarial pass
-- [ ] `verification.md` carries a `## Coverage` map (acceptance criteria + domain checklist), a `Not covered:` line, and a `Regression tests:` line; a completeness critic found no un-named gap
-- [ ] architect + security + code-review all approved
-- [ ] `delivery-gate.sh` exited 0 — paste the output as evidence
-- [ ] the run's `README.md` captures the key choices and any escalations
-- [ ] Reported what was verified, with command output — no unverified "done"
+**Done =** mode stated; smallest diff; Before/After Eval complete for code-mode changes; REAL
+tests + request/docs green (not proxy); runtime MUST proven by real behavior; code-mode runs use
+red-green test + DB evidence if data load-bearing; neighbor snapshots re-run with unnamed drift resolved; every
+`GOAL.md` Success Criterion checked, with no orphan scope; `Z-<date>.md` written with run branch +
+completion timestamp; DEBUG prod issue has reproduction fidelity and, if
+non-exact, residual risk + post-deploy confirmation plan; user-facing UI at the Expressive baseline;
+destructive steps consented; commit/merge only after the commit gate passes (`reference/delivery-gate.md`);
+verified commands reported.
 ````

@@ -57,108 +57,107 @@ iwr -useb https://raw.githubusercontent.com/cskwork/claude-codex-skill/main/inst
 ````markdown
 ---
 name: codex-cli
-description: Delegate code review, code implementation, or image generation to the OpenAI Codex CLI for a second opinion. Image generation works through ChatGPT login alone — no OPENAI_API_KEY required.
-when_to_use: User types /codex-cli, or asks to "use codex" / "ask codex" / "have codex" do X, or wants a second-opinion code review, or requests an image that Codex can produce.
-allowed-tools: Bash(codex *) Bash(cp *) Bash(ls *) Bash(Get-ChildItem *) Bash(Copy-Item *) Read
+description: Delegate a bounded review, implementation, or image task to local Codex CLI when the user requests Codex or its capabilities are needed.
 ---
 
-Wrap the local codex CLI (codex --version >= 0.128.0) so Claude Code can hand
-off three kinds of work without leaving the conversation:
+# codex-cli
 
-- review — second-opinion code review on a diff
-- impl — non-interactive coding task in a sandbox
-- image — image generation via Codex built-in image_gen.imagegen tool
-  (no API key, ChatGPT login is enough)
+Wrap the local `codex` CLI so Claude Code can hand off three kinds of work without leaving the conversation:
+
+- **review** — second-opinion code review on a diff
+- **impl** — non-interactive coding task in a sandbox
+- **image** — image generation via Codex's built-in `image_gen.imagegen` tool (no API key, ChatGPT login is enough)
 
 ## Verify once per session
 
-codex --version          # codex-cli >= 0.128.0
+```bash
+codex --version          # codex-cli ≥ 0.128.0
 codex login status       # must say "Logged in"
+```
 
-If not logged in, tell the user to run `! codex login` from the prompt. Do not
-log in on their behalf.
+If not logged in, tell the user to run `! codex login` from the prompt. Do not log in on their behalf.
 
 ## Pick the mode
 
-Parse $ARGUMENTS. First token selects review | impl | image; rest is prompt or
-flags. If /codex-cli invoked with no subcommand, infer:
+The first word of the invocation selects the mode (`review | impl | image`); everything after it is the prompt or flags. With no mode word, infer:
 
-- mentions "review", "diff", "PR", "second opinion" -> review
-- mentions "image", "picture", "render", "draw", "그려" -> image
-- otherwise -> impl
+- mentions "review", "diff", "PR", "second opinion" → review
+- mentions "image", "picture", "render", "draw", "그려" → image
+- otherwise → impl
 
-State the mode you picked so the user can correct you.
+State the mode you picked in your reply so the user can correct you.
 
 ## Mode: review
 
+```bash
 codex review --uncommitted              # staged + unstaged + untracked
 codex review --base main                # PR-style against base branch
 codex review --commit <sha>             # one specific commit
-"Focus on concurrency. Skip nits." | codex review --uncommitted -
+printf '%s\n' "Focus on concurrency. Skip nits." | codex review --uncommitted -
+```
 
-After it returns, paraphrase findings; group by CRITICAL / HIGH / MEDIUM / LOW
-per ~/.claude/rules/common/code-review.md. Cite file:line per finding.
+After it returns, group the findings by **CRITICAL / HIGH / MEDIUM / LOW** and cite `file:line` per finding.
 
-Codex review is second opinion, not ground truth. If it contradicts something
-already verified in this session, flag the conflict instead of silently siding
-with Codex.
+Codex's review is a second opinion, not ground truth. If it contradicts something already verified in this session, flag the conflict to the user instead of silently siding with Codex.
 
 ## Mode: impl
 
-codex exec "<prompt>" -s workspace-write -C "<absolute path>" \
+```bash
+# One-shot non-interactive (preferred)
+codex exec "<prompt>" \
+  -s workspace-write \
+  -C "<absolute path>" \
   --output-last-message codex-out.txt
 
+# Read-only research / planning
 codex exec "<prompt>" -s read-only -C "<path>"
+
+# Long prompt via stdin
 cat prompt.md | codex exec -s workspace-write -C "<path>" -
+
+# Continue most recent session
 codex exec resume --last "<follow-up>"
+```
 
-Sandbox: default workspace-write. read-only for analysis/plan. Always pass -C
-absolute path. Do NOT pass -s danger-full-access or
---dangerously-bypass-approvals-and-sandbox without explicit per-run approval.
+Sandbox policy:
 
-After Codex finishes, read codex-out.txt (or the diff) and summarize. Do not
-rerun `codex apply` without asking.
+- Default `workspace-write` (network on, writes inside `-C` only).
+- Use `read-only` when the user wants analysis or a written plan with no edits.
+- Pass `-C` with the intended absolute project path so the task cannot run in an accidental working directory.
+- Escalating past the sandbox needs explicit per-run user approval: `-s danger-full-access` turns off the sandbox, and `--dangerously-bypass-approvals-and-sandbox` turns off both the sandbox and the approval gate (it exists for externally-sandboxed CI).
+
+After Codex finishes, inspect the diff, generated artifacts, and verification evidence before reporting the outcome. Apply a separate returned patch only when the user authorized that target; do not reapply changes already present.
 
 ## Mode: image
 
-Codex has built-in image tool (image_gen.imagegen). Activates when
-`codex features list` shows image_generation = stable, true. Auth uses
-codex login — ChatGPT login is enough.
+Codex has a built-in image tool (`image_gen.imagegen`). It activates automatically when `codex features list` shows `image_generation = stable, true`. Authentication uses your `codex login` — ChatGPT login is enough; no `OPENAI_API_KEY` needed.
 
-codex exec --skip-git-repo-check -s workspace-write -C "<absolute dir>" \
+Invoke:
+
+```bash
+codex exec --skip-git-repo-check \
+  -s workspace-write \
+  -C "<absolute path to output dir>" \
   "Generate an image of <prompt>, 1024x1024. Save the result as <name>.png in the current working directory."
+```
 
-CRITICAL prompt rule: do NOT tell Codex to "use the OpenAI API", "use curl",
-"use python", or "use openai CLI". Those force shell-out needing
-OPENAI_API_KEY. Just say generate and save — Codex picks built-in tool.
+**Critical prompt rule.** Do NOT tell Codex to "use the OpenAI API", "use curl", "use python", or "use openai CLI". Those instructions force a shell-out path that needs `OPENAI_API_KEY`. Just say *generate and save* — Codex picks its built-in tool.
 
-Where the file lands: ~/.codex/generated_images/<session_id>/ig_<hash>.png
-Then Codex tries to copy to workspace via shell. On Windows codex-cli 0.128.0
-the copy fails (CreateProcessAsUserW failed: 5) even though generation
-succeeded. Do NOT escalate to danger-full-access. Copy yourself:
+**Where the file lands.** Codex writes the PNG to `~/.codex/generated_images/<session_id>/ig_<hash>.png`, then tries to copy it to the workspace via shell. On Windows codex-cli 0.128.0 the copy step often fails (`CreateProcessAsUserW failed: 5`) even though generation succeeded. Do NOT escalate to `-s danger-full-access` for this — copy the file yourself:
 
-PowerShell:
-$src = Get-ChildItem "$env:USERPROFILE\.codex\generated_images" -Recurse -Filter "ig_*.png" |
-  Sort-Object LastWriteTime -Descending | Select-Object -First 1
-Copy-Item $src.FullName "<output path>\<name>.png"
-
-bash:
-src=$(ls -t ~/.codex/generated_images/*/ig_*.png 2>/dev/null | head -1)
-cp "$src" "<output path>/<name>.png"
+Use the exact generated image path returned by this invocation and copy it to the requested output path. Verify the file exists and inspect it before reporting success. Do not select the globally newest generated image: another session may have created it. If the invocation did not identify its artifact, inspect that session’s output or report the missing path.
 
 Show the user the absolute path. Do not embed PNG bytes in chat.
-Supported sizes: 1024x1024, 1536x1024, 1024x1536.
+
+**Supported sizes:** `1024x1024` (square), `1536x1024` (landscape), `1024x1536` (portrait). For unsupported sizes, list the valid options instead of failing silently.
 
 ## Safety
 
-- Do not send confidential code/prompts to Codex without confirming.
-- Do not generate images of real identifiable people without consent.
-- Do not pass --dangerously-bypass-approvals-and-sandbox (CI-only).
-- Do not pass -s danger-full-access without explicit per-run user approval.
+- Send confidential code or prompts only when the user explicitly authorized sharing that material with Codex; reuse that authorization for the same bounded task.
 
 ## Output discipline
 
-- Don't stream Codex stdout unless asked. Summarize.
-- Save long sessions to codex-out.txt and quote only what's relevant.
-- Always state the mode and exact command so the user can rerun.
+- Summarize Codex's output; stream raw stdout only when the user asked for it.
+- Save long sessions to `codex-out.txt` and quote only what's relevant.
+- Always state the mode you ran and the exact command, so the user can rerun it.
 ````

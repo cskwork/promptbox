@@ -66,5 +66,4 @@ python3 ~/.codex/skills/naver-cloud-vpn/scripts/naver_vpn.py --connect
 The connection stays attached to the command. `Ctrl+C` stops it. The script refuses an occupied OpenVPN management port and removes temporary profile and authentication files on every handled exit.
 
 Treat `AUTH_OK` as credential proof only. Treat `CONNECTED` as tunnel-process proof only. Route behavior remains unverified unless separately checked.
-
 ````

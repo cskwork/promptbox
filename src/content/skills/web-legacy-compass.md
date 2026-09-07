@@ -57,7 +57,7 @@ install: "git clone https://github.com/cskwork/web-legacy-compass.git && cd web-
 ````markdown
 ---
 name: web-legacy-compass
-description: Trace real legacy-web user flows before changing frontend or API code. Use for feature work or debugging where request order, important payload fields, browser state, frontend console output, backend business exceptions, and database reads or writes must be correlated and recorded.
+description: Trace real legacy-web user flows before changing frontend or API code. Use for feature work or debugging where request order, client state, backend exceptions, and DB reads/writes must be correlated.
 ---
 
 # Web Legacy Compass
@@ -80,7 +80,7 @@ Create the investigation record immediately and update it throughout the work. U
 docs/web-flows/YYYY-MM-DD-<feature-or-bug>.md
 ```
 
-Start from `templates/FLOW-RECORD.md`.
+Start the record from `templates/FLOW-RECORD.md`.
 
 ## Operating constraints
 
@@ -115,7 +115,7 @@ Mark missing access in the record and continue with the strongest available evid
 
 Record the initial URL, visible state, user/tenant/role when relevant, selected entity, filters, browser storage relevant to the behavior, and any pre-existing console errors.
 
-Start network and trace capture **before** reproducing the flow. Use the routing rules in `references/BROWSER-TOOL-ROUTING.md`.
+Read `references/BROWSER-TOOL-ROUTING.md` for browser selection and capture commands before opening the browser. Start network and trace capture **before** reproducing the flow.
 
 ### 3. Reproduce the exact user journey
 
@@ -159,11 +159,11 @@ For every state-changing or selection-critical request, identify:
 - the tables/entities inserted, updated, or deleted;
 - transaction boundaries and secondary effects.
 
-Use `references/EVIDENCE-MODEL.md` for payload, data, and log rules.
+Read `references/EVIDENCE-MODEL.md` before recording payload, database, client-state, or log evidence.
 
 ### 5. Parallelize analysis without corrupting browser state
 
-For non-trivial flows, split independent code analysis after creating a shared reproduction packet. Use one browser owner only.
+Use one browser owner. Delegate disjoint code analysis only when it reduces work or adds useful independent review; prepare the shared reproduction packet first.
 
 Recommended roles:
 
@@ -175,7 +175,7 @@ Recommended roles:
 
 Give each analyst the same sequence IDs, endpoint list, important payload fields, timestamps/correlation IDs, and scoped question. Tell subagents not to delegate recursively. The main agent must verify findings against source code or runtime evidence; do not merely concatenate reports.
 
-When parallel agents are unavailable, perform the roles sequentially in the same order. See `references/SUBAGENT-PATTERN.md`.
+Read `references/SUBAGENT-PATTERN.md` for the handoff packet, role prompts, and merge procedure before writing the first delegated prompt. Otherwise analyze directly in the order required by the evidence; roles are coverage aids, not mandatory passes.
 
 ### 6. Find the earliest meaningful divergence
 
@@ -257,13 +257,4 @@ Do not declare completion until all applicable statements are true:
 - [ ] The earliest divergence is supported by evidence and has a disproof check.
 - [ ] The implementation is minimal, regression-tested, and replayed through the actual browser flow.
 - [ ] The final Markdown record matches the implemented behavior.
-
-## Reference loading
-
-Read only the reference needed for the current stage:
-
-- browser selection and commands: `references/BROWSER-TOOL-ROUTING.md`
-- payload, database, state, and logging evidence: `references/EVIDENCE-MODEL.md`
-- parallel-agent handoff and verification: `references/SUBAGENT-PATTERN.md`
-- investigation/output document: `templates/FLOW-RECORD.md`
 ````
