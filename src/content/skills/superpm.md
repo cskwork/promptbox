@@ -51,7 +51,7 @@ PM(제품/프로젝트 관리, Product/Project Management) 요청 하나를 받�
 ````markdown
 ---
 name: superpm
-description: "Produce focused PM artifacts and verify them with a critic. Use for PRDs, strategy, OKRs, roadmaps, specs, research, analytics, GTM, growth, pricing, positioning, market signals, release notes, retros, and resume reviews."
+description: Produce product planning, strategy, research, analytics, and launch artifacts with independent critique. Includes PRDs, roadmaps, user flows, screen specs, implementation handoffs, and resume or policy-document review.
 ---
 
 # /superpm - one PM request, a verified artifact
@@ -69,26 +69,33 @@ one-paragraph note you could write directly, skip the skill.
 - **Smallest useful artifact.** Only the frameworks the decision needs - no bolted-on
   SWOT/persona/roadmap when the ask was one pricing call.
 - **Ground claims in evidence.** Numbers, quotes, segments come from the user's data, docs, or
-  named assumptions - never invented. Market/customer claims: pull real signal via
-  `reference/signal.md` (read-only, keyless) before asserting.
+  named assumptions - never invented.
 - **Surface hidden assumptions.** The critic names unstated assumptions and missing pieces as
   risks - never present an assumption as fact.
 - **Ask only when genuinely ambiguous.** Read the repo/docs/data first; interview only
   load-bearing, user-only choices (`reference/intent.md`).
 - **Hard stops.** Irreversible or outward-facing actions (publish, send, post, share
   externally) need explicit consent.
+- **Trace the chain.** EXECUTE -> FLOW -> STORYBOARD -> PACKAGE share the 기능명세 (SPEC) as one
+  source of truth (`reference/model.md`); a flow node or screen callout with no SPEC is never
+  invented. Derived artifacts come from the spec, not beside it.
 
 ## Intent capture - signal to domain
 
 Read the request and route to one domain (the artifact named usually decides it). When the ask
-spans domains, pick the primary deliverable and pull supporting frameworks from the others.
+spans domains, pick the primary deliverable and pull supporting frameworks from the others. When
+the ask is to **plan a buildable thing end-to-end** (기획하자 / 개발하고 싶어, no single artifact
+named), route to **PLAN** - a stepped session over the chain, not one artifact (`reference/plan.md`).
 
 | Signal in the request | Domain | Reference |
 |---|---|---|
+| 기획하자 / 이거 개발하고 싶어 / 기획 도와줘 / plan this feature end-to-end / PRD부터 화면까지 | **PLAN** (session) | `reference/plan.md` |
 | brainstorm ideas / risky assumptions / opportunity tree / prioritize features / customer interview / metrics | **DISCOVER** | `reference/discover.md` |
 | product strategy / vision / value proposition / lean or business model / monetization / pricing / SWOT / PESTLE / Porter / Ansoff | **STRATEGY** | `reference/strategy.md` |
 | PRD / OKRs / roadmap / sprint plan / retro / pre-mortem / user or job stories / stakeholder map / prioritization framework / red-team a plan | **EXECUTE** | `reference/execute.md` |
+| user flow / 유저플로우 / flowchart / screen-to-screen flow / 화면 흐름 / 분기·상태 전이 | **FLOW** | `reference/flow.md` |
 | 화면설계서 / 기능명세 / 스토리보드 / screen design doc / screen spec / wireframe / UI spec | **STORYBOARD** | `reference/storyboard.md` |
+| implementation package / 구현 패키지 / 통합 산출물 번들 / export bundle / hand off to devs | **PACKAGE** | `reference/package.md` |
 | personas / segments / customer journey / market sizing (TAM/SAM/SOM) / competitor analysis / sentiment | **RESEARCH** | `reference/research.md` |
 | SQL from a question / cohort analysis / A/B test read-out | **ANALYTICS** | `reference/analytics.md` |
 | go-to-market / beachhead / ICP / growth loops / GTM motion / battlecard | **GTM** | `reference/gtm.md` |
@@ -116,16 +123,22 @@ in `reference/signal.md` first.
 
 4. **Critic (independent).** Run `reference/critic.md`. Independence is mechanical: if the
    harness supports subagents, hand a fresh one only the `## Intent` block + the draft;
-   otherwise switch stance and read cold. Red-team: missing framework sections, unsupported
-   claims, unvalidated assumptions, dodged decisions - each emitted as a risk. Do not
+   otherwise switch stance and read cold. Red-team all four checks: missing framework sections,
+   unsupported claims, dodged decisions, unvalidated assumptions - each emitted as a risk. Do not
    self-congratulate a draft to green.
 
 5. **Deliver.** Fold blockers and gaps back in; leave user-owned risks in a `## Critic` block.
    Response shape: artifact -> remaining risks -> one line on what was checked against what ->
-   the one natural next artifact in the chain (DISCOVER -> STRATEGY -> EXECUTE -> STORYBOARD ->
-   GTM/GROWTH; ANALYTICS measures any) - offer it, don't start it. Inline by default; write
-   files when multi-page or multi-file (storyboard: always files) and report paths.
+   the one natural next artifact in the chain (DISCOVER -> STRATEGY -> EXECUTE -> FLOW ->
+   STORYBOARD -> PACKAGE; GTM/GROWTH for launch; ANALYTICS measures any) - offer it, don't start
+   it. Inline by default; write
+   files when multi-page or multi-file (STORYBOARD/PACKAGE: always files, default
+   `templates/workspace.html` - the interactive SSOT canvas) and report paths.
    Outward/irreversible steps wait for explicit consent.
+
+For a **PLAN session** (`reference/plan.md`), run this loop once per stage
+(EXECUTE -> FLOW -> STORYBOARD -> PACKAGE), gating for the user after each and carrying the running
+SSOT JSON forward; the whole chain is the deliverable, ending in `workspace.html` + a PACKAGE.
 
 ## Follow-up turns
 
@@ -138,24 +151,17 @@ The loop is per-artifact, not per-message. On iteration:
   DISCOVER follows the idea-proposal batch rule (`reference/discover.md`).
 - Keep the loaded domain reference; do not re-read it each turn.
 
-## Reference map
+## Shared references
+
+The domain table above routes domain-specific reading. Load these only when needed:
 
 | Read | When |
 |---|---|
-| `reference/intent.md` | Capture: ambiguity-gated <=5 question interview before drafting |
-| `reference/critic.md` | Critic: independent red-team verification gate (every domain) |
-| `reference/signal.md` | Signal: live market & customer evidence (voice of customer), read-only + keyless; feeds RESEARCH/DISCOVER/GTM, delegates to the `last30days` skill if present |
-| `reference/discover.md` | DISCOVER: ideation, assumptions, OST, prioritization, interviews, metrics |
-| `reference/strategy.md` | STRATEGY: strategy canvas, vision, value prop, lean/business model, pricing, analysis frameworks |
-| `reference/execute.md` | EXECUTE: PRD, OKRs, roadmap, sprint, retro, pre-mortem, stories, stakeholder map, prioritization |
-| `reference/storyboard.md` | STORYBOARD: 화면설계서/기능명세 - derive screens, wireframe (Mode B) or replica (Mode A), per-element spec; standalone via bundled HTML, delegates to the `storyboard-spec` skill if present |
-| `reference/research.md` | RESEARCH: personas, segments, journey map, market sizing, competitor, sentiment |
-| `reference/analytics.md` | ANALYTICS: NL->SQL, cohort, A/B test |
-| `reference/gtm.md` | GTM: strategy, beachhead, ICP, growth loops, motions, battlecard |
-| `reference/growth.md` | GROWTH: marketing ideas, positioning, value-prop statements, naming, North Star |
-| `reference/toolkit.md` | TOOLKIT: resume, NDA, privacy policy, proofread |
-| `reference/ai-ship.md` | AI-SHIP: shipping artifacts, intended-vs-implemented |
-| `templates/` | Reusable artifact scaffolds (PRD, strategy canvas, OST, battlecard, storyboard page/board, ...) |
+| `reference/intent.md` | Capture: unresolved choices that only the user can answer |
+| `reference/critic.md` | Independent review against the artifact's intent |
+| `reference/signal.md` | Current market/customer evidence; uses `last30days` if installed |
+| `reference/model.md` | Shared SPEC identifiers, entities, sync rules R1-R6, and validation codes for FLOW/STORYBOARD/PACKAGE |
+| `templates/` | Artifact scaffolds, including the shared `templates/workspace.html` canvas |
 
 ## Output language
 

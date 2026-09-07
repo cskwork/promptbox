@@ -1,8 +1,8 @@
 ---
 title: verify
 title_en: Verify
-summary: "초록 빌드를 검증으로 인정하지 않는 스킬. 빌드·정적검사·클린코드·시나리오 API QA·보고 5개 게이트를 순서대로 돌리고, 게이트마다 남이 그대로 재실행할 수 있는 증거 파일(receipt)을 디스크에 남긴다. 판정은 PASS·FAIL·BLOCKED 세 가지이며, 실행하지 못한 게이트는 절대 PASS가 되지 않는다."
-summary_en: "Refuses to call a green build verified. Runs five gates in order — build, static checks, clean-code review of the diff, scenario-based API QA, report — and each one ends on a receipt file another person can re-run. Three verdicts: PASS, FAIL, and BLOCKED. A gate that could not run never reads as green."
+summary: "변경한 서비스의 빌드, 정적 검사, 코드 검토, HTTP 시나리오를 확인하고 재실행 가능한 증거와 PASS·FAIL·BLOCKED 판정을 남깁니다."
+summary_en: "Verify changed service behavior with replayable checks and explicit pass, fail, or blocked results."
 tags: [skill, verification, qa, api-testing, curl, jwt, payload-variants, receipts, code-review, agent-skills, claude-code, codex]
 source: https://github.com/cskwork/verify-skill
 author: cskwork
@@ -14,161 +14,210 @@ install: "git clone https://github.com/cskwork/verify-skill.git ~/.claude/skills
 
 ## 한 줄
 
-빌드 성공은 **컴파일러가 만족했다는 증거**일 뿐이다. 엔드포인트가 실제 payload를 받는지, 쿼리가 맞는 행을 돌려주는지, 변경이 호출자를 깨뜨리지 않았는지는 증명하지 않는다. 이 스킬은 그 간극을 **receipt**로 메운다 — 남이 그대로 재실행해 같은 판정에 도달할 수 있는 파일. receipt가 없으면 통과도 없다.
+변경한 서비스의 동작을 빌드, 정적 검사, 코드 검토, HTTP 시나리오로 확인하고 receipt(다른 사람이 재실행할 수 있는 증거 파일)를 남깁니다.
 
-*EN: A green build proves the compiler was satisfied. `verify` closes the gap with receipts — files another person can re-run to reach the same verdict.*
+## 판정과 범위
 
-## 5개 게이트
+실행 결과는 PASS, FAIL, BLOCKED로 구분합니다. 실행하지 못한 검사는 통과로 표시하지 않습니다. 기존 실패와 이번 변경의 회귀를 구분하고, 환경과 데이터에 대한 기존 승인 범위를 지킵니다. 스킬 원문과 함께 저장소의 스크립트와 참고 파일도 설치해야 합니다.
 
-| # | 게이트 | 묻는 것 | receipt |
-|---|--------|---------|---------|
-| 1 | 빌드 | 변경한 코드가 컴파일되는가 | 명령·exit code·출력 끝부분 |
-| 2 | 정적검사 | 이 레포가 **이미 쓰는** 타입·린트·스키마 검사를 통과하는가 | 도구별 exit code·지적 건수 |
-| 3 | 클린코드 | 이 diff를 승인할 수 있는가 (diff만 본다) | 변경 파일당 한 줄, 없으면 `none` 명시 |
-| 4 | 시나리오 | 변경이 닿은 각 API가 **실제로** 동작하는가 | 변형별 요청·응답 원문 |
-| 5 | 보고 | 동료가 읽고 무엇이 증명됐는지 아는가 | 한 장짜리 `report.md` |
+## 스킬 원문
 
-## 판정 3종 — 세 번째가 핵심
+````markdown
+---
+name: verify
+description: Verify changed service behavior with replayable build, static-analysis, review, and HTTP scenario receipts. Use for endpoint verification or a merge-readiness report.
+---
 
-- **PASS** — 실행했고 receipt가 기대한 결과를 보여준다.
-- **FAIL** — 실행했고 receipt가 잘못된 무언가를 보여준다.
-- **BLOCKED** — 실행하지 못했다. 자격증명 없음, 의존 서비스 불가, 런타임 부재.
+# verify
 
-`BLOCKED`는 절대 `PASS`가 아니다. 건너뛴 게이트가 초록으로 보이는 것이 이 스킬이 막으려는 실패다. 기존에 이미 깨져 있던 실패와 이번 diff가 만든 회귀도 반드시 분리한다.
+A green build is not proof. It proves the compiler was satisfied. It does not prove the endpoint accepts the real payload, that the query returns the right rows, or that the change did not break the caller.
 
-## 재사용 토큰 모듈
+This skill trades that gap for **receipts**: recorded artifacts another person can re-run and reach the same verdict. No receipt, no pass.
 
-보호된 엔드포인트에는 자격증명이 필요하고, API 검증이 멈추는 지점은 대개 여기다.
+Five gates, in order. Each gate ends on a receipt written to disk.
 
-```bash
-TOKEN=$(scripts/token.sh)      # 신선하면 캐시, 아니면 발급
-scripts/token.sh --header      # "Authorization: Bearer <token>"
-scripts/token.sh --refresh     # 401 이후 강제 재발급
-scripts/token.sh --status      # 캐시 상태만 확인
-```
+| # | Gate | Question it answers | Receipt |
+|---|------|--------------------|---------|
+| 1 | Build | Does the changed code assemble? | command, exit code, tail of output |
+| 2 | Static | Does it pass this repo's own syntax, type, lint, and schema checks? | per-tool exit code and finding counts |
+| 3 | Clean code | Is this diff code you would approve? | finding per changed file, or explicit `none` |
+| 4 | Scenario | Does each touched API behave live, across payload variants? | raw request and response per variant |
+| 5 | Report | Would a colleague understand what you proved? | `report.md` |
 
-5개 모드 — `static`, `http_get`, `http_post_json`, `http_post_form`, `command`. 마지막이 만능 탈출구다(브라우저 로그인 스크립트, OAuth device flow, `aws sts`, 오프라인 서명 스크립트).
+## The three verdicts
 
-**신원별로 캐시한다.** 변형 30개 suite가 로그인 1회로 끝나고, 관리자에서 일반 사용자로 바꿀 때 관리자 토큰을 조용히 재사용하지 않는다. 자격증명은 디스크에 닿기 전에 마스킹된다.
+Every gate lands on exactly one:
 
-## payload 변형 매트릭스
+- **PASS** — ran, and the receipt shows the expected result.
+- **FAIL** — ran, and the receipt shows something wrong.
+- **BLOCKED** — could not run. Missing credential, unreachable dependency, no local runtime.
 
-호출 한 번은 거의 아무것도 증명하지 않는다. 엔드포인트당 **최소 3종**이 바닥이다.
+`BLOCKED` is never `PASS`. Report it as `BLOCKED` and name the one thing that would unblock it. A skipped gate that reads as green is the failure this skill exists to prevent.
 
-| 변형 | 증명하는 것 |
-|------|-------------|
-| `happy` | 실제 유효한 payload에서 문서화된 계약이 지켜진다 |
-| `boundary` | 빈 값·최댓값·null·유니코드 경계가 동작한다 |
-| `negative` | 잘못된 입력이 **500이 아니라 4xx**로 거절된다 |
-| `regression` | 버그 리포트의 그 payload가 이제 통과한다 (버그 수정 시) |
-| `authz` | 잘못된 역할·테넌트의 같은 호출이 거절된다 (권한 변경 시) |
+Also separate **pre-existing** failures from **regressions**. A lint error that already fails on the base commit is pre-existing; say so and move on. A lint error the diff introduced is a regression and blocks gate 2.
 
-payload 출처는 4단계 사다리를 순서대로 밟는다 — 사용자 제공 → 저장된 fixture → **실제 DB 행** → 합성. 보고서는 어느 단계까지 갔는지 밝힌다. 합성 payload는 계약이 아니라 당신의 상상을 시험하기 때문이다.
+## Phase 0 — Scope
 
-시나리오는 JSON이라 재실행이 몇 초다.
+A gate needs a subject. Establish it before running anything.
 
-```json
-{
-  "endpoint": "GET /api/items",
-  "auth": "required",
-  "variants": [
-    { "name": "happy", "path": "/api/items", "query": { "limit": 3 },
-      "expect": { "status": 200, "jq": [".data.total == 3"] }, "source": "db-row" }
-  ]
-}
-```
+1. **Find the diff base.** Use the base the user named. Otherwise use the merge-base with the repo's main or release branch. State which base you used and why.
+2. **Inventory the change.** `git diff --stat <base>..HEAD` plus uncommitted work. List every changed file.
+3. **Derive the API target list.** For each changed file, trace up to the HTTP endpoints that reach it. For jobs, events, or other non-HTTP entrypoints, name the actual boundary and the evidence needed; do not invent an endpoint.
+4. **Load the adapter.** The adapter is a shell file of `VERIFY_*` assignments — build command, static checks, run command, health URL, token acquisition, account creation. `scripts/lib.sh` resolves `$VERIFY_ADAPTER_FILE`, then `<target-repo>/.verify/adapter.env`, then `adapters/<name>.env` under `VERIFY_ADAPTER=<name>`. No adapter for this stack yet? Copy `adapters/_template.env`, fill it in by reading the repo with `adapters/_template.md` as the field guide and `adapters/spring-mybatis.md` as a worked example, and save it as `<target-repo>/.verify/adapter.env` — the next run finds it on its own.
+5. **Open the run directory.** Export `VERIFY_TARGET_DIR=<target-repo>` before any script runs; it defaults to the current directory, so an agent working from the skill folder writes receipts into the skill. The run is then `.verify/<YYYYMMDD-HHMM>-<slug>/` in the target repo, and all receipts land there.
 
-## 역할 커버리지 — 가장 놓치기 쉬운 간극
+**Completion criterion:** a written target list where every changed file is either mapped to at least one endpoint or explicitly marked as having none, and an adapter loaded or authored.
 
-역할이 여러 개인 변경에서는 **역할마다 그 역할의 실계정 + 그 역할의 엔드포인트**가 필요하다.
+State the target environment and scenario matrix. Continue checks already authorized; ask only before a live action whose target or data mutation is not covered by the user’s instruction. Account creation is a write and follows the same boundary.
 
-토큰의 role claim만 바꾼 `authz` 변형은 "가드가 거부한다"만 증명한다. 그 역할의 화면은 **전혀** 검증되지 않는다 — 호출한 적이 없고, 토큰 뒤의 계정도 실제로 그 역할이 아니다. 계정을 못 찾으면 그 역할은 `BLOCKED`이고, 보고서에 어떤 계정이 있으면 풀리는지 적는다.
+### The environment ladder
 
-## 환경 사다리
+Gate 4 calls a real service, so name the target environment in the plan and hold to this ladder:
 
-| 환경 | 읽기 | 쓰기 |
-|------|------|------|
-| local, dev | 기본 | 엔드포인트 목록 승인 후 |
-| staging, audit | 명시 지시가 있을 때만 | 같은 지시에서 엔드포인트 단위 승인 |
-| production | **never** | **never** |
+| Environment | Reads | Writes |
+|-------------|-------|--------|
+| local, dev | default | allowed within an explicitly authorized endpoint/data scope |
+| staging, audit, pre-production | when the user authorizes this target | only for explicitly authorized endpoints and data |
+| production | never from this skill | never |
 
-문서로만 두지 않는다. `VERIFY_FORBIDDEN_HOSTS`를 adapter에 적으면 `lib.sh`의 `vf_guard_target`이 `call.sh`·`token.sh`·health poll 세 지점에서 **curl 실행 전에** 거부한다. 되돌릴 수 없는 실수를 막는 유일한 가드다.
+Production stays off the ladder. A read there still costs a token in a real session, a rate-limit slot, and an audit-log entry, and one mistyped variant writes. Set `VERIFY_FORBIDDEN_HOSTS` in the adapter to the production hostnames, and `scripts/lib.sh` refuses them before curl runs. When a change can only be proved in production, stop and hand the user the exact command instead of running it.
 
-"로컬"도 자동으로 안전하지 않다. dev 프로필은 보통 공유 DB를 가리키므로, 로컬 프로세스가 공유 데이터를 쓴다.
+Check the target repository's own rules first — many teams write this policy down, and their wording wins over this table.
 
-## 보고는 wait-what 스타일
+**"Local" is not automatically safe.** A dev profile usually points at a shared development database, so a local process writes shared data. Confirm where the datasource actually points before any write variant.
 
-게이트 5가 최종 산출물이다. 제대로 검증했어도 설명이 나쁘면 읽는 사람은 여전히 감을 못 잡는다. 전제는 하나 — **읽는 사람은 맥락을 놓쳤다**.
+## Gate 1 — Build
 
-- 요약이 아니라 **다시 설명**한다. 판정을 먼저, 증거를 뒤에.
-- 단순화 기술영어(ASD-STE100). 한 문장에 한 생각, 능동태, 정의하지 않은 전문용어 금지.
-- **프로젝트의 어휘**를 쓴다 — `CONTEXT.md`·용어집·ADR의 표제어.
+Run `scripts/gate-build.sh --base <base>`. It runs the adapter's build command, captures stdout and stderr to `receipts/01-build.log`, and records the verdict.
 
-가장 값진 절은 "검증하지 않은 것"이다.
+A non-zero exit prints the commands to re-run the same build at the base: a build already broken at the base is `BLOCKED` on a pre-existing break, not a `FAIL` on this diff.
 
-```markdown
-## 검증하지 않은 것
-1. 관리자 화면. 데이터가 있는 관리자 계정이 없었다.
-```
+**Completion criterion:** `receipts/01-build.log` exists, and the report quotes the command, the exit code, and the final error line if any. A build claim with no log is not a claim.
 
-간극을 숨긴 보고서를 한 번 믿은 사람은 그 뒤로 보고서를 믿지 않는다.
+`FAIL` here stops the run. Gates 2 to 4 have nothing to measure.
 
-## adapter — 스택 분리
+## Gate 2 — Static
 
-게이트는 스택에 의존하지 않는다. adapter 파일 하나가 게이트로는 알 수 없는 사실 6개를 담는다.
+Run `scripts/gate-static.sh`. It walks the adapter's `VERIFY_STATIC_CMDS` one line at a time, writes each tool's output and exit code to `receipts/02-static.log`, and records a tool it cannot execute as `BLOCKED` rather than `PASS`.
 
-```bash
-cp adapters/_template.env /path/to/repo/.verify/adapter.env
-```
+The adapter lists only checks the repo already owns: type check, linter, formatter in check mode, schema and config parsers, dependency audit. Scope every tool to the changed files where the tool supports it. Whole-repo mode buries this diff's one new warning under two hundred old ones.
 
-| 사실 | 키 |
-|------|-----|
-| 빌드 명령 | `VERIFY_BUILD_CMD` |
-| 검사 목록 | `VERIFY_STATIC_CMDS` |
-| 기동 방법 | `VERIFY_RUN_CMD`, `VERIFY_BASE_URL` |
-| 기동 확인 | `VERIFY_HEALTH_PATH` |
-| 토큰 발급 | `VERIFY_TOKEN_MODE` 계열 |
-| 테스트 계정 | `VERIFY_ACCOUNT_HOWTO` |
+Two checks earn their own attention because compilers miss them:
 
-`adapters/spring-mybatis.md`는 실제 Spring Boot 3 + MyBatis 서비스에 돌리며 얻은 **함정 7개**를 담은 완성 예시다. 전부 명확한 에러가 아니라 **잘못된 판정**을 만드는 종류다 — 관리 포트를 health로 잡기, IDE가 `build/`를 동시에 써서 컴파일 실패, 토큰 발급 엔드포인트가 토큰을 요구하는 순환, MyBatis XML은 첫 호출에서만 깨짐, **포트에 이미 떠 있는 프로세스가 내 코드가 아닌 경우**, "로컬"이 공유 DB인 경우, 4xx 계약이 500으로 나가는 경우.
+- **Serialization contract** — a changed request or response type must still parse the real payload shape. Fixture files or a round-trip test, not inspection.
+- **Data-layer syntax** — externalized queries such as SQL mapper XML, migrations, or GraphQL documents parse at build time in some stacks and only at first call in others. When the stack defers it, that check belongs to gate 4.
 
-## 하네스 자체를 검증한다
+**Completion criterion:** every tool the adapter lists has a line in `receipts/02-static.log` with its name, exit code, and finding count, split into pre-existing and new.
 
-```bash
-scripts/selftest.sh     # 임시 서버로 5개 게이트 + 하네스 판별력 22개 항목
-```
+## Gate 3 — Clean code
 
-가장 값진 것은 **부정 검사**다 — 기대 status가 틀리면 FAIL이 나오는지, 기대값을 안 적은 변형이 통과하지 않는지, 금지 호스트가 거부되는지. 이것이 하네스가 판별력을 가졌다는 증거이고, 초록 결과를 믿을 유일한 근거다.
+Read `references/clean-code-gate.md` before you open the diff. It sets the reading order — one pass per question — and the severity bar that decides whether a finding blocks.
 
-이 검사들을 쓰면서 실제 결함 3건을 잡았다.
+Judge only the diff. Unrelated cleanups belong to a different task.
 
-1. **마스킹 유출** — BSD `sed`는 bracket 안 이스케이프가 없어 `[^\r]`을 "backslash 아님, r 아님"으로 읽는다. `Authorization: Bearer secret-r-value`가 `<REDACTED>rer secret-r-value`로 새어나갔다. GNU sed에서는 통과하므로 Linux CI에서 안 잡힌다.
-2. **stdin 삼킴** — gradle이 검사 목록 heredoc을 먹어서 두 번째 검사가 조용히 실행되지 않았고, 게이트는 PASS를 보고했다.
-3. **adapter 미로딩** — `VERIFY_BASE_URL` 없이 health를 폴링했다.
+**Completion criterion:** one row per changed file in the findings table, with `none` written out where you found nothing. An empty table is ambiguous between "clean" and "not looked at".
 
-## 설치
+Findings at **blocking** severity fail this gate. Everything else records as a note and the gate passes.
+
+## Gate 4 — Scenario
+
+The gate that produces real proof. It calls the running service.
+
+### 4a — Bring the service up, and prove it is *your* code
+
+Start it per the adapter, then poll the health URL until it answers. Record the health response as the first receipt. A scenario suite run against a dead port produces connection errors that look like application bugs.
+
+Then answer the question health cannot: **is the process serving the diff?**
+
+A service is often already listening on that port — started by an IDE, left over from this morning, or a container from last week. It answers health perfectly and runs code that predates your change. Every variant then passes, and the report certifies a fix that is not deployed.
+
+Check it, do not assume it:
+
+- Compare the process start time against the commit time of the change. A process older than the commit cannot contain it.
+- Or read a build identifier the service exposes, such as a build-info endpoint or a version banner in its log.
+- Or restart it yourself, so the question does not arise.
+
+Found a foreign process on the port? Do not kill it — it may be someone's debugger session. Start a second instance on another port instead, and remember that most stacks need **two** ports moved, the application port and the management port.
+
+**Completion criterion:** the receipt names the process you called and the evidence that it contains the change.
+
+### 4b — Get a token
+
+Protected endpoints need a credential. Use `scripts/token.sh`, which the adapter configures:
 
 ```bash
-# 전역 (모든 CLI 공용)
-git clone https://github.com/cskwork/verify-skill.git ~/.agents/skills/verify
-
-# Claude Code 단독
-git clone https://github.com/cskwork/verify-skill.git ~/.claude/skills/verify
-
-cd ~/.claude/skills/verify && scripts/selftest.sh   # 22/22 확인
+export VERIFY_ADAPTER=<stack>          # selects adapters/<stack>.env
+TOKEN=$(scripts/token.sh)              # prints token to stdout, caches it
+scripts/token.sh --refresh             # forces a new one after a 401
 ```
 
-`curl`·`jq`·`bash`만 필요하다. bash 3.2 호환으로 작성해 macOS 기본 셸에서 검증했다.
+The script caches to `.verify/.token-cache/` and refreshes on expiry, so a suite of thirty calls costs one login. It prints the token to stdout only and never writes it into a receipt — `scripts/lib.sh` redacts credentials before anything reaches disk.
 
-## 언제 쓰지 않는가
+Read `references/token-module.md` to wire a new stack into it.
 
-- 문서·주석만 바뀐 커밋
-- HTTP 계약에 영향 없는 설정 변경
-- 프론트엔드 전용 diff (브라우저 QA는 별도 스킬)
+### 4c — Get an account
 
-## 링크
+A token needs a subject that exists. When the adapter's token call needs a user, group, or tenant that is absent, create one before retrying. The adapter names the mechanism and its inputs.
 
-- 레포: <https://github.com/cskwork/verify-skill>
-- 한/영 소개: <https://cskwork.github.io/verify-skill/>
-- 예시 보고서: <https://github.com/cskwork/verify-skill/blob/main/docs/example-report.md>
-- 보고 스타일 원안: [`wait-what`](https://github.com/mattpocock/skills/tree/main/skills/productivity/wait-what) by Matt Pocock
+Prefer the fixture the adapter already documents over a hand-built row. A synthesized account that skips a required relation produces a token that authenticates and then fails every business rule, which reads as an application bug.
+
+**One real account per role in scope.** When the change touches endpoints that several roles use, each role needs a real account of that role and a call to its own endpoints. Flipping the role claim on an existing token proves the guard refuses it — it proves nothing about whether that role's endpoints work. Read `references/scenario-design.md` for why this is the easiest gap to miss and still feel finished.
+
+Record what you created, so it can be cleaned up or reused.
+
+**Completion criterion:** every role in scope has either a real account of that role recorded, or a `BLOCKED` line naming the role and the account that would unblock it.
+
+### 4d — Run the variants
+
+Per endpoint, build a payload matrix. Read `references/scenario-design.md` for how to source realistic payloads and what each variant proves.
+
+The floor is three variants per endpoint:
+
+| Variant | Proves |
+|---------|--------|
+| `happy` | The documented contract holds for a real, valid payload. |
+| `boundary` | Empty, maximum, null, and unicode inputs behave. |
+| `negative` | Bad input is rejected with the right status, not a 500. |
+
+Add `regression` when the work fixes a bug: the payload that reproduced it must now pass. Add `authz` when the change touches permissions: the same call as the wrong role must be refused.
+
+Source payloads in this order, stopping at the first that works: user-supplied case, saved fixture from an earlier run, a real row from the database with identifiers redacted, then synthesized. Say which you used. A synthesized payload proves less than a real one and the report must not blur that.
+
+Write one JSON file per endpoint into `<run>/scenarios/`, then run `scripts/run-scenarios.sh`. It fires every variant through `scripts/call.sh`, so each raw exchange lands in `receipts/04-scenario/<endpoint>.<variant>.txt` and the suite re-runs from the files instead of from memory. Use `scripts/call.sh` directly for a single ad-hoc call.
+
+**Completion criterion:** every endpoint in the phase 0 target list has one receipt per planned variant, and each receipt carries the request, the response status, the response body, and the assertion outcome. Copy results into the report verbatim. Paraphrasing a response is how a wrong field slips through.
+
+### 4e — Check the side effects
+
+A 200 is not the whole answer. When the call writes, read the write back: query the row, check the emitted event, confirm the file. When the call was supposed to fix a wrong value, show the value before and after.
+
+**Completion criterion:** each writing endpoint has a before and after observation in its receipt.
+
+## Gate 5 — Report
+
+Write `.verify/<run>/report.md`, then give the verdict, material limitations, and report path in chat.
+
+Write it in the **wait-what** style: assume the reader lost the thread, give back the context they are missing, one idea per sentence, and use this project's own vocabulary. Read `references/report-style.md` — this is the deliverable, and a correct verification described badly still leaves the reader guessing.
+
+**Completion criterion:** the report carries a verdict line, a gate table with all five verdicts, the receipt paths, an explicit list of what stayed unverified, and the next action for the user.
+
+## Red flags
+
+Each of these means a gate did not really run. Go back.
+
+- "Build passed" with no exit code quoted.
+- A scenario table with no response bodies.
+- A gate marked `PASS` whose receipt file does not exist.
+- One variant per endpoint, all of them `happy`.
+- A role called "verified" when only its `authz` refusal was tested.
+- A gate 4 that ran against production, or against staging with no instruction to.
+- A `200` accepted as proof for a write, with no read-back.
+- Findings phrased as "looks good" or "seems fine".
+- A `BLOCKED` gate summarized as "verified".
+
+## Iteration
+
+A `FAIL` hands back a **delta**, not "it broke". Name the endpoint, the variant, the expected result, the observed result, and the most likely source line. Then fix the delta and re-run only the gates the fix could have changed.
+
+Continue a scoped repair while new evidence supports a different next step and the user authorized fixing failures. Stop when the same blocker repeats without a new discriminator, or the next action needs new scope or access. Report the receipts and the specific missing input.
+````

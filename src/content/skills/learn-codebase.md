@@ -1,7 +1,7 @@
 ---
 title: learn-codebase
-summary: "남이나 AI가 짠 낯선 코드를, 왜 이렇게 짰는지(설계 의도)와 실제 코드를 나란히 짚어 가며 길 잃지 않고 이해하도록 단계별로 안내하는 도구."
-summary_en: "Learn any codebase by pairing design intent with implementation, one depth level at a time — stop the moment you know enough to act."
+summary: "코드와 테스트를 근거로 실행 흐름과 설계 이유를 설명하는 학습 스킬. 요청한 범위와 깊이에 맞추고 퀴즈는 원할 때 진행합니다."
+summary_en: "Explain code flows and design decisions from source evidence, at the depth requested. Quiz only when invited."
 tags: [skill, claude-code, codex, code-review, onboarding, intent]
 source: https://github.com/cskwork/learn-codebase
 author: cskwork
@@ -14,149 +14,60 @@ install: "git clone https://github.com/cskwork/learn-codebase ~/.claude/skills/l
 
 ## 한 줄
 
-코드만 읽으면 **흉내**에 그치고, 설계 문서(스펙)만 읽으면 **추측**에 그친다. 둘을 **나란히** 짚으면 어디를 고쳐도 되는지 자신 있게 안다.
+코드의 실행 흐름과 설계 이유를 실제 파일과 테스트에 연결해 설명합니다. 요청한 범위와 깊이를 우선하며, 확인된 사실과 추론을 구분합니다.
 
-*EN: Read code alone and you only mimic; read the spec alone and you only guess. Pair them and you know what is safe to change.*
+## 설명과 퀴즈
 
-## 언제 쓰는가
+Map(구조), Walk(실행 흐름), Probe(설계 판단), Master(불변 조건) 중 필요한 깊이로 설명합니다. 전체 설명을 요청했으면 메뉴 선택을 기다리지 않습니다. 퀴즈는 사용자가 원할 때 별도 스킬로 진행하며, 정답 공개나 종료 요청을 따릅니다. 참고 파일과 템플릿은 원본 저장소에서 함께 설치합니다.
 
-- AI가 PR을 쳤는데 뭘 한 건지 모르겠을 때
-- 40페이지 스펙 + 100개 파일 레포에 처음 들어갈 때
-- 주니어에게 *전체 제품*이 아니라 *한 기능*만 가르쳐야 할 때
-- 스펙과 구현이 어긋났는지(drift, 문서와 코드가 시간이 지나며 벌어짐) 의심될 때
-- 동작 X를 바꿔야 하는데 영향 범위가 무서울 때
-
-## 4단계 (필요한 깊이까지만 멈춰라)
-
-| Level | 예산 | 목표 | 산출물 |
-|---|---|---|---|
-| 1 Map | ≤5분 | 이게 뭐고 왜 있는가 | 3줄 요약 + entry function(코드가 시작되는 진입 함수) 1개 |
-| 2 Walk | ≤30분 | happy path(정상 흐름)가 어떻게 흐르는가 | side-by-side(나란히 비교) 추적 표 (5–10행) |
-| 3 Probe | ≤2h | 왜 이렇게 만들었는가 | 의사결정 매트릭스 + 기각된 대안 |
-| 4 Master | 깊게 | 무엇이 시스템을 지탱하는가 | 불변식·seam(테스트를 끼워 넣는 이음새) 맵 |
-
-## Plain-Speech Rule (Feynman 모드)
-
-비전공자도 따라올 수 있어야 함. 모든 산출물은 다음 5가지를 지켜야 통과:
-
-1. **첫 줄에 일상 비유 또는 한 줄 plain summary(쉬운 말 요약)**
-2. **모든 식별자(FR-001, twin_group 등)는 첫 등장에 괄호 안 풀어 쓰기**
-3. **무엇(what)보다 왜(why)를 먼저**
-4. **알몸 약어·코드 경로 금지**
-5. **마지막에 "If you only read one thing" — 3문장 zero-jargon(전문 용어 없는) 요약**
-
-## Bite-Size Delivery Rule
-
-한 응답 = 한 청크(작게 나눈 한 덩어리). 스크롤 한 번 이상이면 실패. TL;DR(너무 길어 안 읽을까 봐 핵심만 3줄) → 메뉴 (A/B/C/D) → 사용자가 고른 것만 다음 응답.
-
-## 핵심 동작
-
-읽는 코드 chunk마다 그것을 정당화하는 **intent(이렇게 짠 설계 의도)**를 찾고, 양쪽을 한 행에 적는다. 빈 칸이 있으면 그건 **다음에 probe(깊이 파고들어 확인)할 대상**이지, 문제가 아니다.
-
-```
-| What this means (plain)         | Intent (cite)    | Code (file:line) | Test/Contract | Why-not (rejected) |
-| AI 제안, 사람 승인 (역방향 금지) | spec.md§MVP2원칙 | review.py:42     | test_review.py::T1 | auto-approve (Q1 false-positive 위험) |
-```
-
-## 자주 하는 실수
-
-| 실수 | 결과 | 처방 |
-|---|---|---|
-| 코드를 top-to-bottom으로 읽음 | 문법은 외우지만 목적 놓침 | 스펙 §0 먼저 열기 |
-| 스펙만 읽고 코드 안 봄 | 자신 있게 틀림 | 모든 주장에 `file:line` 페어링 |
-| 인용 생략 | 나중에 감사·공유 불가 | 항상 `(doc§)` + `(file:line)` |
-| 즉시 Level 4로 직진 | 번아웃 + 왜를 놓침 | 과제에 필요한 Level까지만 |
-| AI 생성 코드를 스펙으로 취급 | hallucination을 codify | 스펙이 이김. drift 발견하면 flag |
-| 한 응답에 모든 Level 덤프 | 독자가 스크롤하다 떠남 | Stage A만, 그 다음 메뉴 |
-
-## 의도(intent)는 어디 있는가
-
-권위 순(높은 것부터): 정식 스펙 문서 → ADR / Clarifications → 계약·스키마 → 테스트 → 이슈 ref가 달린 커밋 메시지 → 이슈 트래커·PR → `CLAUDE.md` / `AGENTS.md`.
-
-## 설치
-
-```bash
-git clone https://github.com/cskwork/learn-codebase ~/.claude/skills/learn-codebase
-# 또는 작업 디렉토리에 두고 심볼릭 링크
-git clone https://github.com/cskwork/learn-codebase ~/code/learn-codebase
-ln -s ~/code/learn-codebase ~/.claude/skills/learn-codebase
-```
-
-세션에서:
-
-> "Use `learn-codebase` to walk me through feature X."
-
-## SKILL.md 본문 (복사용 — 본문이 길어 핵심만 발췌; 전체는 원본 레포 참조)
+## 스킬 원문
 
 ````markdown
 ---
 name: learn-codebase
-description: Use when learning a codebase another agent (human or AI) has built, reviewing an AI-generated PR against a spec, onboarding to a single feature mid-stream, planning a change to behavior whose blast radius you do not yet know, or diagnosing suspected spec-versus-code drift.
+description: Explain unfamiliar code by pairing intended behavior with source, tests, and design decisions. Use for feature onboarding, understanding AI-written changes, investigating spec/code drift, or assessing change impact.
 ---
 
 # learn-codebase — Intent-Anchored Reading
 
-## Overview
-To understand code another agent wrote, anchor every read on the intent that
-justifies it. Read intent and code as paired columns, never in sequence.
+Connect what a feature is meant to do with the code that implements it. Read-only analysis is the default; findings do not authorize fixes or issue creation.
 
-Code without intent = ritual mimicry.
-Intent without code = aspiration.
-Side-by-side = bidirectional traceability you can act on.
+## Scope and delivery
 
-## Plain-Speech Rule (applies to ALL outputs)
-1. Lead with everyday analogy or one-line plain summary before any jargon.
-2. Expand every identifier the first time it appears, in parentheses.
-3. Translate the why before the what.
-4. No naked acronyms, no naked code paths.
-5. Close with a 1-minute summary block titled "If you only read one thing" —
-   3 sentences max, zero jargon.
+Start with the feature or question the user named. Use the shallowest level that answers it, and complete the requested explanation without forcing menu selections between sections. For an open-ended learning session, begin with a short map and offer a focused next step.
 
-## Bite-Size Delivery Rule (applies to ALL outputs)
-1. One response = one chunk (≤3-sentence TL;DR + 1 citation).
-2. TL;DR first, every time.
-3. End every chunk with a "next options" menu — 2 to 4 choices.
-4. Cap per chunk: ≤5 headings, ≤8 table rows, ≤1 fenced code block ≤30 lines.
-5. Park the rest, don't summarize it.
+Match the user's language and demonstrated knowledge. In Korean, use `정상 흐름`, `진입점`, `판단 근거`, and `규칙 지도`; preserve source identifiers and exact errors. Explain unfamiliar terms once when needed. A plain summary usually suffices; use an analogy only if it clarifies the behavior. Do not assume a question proves a knowledge gap.
 
-## When to Use
-- "AI shipped this PR last week and I have no idea what it does."
-- "There's a 40-page spec and a 100-file repo. Where do I even start?"
-- "I need to onboard a junior dev to one feature."
-- "Did the implementation actually match what we asked for?"
-- "I need to change behavior X but I'm scared of what depends on it."
+Lead with the answer, then the evidence. Keep tables and excerpts focused on the question; put extensive detail in a linked artifact when useful. [templates/plain-speech-checklist.md](templates/plain-speech-checklist.md) is a review aid for substantial explanations.
 
-## The Core Move
-For every code chunk you read, find the intent that justifies it. Record both
-in a side-by-side row. Cite both. A row with empty cells is a probe target.
+## Pair intent with implementation
 
-| What this means (plain) | Intent (cite) | Code (file:line) | Test/Contract | Why-not |
-| ----------------------- | ------------- | ---------------- | ------------- | ------- |
-| ...                     | ...           | ...              | ...           | ...     |
+For each important behavior or decision, capture:
 
-## The 4 Levels (stop at the level your task needs)
+| What this means | Intent (document section) | Code (file:line) | Test or contract | Rejected alternative and reason |
+|---|---|---|---|---|
+| A reviewer approves a candidate before it becomes a real item. | spec.md § Approval | review.py:42 | test_review.py::test_approval | Auto-approval rejected in ADR-3 |
 
-### Level 1 — Map (≤5 min)
-analogy + 3-line plain summary + entry: file:line + menu
+Use [templates/sidebyside.md](templates/sidebyside.md) for a full walk. Mark missing evidence `?`; distinguish observed behavior, documented intent, and inference. Never invent rationale or claim a test ran merely because it exists.
 
-### Level 2 — Walk (≤30 min)
-trace summary + first 3 rows of side-by-side + menu
+Start from the canonical spec for **Forward (spec→code)** reading. Start from an entry function for **Reverse (code→spec)** reading when intent is sparse, drifted, or absent. Missing intent is a finding, not a reason to fabricate a spec or stop explaining the code.
 
-### Level 3 — Probe (≤2 h)
-top 3 surprising decisions + menu (full matrix on request)
+Use the project's stated authority. Otherwise look for canonical specifications, ADRs and clarifications, contracts/schemas, tests, and relevant issue/commit history. Current code establishes implemented behavior; a conflicting document establishes a discrepancy to report. Read [references/finding-intent.md](references/finding-intent.md) when the source of intent is unclear or using Reverse reading.
 
-### Level 4 — Master (deep)
-top 3 invariants + one-line guardian each + menu
+## Choose the useful depth
 
-## Where Intent Lives
-Authority order: canonical spec docs → ADRs / Clarifications → contracts /
-schemas → tests → commit messages with issue refs → issue tracker / PRs →
-agent rule files (CLAUDE.md, AGENTS.md).
+| Level | Question | Evidence and result |
+|---|---|---|
+| 1 — Map | What does this feature do? | Overview, central user story, and an anchored entry function; short purpose/scope explanation. |
+| 2 — Walk | How does the normal flow work? | Trace one story end to end, pairing meaningful stops with intent and tests/contracts; include relevant error paths and unknowns. |
+| 3 — Probe | Why is it built this way? | Map relevant clarifications and ADRs to enforcing code, protecting tests, and recorded rejected alternatives. |
+| 4 — Master | What breaks if X changes? | Map domain invariants to validators, schemas, assertions, and tests; identify module boundaries and affected contracts. |
 
-## Common Mistakes
-Reading code top-to-bottom, skipping citations, jumping to Level 4 immediately,
-treating AI-generated code as spec, dumping all Levels in one response.
+These are depth choices, not mandatory sequential gates. Use a decision matrix or invariant map only when it answers the request. [templates/progression-checklist.md](templates/progression-checklist.md) helps review a substantial artifact; [examples/twin-question-platform.md](examples/twin-question-platform.md) demonstrates Levels 1–3.
 
-(See https://github.com/cskwork/learn-codebase/blob/main/SKILL.md for the full
-text with templates and self-test scenarios.)
+## Drift and completion
+
+For a drift investigation, use [references/diagnostic.md](references/diagnostic.md) to check required behavior, enforcement, boundary tests, and code without documented intent. Report discrepancies with both citations and the next check that would resolve uncertainty. Do not automatically implement, descope, create issues, or back-fill decisions.
+
+Before reporting, confirm the explanation answers the requested question, cites the relevant intent and code, and labels missing evidence. Change-impact predictions remain predictions until verified. Stop when the requested depth is satisfied; expand only for an unresolved concern or user request.
 ````

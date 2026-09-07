@@ -47,8 +47,7 @@ Use the upstream SwarmForge project without vendoring it into this skill. Read
 
 ## Choose a pack
 
-Assess the request, recommend one pack with a one-sentence reason, and always ask
-the user to choose `2`, `4`, or `6` before installation:
+Use the pack the user specified. Otherwise recommend one pack with a one-sentence reason and ask for the unresolved `2`, `4`, or `6` choice before installation:
 
 - Recommend `2` for a localized, clear, low-risk task in one subsystem.
 - Recommend `4` for moderate cross-layer work that benefits from specification
@@ -56,27 +55,22 @@ the user to choose `2`, `4`, or `6` before installation:
 - Recommend `6` for major, security-sensitive, migration, public-API, UI/E2E,
   release-critical, or high-regression-risk work.
 
-Ask even when the request already names a pack; confirm that choice once. Do not
-treat silence in an interactive turn as consent. Default to `2` only when the
-user explicitly delegates the choice, submits an empty answer, or the
-environment cannot request input. State whenever this default is used.
+Do not repeat a clear pack choice or treat silence as consent. Default to `2` only when the user delegates the choice; otherwise leave installation pending the missing choice.
 
 ## Choose the integration route
 
-Before installation, inspect local branches and ask the user to choose a route
-in the form `<base-ref> -> <target-branch>`. The target is the primary checkout
+Before installation, inspect local branches and resolve the route the user authorized in the form `<base-ref> -> <target-branch>`. Ask only when that route remains unresolved. The target is the primary checkout
 branch that receives role handoffs. Recommend the current branch when work is
 already isolated there; recommend a new task branch from the chosen base when
 the current branch should remain untouched.
 
-If the target does not exist, create it from the confirmed base only after the
-user approves that branch operation. If it exists, do not reset or recreate it.
+If the target does not exist, create it from the confirmed base when the user has authorized that branch operation. If it exists, do not reset or recreate it.
 The selected target must be checked out at the project root before installation
 and launch. Resolve the target from the actual checkout: upstream's `master`
 config value means the primary checkout, whatever its branch name.
 
 Default the base and target to the current branch only when the user explicitly
-delegates the choice or input is unavailable. State the resolved route and stop
+delegates the choice. State the resolved route and stop
 on a detached HEAD, a dirty checkout that prevents switching, or an ambiguous
 ref.
 
@@ -113,7 +107,7 @@ switch packs, or copy upstream code into this skill repository.
 In an existing Git repository, commit every installed non-script file on the
 selected target before launch: `swarm`, `.swarmforge-install`, `.gitignore`, and
 the configuration, role prompts, active constitution articles, and protocol
-files under `swarmforge/`. Ask before creating that commit. Upstream creates
+files under `swarmforge/`. Create that setup commit only when authorized, reusing permission already given for this setup. Upstream creates
 role worktrees from target `HEAD`; uncommitted setup files would not appear in
 those worktrees. `swarmforge/scripts/` is intentionally ignored because the
 launcher synchronizes that pinned runtime into role worktrees.
