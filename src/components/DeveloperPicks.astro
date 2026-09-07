@@ -1,5 +1,4 @@
 ---
-import Card from '~/components/Card.astro';
 import CopyButton from '~/components/CopyButton.astro';
 import { getCollection } from 'astro:content';
 import { ONBOARDING_PICKS, INSTALL_PROMPT } from '~/data/onboarding';
@@ -26,28 +25,28 @@ const picks = (
 const promptHref = `${base}/prompts/agents-quick-onboarding/`;
 
 const does = [
-  { ko: '추천 스킬을 ~/.agents/skills/ 에 설치 (있으면 최신화)', en: 'Installs each skill, updates if present' },
-  { ko: '공통 시스템 프롬프트 AGENTS.md 를 한곳에', en: 'One shared system prompt for every tool' },
-  { ko: '설치된 모든 CLI에 자동 심링크', en: 'Auto-symlinks into every CLI you have' },
+  { ko: 'pi가 없으면 설치, 있으면 최신 버전으로 업데이트', en: 'Installs pi or updates it to the latest release' },
+  { ko: 'Impeccable을 포함한 pi 기본 스킬·설정 동기화', en: 'Syncs the pi setup, including Impeccable' },
+  { ko: '공통 AGENTS.md를 설치된 코딩 에이전트에 연결', en: 'Shares one AGENTS.md across installed coding agents' },
 ];
 ---
-<section id="start-here" class="reveal scroll-mt-20 py-10">
+<section id="start-here" class="scroll-mt-20 py-6">
   <div class="glass-panel rounded-2xl p-6 lg:p-8">
     <div class="mb-5 flex flex-wrap items-end justify-between gap-2">
       <div>
         <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50"><span data-lang="en">Developer picks — start here</span><span data-lang="ko">개발자 추천 — 여기서 시작</span></h2>
-        <p class="mt-1 text-sm text-ink-500"><span data-lang="en">A hand-picked starter kit, installed with one prompt.</span><span data-lang="ko">프롬프트 하나로 설치하는 엄선된 스타터 키트.</span></p>
+        <p class="mt-1 text-sm text-ink-500 dark:text-ink-400"><span data-lang="en">One prompt to install or update pi and restore its default setup.</span><span data-lang="ko">프롬프트 하나로 pi 설치·업데이트와 기본 환경 구성을 함께 진행합니다.</span></p>
       </div>
-      <span class="font-mono text-[0.72rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">Developer picks</span>
+
     </div>
 
     <p class="mb-5 max-w-3xl text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
-      <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">Paste the prompt below</strong> into Claude Code, Codex, Gemini CLI, or another coding agent.
-      It installs the recommended skills and shared rules under <code class="rounded bg-ink-100/80 px-1 py-0.5 font-mono text-[0.85em] dark:bg-ink-800/80">~/.agents/</code>,
-      connects every detected CLI, and updates anything already installed.</span>
-      <span data-lang="ko">아래 프롬프트를 쓰는 코딩 에이전트(Claude Code · Codex · Gemini CLI …) 채팅창에 <strong class="font-semibold text-ink-800 dark:text-ink-100">그대로 붙여넣으면</strong>,
-      추천 스킬 한 묶음과 공통 규칙을 <code class="rounded bg-ink-100/80 px-1 py-0.5 font-mono text-[0.85em] dark:bg-ink-800/80">~/.agents/</code> 한곳에 설치하고
-      설치된 모든 CLI에 자동으로 연결합니다. 이미 있으면 최신으로 업데이트합니다.</span>
+      <span data-lang="en"><strong class="font-semibold text-ink-800 dark:text-ink-100">Paste the prompt below</strong> into an existing coding agent.
+      It installs pi if needed or updates it to the latest release, then syncs the default settings and skills, including Impeccable, from pi-setup-public.
+      The current AGENTS.md from <a href={`${base}/configs/the-system-prompt/`} class="font-medium underline underline-offset-2">cskwork/THE-SYSTEM-PROMPT</a> is also linked to your installed coding agents.</span>
+      <span data-lang="ko">사용 중인 코딩 에이전트 채팅창에 아래 프롬프트를 <strong class="font-semibold text-ink-800 dark:text-ink-100">그대로 붙여넣으세요.</strong>
+      pi가 없으면 설치하고, 이미 있으면 최신 버전으로 업데이트합니다. 이어서 pi-setup-public의 기본 설정과 Impeccable을 포함한 스킬을 동기화하고,
+      <a href={`${base}/configs/the-system-prompt/`} class="font-medium underline underline-offset-2">cskwork/THE-SYSTEM-PROMPT</a>의 최신 AGENTS.md 원문을 설치된 코딩 에이전트에 연결합니다.</span>
     </p>
 
     <!-- One-shot install prompt: the <pre> is the copy target (button grabs its innerText). -->
@@ -56,7 +55,9 @@ const does = [
         <span class="font-mono text-[0.7rem] uppercase tracking-wider text-ink-400"><span data-lang="en">Paste into your agent</span><span data-lang="ko">한 방 설치 프롬프트</span></span>
         <CopyButton target="#onboard-prompt" labelEn="Copy prompt" labelKo="프롬프트 복사" size="sm" />
       </div>
-      <pre id="onboard-prompt" class="max-h-80 overflow-auto px-4 py-3 font-mono text-[0.78rem] leading-relaxed text-ink-100">{INSTALL_PROMPT}</pre>
+      <details class="text-ink-100"><summary class="cursor-pointer px-4 py-3 text-sm text-ink-300"><span data-lang="en">Read installation prompt</span><span data-lang="ko">설치 프롬프트 읽기</span></summary>
+      <pre id="onboard-prompt" tabindex="0" class="max-h-80 overflow-auto px-4 py-3 font-mono text-[0.78rem] leading-relaxed text-ink-100">{INSTALL_PROMPT}</pre>
+      </details>
     </div>
 
     <div class="mb-6 grid gap-2 sm:grid-cols-3">
@@ -69,24 +70,20 @@ const does = [
     </div>
 
     <div class="mb-3 flex flex-wrap items-baseline gap-x-2">
-      <h3 class="text-sm font-semibold text-ink-800 dark:text-ink-100"><span data-lang="en">What's in the kit</span><span data-lang="ko">한 묶음에 담긴 것</span></h3>
-      <span class="font-mono text-[0.72rem] text-ink-500 dark:text-ink-400">What's in the kit · {picks.length} items</span>
+      <h3 class="text-sm font-semibold text-ink-800 dark:text-ink-100"><span data-lang="en">Related starter tools</span><span data-lang="ko">함께 살펴볼 도구</span></h3>
+      <span class="font-mono text-[0.72rem] text-ink-500 dark:text-ink-400"><span data-lang="en">{picks.length} items</span><span data-lang="ko">{picks.length}개 항목</span></span>
       <a href={promptHref} class="ml-auto font-mono text-[0.72rem] text-accent-700 hover:underline dark:text-accent-400"><span data-lang="en">Installation prompt details →</span><span data-lang="ko">설치 프롬프트 자세히 →</span></a>
     </div>
 
-    <div class="grid gap-4 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
+    <ul class="grid gap-x-6 sm:grid-cols-2">
       {picks.map(({ entry, category }) => (
-        <Card
-          href={`${base}/${category}/${entry.slug}/`}
-          title={entry.data.title}
-          titleEn={entry.data.title_en}
-          summary={entry.data.summary}
-          summaryEn={entry.data.summary_en}
-          tags={entry.data.tags}
-          source={entry.data.source}
-          category={category}
-        />
+        <li class="border-b border-ink-200/60 dark:border-white/10">
+          <a href={`${base}/${category}/${entry.slug}/`} class="flex min-h-11 items-center justify-between gap-3 py-2 text-sm text-ink-700 hover:text-accent-700 dark:text-ink-200 dark:hover:text-accent-400">
+            <span class="min-w-0 break-words"><span data-lang="en">{entry.data.title_en || entry.data.title}</span><span data-lang="ko">{entry.data.title}</span></span>
+            <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="M5 12h14m-5-5 5 5-5 5"/></svg>
+          </a>
+        </li>
       ))}
-    </div>
+    </ul>
   </div>
 </section>

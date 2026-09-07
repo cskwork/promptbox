@@ -24,23 +24,42 @@ const currentHref = base + '/';
 
 <BaseLayout title="promptbox — tools for AI coding agents" titleKo="promptbox — AI 코딩 에이전트 도구 모음" descriptionKo="복사해서 바로 쓰는 AI 코딩 에이전트용 프롬프트·스킬·훅·설정 모음." currentHref={currentHref}>
   <Hero total={total} categoryCount={categoryCount} />
-  <HowItWorks />
-  <DeveloperPicks />
 
-  <section id="catalog" class="scroll-mt-20 pt-4">
+  <section id="catalog" class="scroll-mt-20 pt-4" aria-labelledby="catalog-heading">
     <div class="mb-6 flex items-end justify-between border-b border-ink-200/70 pb-3 dark:border-ink-800/70">
-      <h2 class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50"><span data-lang="en">Catalog</span><span data-lang="ko">카탈로그</span></h2>
-      <span class="font-mono text-[0.72rem] uppercase tracking-wider text-ink-500 dark:text-ink-400">{total} items</span>
+      <h2 id="catalog-heading" class="text-2xl font-bold tracking-tight text-ink-900 dark:text-ink-50"><span data-lang="en">Catalog</span><span data-lang="ko">카탈로그</span></h2>
+      <span id="pc-catalog-count" class="text-sm tabular-nums text-ink-500 dark:text-ink-400" role="status" aria-live="polite"><span data-lang="en">{total} items</span><span data-lang="ko">{total}개 항목</span></span>
     </div>
 
-    <div class="space-y-12">
+    <div class="catalog-toolbar">
+      <div class="relative">
+        <label for="pc-catalog-search" class="sr-only"><span data-lang="en">Search catalog</span><span data-lang="ko">카탈로그 검색</span></label>
+        <svg class="pointer-events-none absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-500 dark:text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg>
+        <input id="pc-catalog-search" type="search" placeholder="Search tools, tasks, or tags…" data-placeholder-en="Search tools, tasks, or tags…" data-placeholder-ko="도구, 작업, 태그로 검색…" autocomplete="off" class="glass-input w-full rounded-xl py-3.5 pl-12 pr-12 text-base" />
+        <kbd class="pc-kbd pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">/</kbd>
+      </div>
+      <nav class="catalog-shortcuts" aria-label="Jump to category" data-aria-en="Jump to category" data-aria-ko="카테고리 바로가기">
+        {grouped.filter(g => g.entries.length).map(group => (
+          <a href={`#${group.key}`} data-catalog-jump class="catalog-shortcut">
+            <span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span>
+            <span class="tabular-nums text-ink-500 dark:text-ink-400">{group.entries.length}</span>
+          </a>
+        ))}
+      </nav>
+    </div>
+    <div id="pc-catalog-empty" class="hidden rounded-xl border border-dashed border-ink-300 px-6 py-12 text-center dark:border-ink-700">
+      <h3 class="text-lg font-semibold"><span data-lang="en">No matching tools</span><span data-lang="ko">검색 결과가 없습니다</span></h3>
+      <p class="mt-2 text-sm text-ink-500 dark:text-ink-400"><span data-lang="en">Try a different task, tool name, or tag.</span><span data-lang="ko">다른 작업, 도구 이름 또는 태그로 검색해 보세요.</span></p>
+      <button id="pc-clear-search" class="btn btn-ghost mt-5 px-4 py-2" type="button"><span data-lang="en">Clear search</span><span data-lang="ko">검색 초기화</span></button>
+    </div>
+    <div class="space-y-10">
       {grouped.map((group) => (
-        <section id={group.key} class:list={['reveal scroll-mt-20', `cat-${group.key}`]}>
+        <section id={group.key} data-catalog-group={group.key} class:list={['catalog-group scroll-mt-20', `cat-${group.key}`]}>
           <div class="mb-4 flex flex-wrap items-center gap-x-3 gap-y-1 border-b border-ink-200/60 pb-2 dark:border-ink-800/60">
             <span class="cat-tile h-9 w-9"><CategoryIcon icon={group.meta.icon} class="h-5 w-5" /></span>
-            <h3 class="text-xl font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span></h3>
+            <h3 class="text-lg font-semibold text-ink-900 dark:text-ink-50"><span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span></h3>
             <span class="rounded-full bg-ink-100/80 px-2 py-0.5 font-mono text-[0.66rem] text-ink-500 dark:bg-ink-800/80 dark:text-ink-300">{group.entries.length}</span>
-            <p class="w-full text-sm text-ink-500 sm:w-auto sm:flex-1 sm:pl-1"><span data-lang="en">{group.meta.blurb_en}</span><span data-lang="ko">{group.meta.blurb}</span></p>
+            <p class="w-full text-sm text-ink-500 sm:w-auto sm:flex-1 sm:pl-1 dark:text-ink-400"><span data-lang="en">{group.meta.blurb_en}</span><span data-lang="ko">{group.meta.blurb}</span></p>
           </div>
 
           {group.entries.length === 0 ? (
@@ -59,6 +78,7 @@ const currentHref = base + '/';
                   tags={entry.data.tags}
                   source={entry.data.source}
                   category={group.key}
+                  catalogItem
                 />
               ))}
             </div>
@@ -67,4 +87,6 @@ const currentHref = base + '/';
       ))}
     </div>
   </section>
+  <HowItWorks />
+  <DeveloperPicks />
 </BaseLayout>

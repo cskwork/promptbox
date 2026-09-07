@@ -97,7 +97,7 @@ cd ~/my-project && prime-agent
   descriptionKo="대안 하네스 안내: OpenCode 2를 설치하고 네이티브 멀티모달 GLM-5.3-Flash를 연결한다. promptbox 기본 하네스는 pi다."
   currentHref={currentHref}
 >
-  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
+  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
     <a href={base + '/'} class="hover:text-accent-700 dark:hover:text-accent-400"><span data-lang="en">Home</span><span data-lang="ko">홈</span></a>
     <span aria-hidden="true">›</span>
     <a href={base + '/tips/'} class="hover:text-accent-700 dark:hover:text-accent-400">Tips &amp; Tricks</a>
@@ -349,8 +349,8 @@ cd ~/my-project && prime-agent
             <span data-lang="en">Alternative — Prime Agent (persistent-kernel harness)</span>
             <span data-lang="ko">다른 선택지 — Prime Agent (IPython 커널 하네스)</span>
           </span>
-          <span class="ml-2 text-sm text-ink-500 group-open:hidden">▸</span>
-          <span class="ml-2 hidden text-sm text-ink-500 group-open:inline">▾</span>
+          <span class="ml-2 text-sm text-ink-500 group-open:hidden dark:text-ink-400">▸</span>
+          <span class="ml-2 hidden text-sm text-ink-500 group-open:inline dark:text-ink-400">▾</span>
         </summary>
         <p class="mt-3 text-sm leading-relaxed text-ink-600 dark:text-ink-300">
           <span data-lang="en">If you want a different single-agent harness, <a class="text-accent-700 dark:text-accent-400 font-medium underline underline-offset-2" href={`${base}/harnesses/prime-agent/`}>Prime Agent</a> is another option: one agent whose only tool is a persistent IPython kernel, so Python variables and loaded data survive across turns. It reads the same <code class="font-mono text-[0.85em]">~/.agents/skills/</code> directory this site installs into, and it takes the same Z.ai key. <strong class="font-semibold text-ink-800 dark:text-ink-100">It sits best on macOS</strong> — the official one-line installer targets macOS/Linux, and Windows needs a bash shell (Git Bash or WSL) before it will run at all.</span>

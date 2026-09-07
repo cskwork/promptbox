@@ -11,203 +11,66 @@ interface NavItem {
   order: number;
   keywords: string;
 }
-
-interface Props {
-  items: NavItem[];
-  currentHref?: string;
-}
-
+interface Props { items: NavItem[]; currentHref?: string }
 const { items, currentHref } = Astro.props;
-
-const grouped = CATEGORY_ORDER.map((key) => ({
+const grouped = CATEGORY_ORDER.map(key => ({
   key,
   meta: CATEGORY_META[key],
-  entries: items
-    .filter((it) => it.category === key)
-    .sort((a, b) => a.title.localeCompare(b.title, 'ko')),
+  entries: items.filter(it => it.category === key).sort((a, b) => a.title.localeCompare(b.title, 'ko')),
 }));
-
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 const homeHref = base + '/';
 ---
 
-<aside class="w-full border-b border-white/50 bg-white/55 px-4 py-6 backdrop-blur-[12px] backdrop-saturate-150 lg:sticky lg:top-14 lg:max-h-[calc(100vh-3.5rem)] lg:w-72 lg:shrink-0 lg:overflow-y-auto lg:border-b-0 lg:border-r dark:border-white/5 dark:bg-ink-950/45">
-  <button
-    id="pc-nav-toggle"
-    type="button"
-    aria-expanded="false"
-    aria-controls="pc-nav-body"
-    class="mb-3 flex w-full items-center justify-between rounded-lg border border-ink-200/70 bg-white/60 px-3 py-2.5 text-sm font-medium text-ink-700 transition-colors hover:border-accent-500/40 dark:border-white/10 dark:bg-ink-900/50 dark:text-ink-200 lg:hidden"
-  >
-    <span class="flex items-center gap-2">
-      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-      <span data-lang="en">Browse categories</span><span data-lang="ko">카테고리 둘러보기</span>
-    </span>
-    <svg class="pc-nav-chev h-4 w-4 transition-transform duration-200" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
-  </button>
-  <div id="pc-nav-body" class="hidden lg:block">
-  <!-- Mobile-only swipeable category quick-jump; reuses cat hues + counts -->
-  <div class="-mx-1 mb-4 flex gap-1.5 overflow-x-auto px-1 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:hidden" aria-label="Category shortcuts" data-aria-en="Category shortcuts" data-aria-ko="카테고리 바로가기">
-    {grouped.filter((g) => g.entries.length > 0).map((group) => (
-      <a
-        href={`#pc-cat-${group.key}`}
-        data-pc-chip
-        class:list={['cat-chip min-h-[2.5rem] shrink-0 whitespace-nowrap', `cat-${group.key}`]}
-      >
-        <span class="cat-tile h-4 w-4" aria-hidden="true"><CategoryIcon icon={group.meta.icon} class="h-2.5 w-2.5" /></span>
-        <span class="font-sans"><span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span></span>
-        <span class="font-mono opacity-70">{group.entries.length}</span>
-      </a>
-    ))}
-  </div>
-  <div class="relative mb-5">
+<aside class="site-sidebar">
+  {currentHref !== homeHref && <div class="relative">
     <label for="pc-search" class="sr-only"><span data-lang="en">Search titles, summaries, and tags</span><span data-lang="ko">제목·요약·태그로 검색</span></label>
-    <svg class="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-    <input
-      type="search"
-      id="pc-search"
-      placeholder="Search"
-      data-placeholder-en="Search"
-      data-placeholder-ko="검색"
-      class="glass-input w-full rounded-lg py-2.5 pl-8 pr-9 text-sm lg:py-1.5"
-      autocomplete="off"
-    />
+    <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-500 dark:text-ink-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5"/></svg>
+    <input type="search" id="pc-search" placeholder="Find an item…" data-placeholder-en="Find an item…" data-placeholder-ko="항목 검색…" class="glass-input w-full rounded-lg py-2.5 pl-9 pr-8 text-sm" autocomplete="off" />
     <kbd class="pc-kbd pointer-events-none absolute right-2 top-1/2 -translate-y-1/2">/</kbd>
-  </div>
-  <!-- Live match count: visual reassurance while filtering (shown only on an active query) -->
-  <p id="pc-search-count" class="mb-4 hidden px-1 font-mono text-[0.66rem] text-ink-500 dark:text-ink-400"></p>
-
-  <nav class="space-y-5 text-sm" aria-label="Catalog" data-aria-en="Catalog" data-aria-ko="카탈로그">
-    <a
-      href={homeHref}
-      class:list={[
-        'flex items-center gap-2 rounded-lg px-2.5 py-2 font-medium transition-colors lg:py-1.5',
-        currentHref === homeHref
-          ? 'bg-accent-500/15 text-accent-700 ring-1 ring-accent-500/30 dark:text-accent-300'
-          : 'text-ink-700 hover:bg-white/60 dark:text-ink-200 dark:hover:bg-ink-900/60',
-      ]}
-    >
-      <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
-      <span data-lang="en">All items</span><span data-lang="ko">전체 카탈로그</span>
-    </a>
-
-    {grouped.map((group) => (
-      <div id={`pc-cat-${group.key}`} data-pc-group={group.key} class:list={['scroll-mt-16 space-y-1', `cat-${group.key}`]}>
-        <div class="mb-1 flex items-center gap-2 px-1">
-          <span class="cat-tile h-5 w-5"><CategoryIcon icon={group.meta.icon} class="h-3 w-3" /></span>
-          <span class="text-[0.72rem] font-semibold uppercase tracking-wider text-ink-700 dark:text-ink-200">
-            <span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span>
-          </span>
-          <span class="ml-auto font-mono text-[0.66rem] text-ink-500 dark:text-ink-400">{group.entries.length}</span>
-        </div>
-        <ul class="space-y-0.5">
-          {group.entries.length === 0 && (
-            <li class="px-2 py-1 text-xs italic text-ink-500 dark:text-ink-400"><span data-lang="en">Nothing here yet</span><span data-lang="ko">아직 항목이 없습니다</span></li>
-          )}
-          {group.entries.map((entry) => (
-            <li>
-              <a
-                href={entry.href}
-                data-pc-item
-                data-pc-keywords={entry.keywords}
-                class:list={[
-                  'block truncate rounded-lg px-2.5 py-2 transition-colors lg:py-1.5',
-                  currentHref === entry.href
-                    ? 'bg-accent-500/15 font-medium text-accent-700 ring-1 ring-accent-500/30 dark:text-accent-300'
-                    : 'text-ink-600 hover:bg-white/60 hover:text-ink-900 dark:text-ink-300 dark:hover:bg-ink-900/60 dark:hover:text-ink-50',
-                ]}
-              ><span data-lang="en">{entry.titleEn || entry.title}</span><span data-lang="ko">{entry.title}</span></a>
-            </li>
-          ))}
-        </ul>
-      </div>
-    ))}
-
-    <p id="pc-noresults" class="hidden px-2 py-3 text-xs italic text-ink-500 dark:text-ink-400">
-      <span data-lang="en">No matches</span><span data-lang="ko">검색 결과가 없습니다</span>
-    </p>
-  </nav>
+  </div>}
+  <button id="pc-nav-toggle" type="button" aria-expanded="false" aria-controls="pc-nav-body" class="nav-toggle">
+    <span data-lang="en">Browse categories</span><span data-lang="ko">카테고리 둘러보기</span>
+    <svg class="pc-nav-chev h-4 w-4 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+  </button>
+  <div id="pc-nav-body">
+    <p id="pc-search-count" class="mb-3 mt-4 hidden text-sm text-ink-500 dark:text-ink-400" role="status" aria-live="polite"></p>
+    <nav class="mt-5 space-y-1 text-sm" aria-label="Catalog" data-aria-en="Catalog" data-aria-ko="카탈로그">
+      <a href={homeHref + '#catalog'} aria-current={currentHref === homeHref ? 'page' : undefined} class:list={['nav-home', currentHref === homeHref && 'is-current']}>
+        <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span data-lang="en">All items</span><span data-lang="ko">전체 카탈로그</span>
+        <span class="ml-auto tabular-nums">{items.length}</span>
+      </a>
+      {grouped.filter(group => group.entries.length).map(group => (
+        <details data-pc-group={group.key} class:list={['nav-category', `cat-${group.key}`]} open={group.entries.some(entry => entry.href === currentHref)}>
+          <summary>
+            <span class="cat-tile h-6 w-6 shrink-0"><CategoryIcon icon={group.meta.icon} class="h-3.5 w-3.5" /></span>
+            <span class="font-medium"><span data-lang="en">{group.meta.label_en}</span><span data-lang="ko">{group.meta.label}</span></span>
+            <span class="ml-auto text-xs tabular-nums text-ink-500 dark:text-ink-400">{group.entries.length}</span>
+            <svg class="nav-category-chevron h-3.5 w-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+          </summary>
+          <ul class="nav-entries">
+            {group.entries.map(entry => (
+              <li>
+                <a href={entry.href} data-pc-item data-pc-keywords={entry.keywords} aria-current={entry.href === currentHref ? 'page' : undefined} class:list={['nav-entry', entry.href === currentHref && 'is-current']}>
+                  <span data-lang="en">{entry.titleEn || entry.title}</span><span data-lang="ko">{entry.title}</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      ))}
+      <p id="pc-noresults" class="hidden px-2 py-4 text-sm text-ink-500 dark:text-ink-400"><span data-lang="en">No matches. Try another keyword.</span><span data-lang="ko">검색 결과가 없습니다. 다른 키워드를 입력해 보세요.</span></p>
+    </nav>
+    <nav class="sidebar-help" aria-label="Getting started" data-aria-en="Getting started" data-aria-ko="시작하기">
+      <a href={homeHref + '#how-it-works'}><span data-lang="en">How to use promptbox</span><span data-lang="ko">promptbox 사용법</span></a>
+      <a href={homeHref + '#start-here'}><span data-lang="en">Developer starter kit</span><span data-lang="ko">개발자 스타터 키트</span></a>
+      <a href={base + '/tips/'}><span data-lang="en">Setup guide</span><span data-lang="ko">설치 가이드</span></a>
+    </nav>
   </div>
 </aside>
 
 <script>
-  const input = document.getElementById('pc-search') as HTMLInputElement | null;
-  const noResults = document.getElementById('pc-noresults');
-  const syncSearchLanguage = () => {
-    if (!input) return;
-    input.placeholder = document.documentElement.lang === 'ko'
-      ? input.dataset.placeholderKo || '검색'
-      : input.dataset.placeholderEn || 'Search';
-    if (input.value) input.dispatchEvent(new Event('input'));
-  };
-  document.addEventListener('pc-language-change', syncSearchLanguage);
-  syncSearchLanguage();
-
-  // Mobile: collapse/expand the sidebar (full sidebar is always shown on lg+)
-  const navToggle = document.getElementById('pc-nav-toggle');
-  const navBody = document.getElementById('pc-nav-body');
-  navToggle?.addEventListener('click', () => {
-    const open = navBody?.classList.toggle('hidden') === false;
-    navToggle.setAttribute('aria-expanded', String(open));
-    navToggle.querySelector('.pc-nav-chev')?.classList.toggle('rotate-180', open);
-  });
-
-  // Mobile quick-jump chips: clear any active search filter so the target group is visible
-  document.querySelectorAll('[data-pc-chip]').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      if (input && input.value) {
-        input.value = '';
-        input.dispatchEvent(new Event('input'));
-      }
-    });
-  });
-
-  // "/" focuses search (unless already typing in a field)
-  document.addEventListener('keydown', (e) => {
-    if (e.key !== '/' || e.metaKey || e.ctrlKey || e.altKey) return;
-    const t = e.target as HTMLElement;
-    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-    e.preventDefault();
-    // On mobile the nav (and the search input) is collapsed; expand it first so focus lands.
-    if (navBody?.classList.contains('hidden')) navToggle?.click();
-    input?.focus();
-  });
-
-  if (input) {
-    input.addEventListener('input', () => {
-      const q = input.value.trim().toLowerCase();
-      let anyVisible = false;
-      let shown = 0;
-      document.querySelectorAll<HTMLAnchorElement>('[data-pc-item]').forEach((a) => {
-        const hay = a.dataset.pcKeywords || '';
-        const show = !q || hay.includes(q);
-        (a.parentElement as HTMLElement).style.display = show ? '' : 'none';
-        if (show) { anyVisible = true; shown++; }
-      });
-      document.querySelectorAll<HTMLElement>('[data-pc-group]').forEach((g) => {
-        const visible = Array.from(g.querySelectorAll<HTMLLIElement>('li')).some(
-          (li) => li.querySelector('[data-pc-item]') && (li as HTMLElement).style.display !== 'none',
-        );
-        g.style.display = q && !visible ? 'none' : '';
-      });
-      if (noResults) noResults.classList.toggle('hidden', anyVisible || !q);
-      const countEl = document.getElementById('pc-search-count');
-      if (countEl) {
-        countEl.classList.toggle('hidden', !q || !anyVisible);
-        countEl.textContent = q && anyVisible
-          ? document.documentElement.lang === 'ko' ? `${shown}개 일치` : `${shown} matches`
-          : '';
-      }
-    });
-    // Esc clears
-    input.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        input.value = '';
-        input.dispatchEvent(new Event('input'));
-        input.blur();
-      }
-    });
-  }
+  import { initCatalogSearch } from '~/scripts/catalog-search';
+  initCatalogSearch();
 </script>
