@@ -23,14 +23,14 @@ const homeHref = base + '/';
       <button
         id="pc-language-toggle"
         type="button"
-        class="inline-flex h-9 min-w-9 items-center justify-center rounded-md px-2 font-mono text-xs font-semibold text-ink-600 transition-colors hover:bg-white/60 hover:text-accent-700 dark:text-ink-300 dark:hover:bg-ink-800/60 dark:hover:text-accent-400 lg:h-8"
+        class="inline-flex h-11 min-w-11 items-center justify-center rounded-md px-2 font-mono text-xs font-semibold text-ink-600 transition-colors hover:bg-white/60 hover:text-accent-700 dark:text-ink-300 dark:hover:bg-ink-800/60 dark:hover:text-accent-400"
         aria-label="한국어로 전환"
       >
         <span data-lang="en">KO</span><span data-lang="ko">EN</span>
       </button>
       <a
         href="https://github.com/cskwork/promptbox"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink-600 lg:h-8 lg:w-8 transition-colors hover:bg-white/60 hover:text-accent-700 dark:text-ink-300 dark:hover:bg-ink-800/60 dark:hover:text-accent-400"
+        class="inline-flex h-11 w-11 items-center justify-center rounded-md text-ink-600 transition-colors hover:bg-white/60 hover:text-accent-700 dark:text-ink-300 dark:hover:bg-ink-800/60 dark:hover:text-accent-400"
         target="_blank"
         rel="noopener"
         aria-label="GitHub repository (opens in a new tab)"
@@ -44,7 +44,7 @@ const homeHref = base + '/';
       <button
         id="pc-theme-toggle"
         type="button"
-        class="inline-flex h-9 w-9 items-center justify-center rounded-md text-ink-600 lg:h-8 lg:w-8 transition-colors hover:bg-white/60 hover:text-accent-700 dark:text-ink-300 dark:hover:bg-ink-800/60 dark:hover:text-accent-400"
+        class="inline-flex h-11 w-11 items-center justify-center rounded-md text-ink-600 transition-colors hover:bg-white/60 hover:text-accent-700 dark:text-ink-300 dark:hover:bg-ink-800/60 dark:hover:text-accent-400"
         aria-label="Toggle light or dark theme"
         data-aria-en="Toggle light or dark theme"
         data-aria-ko="밝은 테마 또는 어두운 테마로 전환"
@@ -62,7 +62,7 @@ const homeHref = base + '/';
   </div>
 </header>
 
-<script is:inline>
+<script>
   const languageButton = document.getElementById('pc-language-toggle');
   const syncLanguage = () => {
     const korean = document.documentElement.lang === 'ko';
@@ -87,7 +87,7 @@ const homeHref = base + '/';
   languageButton?.addEventListener('click', () => {
     const root = document.documentElement;
     root.lang = root.lang === 'ko' ? 'en' : 'ko';
-    localStorage.setItem('pc-language', root.lang);
+    try { localStorage.setItem('pc-language', root.lang); } catch { /* Keep the toggle usable without storage. */ }
     syncLanguage();
   });
 
@@ -98,7 +98,7 @@ const homeHref = base + '/';
   tbtn?.addEventListener('click', () => {
     const root = document.documentElement;
     root.classList.toggle('dark');
-    localStorage.setItem('pc-theme', root.classList.contains('dark') ? 'dark' : 'light');
+    try { localStorage.setItem('pc-theme', root.classList.contains('dark') ? 'dark' : 'light'); } catch { /* Keep the toggle usable without storage. */ }
     syncPressed();
   });
 </script>

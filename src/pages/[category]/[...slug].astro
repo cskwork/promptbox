@@ -78,7 +78,7 @@ const hasMainBlock = category === 'prompts' && mainBlock.trim().length > 200;
   descriptionKo={d.summary}
   currentHref={currentHref}
 >
-  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
+  <nav class="mb-4 flex items-center gap-1.5 text-sm text-ink-500 dark:text-ink-400" aria-label="Breadcrumb" data-aria-en="Breadcrumb" data-aria-ko="경로">
     <a href={base + '/'} class="hover:text-accent-700 dark:hover:text-accent-400"><span data-lang="en">Home</span><span data-lang="ko">홈</span></a>
     <span aria-hidden="true">›</span>
     <a href={`${base}/#${category}`} class="hover:text-accent-700 dark:hover:text-accent-400"><span data-lang="en">{meta.label_en}</span><span data-lang="ko">{meta.label}</span></a>
@@ -92,7 +92,7 @@ const hasMainBlock = category === 'prompts' && mainBlock.trim().length > 200;
         <CategoryIcon icon={meta.icon} class="h-3.5 w-3.5" />
         <span data-lang="en">{meta.label_en}</span><span data-lang="ko">{meta.label}</span>
       </span>
-      <div class="flex items-center gap-2">
+      <div class="flex flex-wrap items-center gap-2">
         {!hasMainBlock && (
           <CopyButton
             target="#pc-rawtext"
@@ -136,7 +136,7 @@ const hasMainBlock = category === 'prompts' && mainBlock.trim().length > 200;
         <div class="mb-4">
           <div class="mb-1.5 font-mono text-[0.7rem] uppercase tracking-wider text-ink-500 dark:text-ink-400"><span data-lang="en">Install</span><span data-lang="ko">설치</span></div>
           <div class="flex items-stretch gap-2">
-            <code id="pc-install" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{d.install}</code>
+            <code id="pc-install" tabindex="0" class="min-w-0 flex-1 overflow-x-auto whitespace-pre rounded-lg border border-ink-800/70 bg-ink-950 px-3 py-2 font-mono text-[0.82rem] text-ink-100">{d.install}</code>
             <CopyButton target="#pc-install" labelEn="Copy" labelKo="복사" size="sm" variant="ghost" class="shrink-0" />
           </div>
         </div>
@@ -159,7 +159,7 @@ const hasMainBlock = category === 'prompts' && mainBlock.trim().length > 200;
             </div>
           ))}
           {(d.author || d.license) && (
-            <div class="sm:col-span-2 flex flex-wrap gap-x-6 gap-y-1 border-t border-ink-100/80 pt-3 text-xs text-ink-500 dark:border-white/10">
+            <div class="sm:col-span-2 flex flex-wrap gap-x-6 gap-y-1 border-t border-ink-100/80 pt-3 text-xs text-ink-500 dark:border-white/10 dark:text-ink-400">
               {d.author && <span><span data-lang="en">Author</span><span data-lang="ko">작성자</span> <strong class="font-medium text-ink-700 dark:text-ink-200">{d.author}</strong></span>}
               {d.license && <span><span data-lang="en">License</span><span data-lang="ko">라이선스</span> <strong class="font-medium text-ink-700 dark:text-ink-200">{d.license}</strong></span>}
             </div>
@@ -250,5 +250,5 @@ const hasMainBlock = category === 'prompts' && mainBlock.trim().length > 200;
   <!-- Hidden raw-text mirror for the "원문 복사" button. Prompt entries copy the
        payload block instead, so this mirror would only duplicate the page for
        screen readers there. -->
-  {!hasMainBlock && <pre id="pc-rawtext" class="sr-only" set:text={rawText}></pre>}
+  {!hasMainBlock && <pre id="pc-rawtext" hidden aria-hidden="true" set:text={rawText}></pre>}
 </BaseLayout>

@@ -16,12 +16,17 @@ html[lang='ko'] [data-lang='en'] {
     @apply text-ink-800;
     font-feature-settings: 'cv11', 'ss01';
     -webkit-tap-highlight-color: transparent;
+    color-scheme: light;
+    caret-color: #047857;
   }
   html.dark {
     @apply text-ink-100;
+    color-scheme: dark;
+    caret-color: #6ee7b7;
   }
   /* Korean: break lines at word (어절) boundaries, never mid-syllable.
      overflow-wrap keeps long Latin/URL tokens from overflowing their box. */
+  body { overflow-wrap: anywhere; }
   html[lang='ko'] body {
     word-break: keep-all;
     overflow-wrap: break-word;
@@ -116,23 +121,21 @@ html[lang='ko'] [data-lang='en'] {
 @layer components {
   /* --- Surfaces ---------------------------------------------------------- */
   .glass-panel {
-    @apply bg-white/80 dark:bg-ink-900/55
-           backdrop-blur-[10px] backdrop-saturate-150
-           border border-white/70 dark:border-white/10
+    @apply bg-white/90 dark:bg-ink-900/90
+           border border-ink-200/70 dark:border-white/10
            shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_10px_30px_-16px_rgba(15,20,40,0.22)]
            dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_10px_30px_-16px_rgba(0,0,0,0.6)];
   }
   .glass-card {
-    @apply relative bg-white/70 dark:bg-ink-900/45
-           backdrop-blur-[10px] backdrop-saturate-150
-           border border-white/60 dark:border-white/10
+    @apply relative bg-white/95 dark:bg-ink-900/90
+           border border-ink-200/80 dark:border-white/10
            shadow-[0_1px_0_rgba(255,255,255,0.55)_inset,0_6px_18px_-12px_rgba(15,20,40,0.2)]
            dark:shadow-[0_1px_0_rgba(255,255,255,0.05)_inset,0_6px_18px_-12px_rgba(0,0,0,0.55)]
            transition-[transform,box-shadow,border-color,background-color] duration-200;
   }
   .glass-card:hover,
   .glass-card:focus-within {
-    @apply -translate-y-0.5 bg-white/85 dark:bg-ink-900/65
+    @apply -translate-y-0.5 bg-white dark:bg-ink-900
            shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_18px_38px_-20px_rgba(16,40,34,0.28)];
     border-color: var(--cat-line, theme('colors.accent.500/0.6'));
   }
@@ -154,26 +157,14 @@ html[lang='ko'] [data-lang='en'] {
   .glass-card[class*='cat-']:focus-within::before {
     opacity: 0.8;
   }
-  /* The home page ships the whole catalog (~75 cards) in one long scroll. Let the
-     browser skip layout/paint for cards that are off-screen until they near the
-     viewport — the dominant cost on this page, not transfer size. intrinsic-size
-     reserves ~card height so the scrollbar/anchors stay stable; `auto` caches each
-     card's real size after first paint. No-op where content-visibility is
-     unsupported (graceful). The reveal IntersectionObserver watches the section,
-     not the card, so the cascade animation is unaffected. */
-  .glass-card {
-    content-visibility: auto;
-    contain-intrinsic-size: auto 200px;
-  }
   .glass-chip {
     @apply bg-white/60 dark:bg-ink-800/55
-           backdrop-blur-[6px]
            border border-white/55 dark:border-white/10
            text-ink-600 dark:text-ink-200;
   }
   .glass-input {
-    @apply bg-white/75 dark:bg-ink-900/60 backdrop-blur-[6px]
-           border border-white/60 dark:border-white/10
+    @apply bg-white dark:bg-ink-900/90
+           border border-ink-200/80 dark:border-white/10
            text-ink-800 dark:text-ink-100
            placeholder:text-ink-500 dark:placeholder:text-ink-400
            focus:bg-white/95 dark:focus:bg-ink-900/85
@@ -208,7 +199,6 @@ html[lang='ko'] [data-lang='en'] {
   .copy-cta {
     @apply relative my-6 overflow-hidden rounded-2xl p-4 sm:p-5
            bg-white/70 dark:bg-ink-900/50
-           backdrop-blur-[14px] backdrop-saturate-150
            border border-accent-500/35 dark:border-accent-400/25
            shadow-[0_1px_0_rgba(255,255,255,0.6)_inset,0_18px_44px_-24px_rgba(16,185,129,0.55)]
            dark:shadow-[0_1px_0_rgba(255,255,255,0.06)_inset,0_18px_44px_-24px_rgba(16,185,129,0.4)];
@@ -283,11 +273,15 @@ html[lang='ko'] [data-lang='en'] {
   /* --- Prose (detail-page body) ----------------------------------------- */
   .prose-pc {
     @apply max-w-none leading-relaxed text-ink-700 dark:text-ink-200;
+    line-height: 1.8;
   }
   .prose-pc h2 { @apply text-xl font-semibold mt-10 mb-3 pb-2 border-b border-ink-200/70 dark:border-ink-800/70 text-ink-900 dark:text-ink-50 scroll-mt-24; }
   .prose-pc h3 { @apply text-lg font-semibold mt-7 mb-2 text-ink-900 dark:text-ink-50; }
   .prose-pc h4 { @apply text-base font-semibold mt-6 mb-2 text-ink-800 dark:text-ink-100; }
-  .prose-pc p  { @apply my-3; }
+  .prose-pc p  { @apply my-3; max-width: 72ch; }
+  .prose-pc > :first-child { margin-top: 0; }
+  .prose-pc img { max-width: 100%; height: auto; }
+  .prose-pc pre:focus-visible { outline: 2px solid #10b981; outline-offset: 3px; }
   .prose-pc ul { @apply list-disc pl-6 my-3 space-y-1.5; }
   .prose-pc ol { @apply list-decimal pl-6 my-3 space-y-1.5; }
   .prose-pc li { @apply marker:text-accent-500; }
@@ -335,32 +329,7 @@ html[lang='ko'] [data-lang='en'] {
     @apply mb-2;
   }
 
-  /* --- Scroll reveal (only when JS is on, so no-JS shows everything) ----- */
-  html.js .reveal {
-    opacity: 0;
-    transform: translateY(14px);
-    transition: opacity 0.55s cubic-bezier(0.22, 1, 0.36, 1), transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  html.js .reveal.is-visible {
-    opacity: 1;
-    transform: none;
-  }
-  /* Staggered cascade: cards inside a revealed section waterfall in */
-  html.js .reveal .grid > * {
-    opacity: 0;
-    transform: translateY(10px);
-    transition: opacity 0.5s cubic-bezier(0.22, 1, 0.36, 1), transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
-  }
-  html.js .reveal.is-visible .grid > * {
-    opacity: 1;
-    transform: none;
-  }
-  html.js .reveal.is-visible .grid > *:nth-child(1) { transition-delay: 0.04s; }
-  html.js .reveal.is-visible .grid > *:nth-child(2) { transition-delay: 0.09s; }
-  html.js .reveal.is-visible .grid > *:nth-child(3) { transition-delay: 0.14s; }
-  html.js .reveal.is-visible .grid > *:nth-child(4) { transition-delay: 0.19s; }
-  html.js .reveal.is-visible .grid > *:nth-child(5) { transition-delay: 0.24s; }
-  html.js .reveal.is-visible .grid > *:nth-child(n+6) { transition-delay: 0.28s; }
+
 }
 
 /* ============================================================
@@ -397,11 +366,7 @@ html[lang='ko'] [data-lang='en'] {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
-  .reveal,
-  .reveal .grid > * {
-    opacity: 1 !important;
-    transform: none !important;
-  }
+
 }
 
 /* shiki: keep code blocks on a solid dark surface regardless of the
@@ -411,4 +376,59 @@ html:not(.dark) .astro-code {
 }
 html.dark .astro-code {
   @apply !bg-ink-950;
+}
+
+/* Search uses semantic hidden state, including flex/grid components. */
+[hidden] { display: none !important; }
+
+@layer components {
+  .site-sidebar {
+    @apply w-full border-b border-ink-200/70 px-4 py-3 dark:border-white/10;
+    @apply lg:sticky lg:top-14 lg:max-h-[calc(100dvh-3.5rem)] lg:w-64 lg:shrink-0 lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r lg:px-4 lg:py-6;
+  }
+  .nav-toggle {
+    @apply mt-2 hidden min-h-11 w-full items-center justify-between text-sm font-medium text-ink-600 dark:text-ink-300 lg:hidden;
+  }
+  .site-sidebar.is-enhanced .nav-toggle { @apply flex lg:hidden; }
+  .nav-home {
+    @apply mb-3 flex min-h-11 items-center gap-2.5 rounded-lg px-3 text-ink-700 transition-colors hover:bg-white/80 dark:text-ink-200 dark:hover:bg-white/5;
+  }
+  .is-current {
+    @apply bg-accent-500/10 text-accent-800 dark:text-accent-300;
+  }
+  .nav-category summary {
+    @apply flex min-h-11 cursor-pointer list-none items-center gap-2.5 rounded-lg px-2 text-ink-700 transition-colors hover:bg-white/80 dark:text-ink-200 dark:hover:bg-white/5;
+  }
+  .nav-category summary::-webkit-details-marker { display: none; }
+  .nav-category[open] .nav-category-chevron { transform: rotate(90deg); }
+  .nav-entries { @apply mb-3 ml-5 border-l border-ink-200 pl-2 dark:border-white/10; }
+  .nav-entry {
+    @apply block rounded-md px-2.5 py-2 text-sm leading-snug text-ink-600 transition-colors hover:bg-white/80 hover:text-accent-800 dark:text-ink-300 dark:hover:bg-white/5 dark:hover:text-accent-300;
+  }
+  .nav-entry.is-current { @apply font-medium text-accent-800 dark:text-accent-300; }
+  .sidebar-help { @apply mt-6 space-y-1 border-t border-ink-200/70 pt-4 text-sm text-ink-500 dark:border-white/10 dark:text-ink-400; }
+  .sidebar-help a { @apply block rounded-md px-3 py-2 hover:text-accent-800 dark:hover:text-accent-300; }
+  .catalog-toolbar { @apply mb-8; }
+  .catalog-shortcuts { @apply mt-3 flex flex-wrap gap-1.5; }
+  .catalog-shortcut {
+    @apply inline-flex min-h-10 items-center gap-2 rounded-lg border border-ink-200/80 bg-white/60 px-3 py-1.5 text-sm text-ink-700 transition-colors hover:border-accent-600/50 hover:bg-white dark:border-white/10 dark:bg-ink-900/60 dark:text-ink-200 dark:hover:border-accent-400/50;
+  }
+  .catalog-shortcut:focus-visible { @apply ring-2 ring-accent-600 dark:ring-accent-400; }
+  .card-main { @apply rounded-t-xl; }
+  .card-main:focus-visible { outline: 2px solid #059669; outline-offset: -3px; box-shadow: none; }
+  .card-source { min-height: 2.5rem; }
+  .card-tag { @apply rounded-md bg-ink-100/70 px-1.5 py-0.5 text-xs text-ink-500 dark:bg-white/5 dark:text-ink-300; }
+  .btn { min-height: 2.5rem; }
+  .catalog-group > div:first-child p { @apply dark:text-ink-400; }
+}
+
+@media (max-width: 1023px) {
+  .site-sidebar.is-enhanced #pc-nav-body:not(.is-open) { display: none; }
+  .site-sidebar { background: rgba(255,255,255,.5); }
+  .dark .site-sidebar { background: rgba(14,17,28,.5); }
+  .nav-entry { min-height: 2.75rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .home-intro { animation: intro-enter .4s ease-out both; }
+  @keyframes intro-enter { from { transform: translateY(6px); } to { transform: none; } }
 }

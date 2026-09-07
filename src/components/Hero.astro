@@ -4,23 +4,22 @@ interface Props {
   categoryCount: number;
 }
 const { total, categoryCount } = Astro.props;
-const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 ---
-<section class="grid items-center gap-8 py-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start lg:gap-12 lg:py-12">
+<section class="home-intro grid items-center gap-6 pb-8 pt-2 lg:grid-cols-[1.15fr_0.85fr] lg:gap-8 lg:pb-10 lg:pt-5">
   <p class="sr-only"><span data-lang="en">Three steps: browse, copy, and paste into your agent.</span><span data-lang="ko">사용 3단계: 카테고리에서 고르고, 원문을 복사하고, 에이전트에 붙여넣습니다.</span></p>
   <div>
-    <h1 class="text-balance text-[clamp(2rem,1.2rem+3.4vw,3.25rem)] font-bold leading-[1.08] tracking-[-0.02em] text-ink-900 dark:text-ink-50">
+    <h1 class="text-balance text-[clamp(2rem,1.1rem+2.6vw,2.8rem)] font-bold leading-[1.08] tracking-[-0.02em] text-ink-900 dark:text-ink-50">
       <span data-lang="en">Proven agent tools,<br /><span class="text-accent-600 dark:text-accent-400">one copy</span> away.</span>
       <span data-lang="ko">검증된 에이전트 도구를<br /><span class="text-accent-600 dark:text-accent-400">복사 한 번</span>으로 바로.</span>
     </h1>
-    <p class="mt-5 max-w-xl text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
+    <p class="mt-4 max-w-xl text-sm text-pretty leading-relaxed text-ink-600 dark:text-ink-300">
       <span data-lang="en">Prompts, skills, hooks, and configs for Claude Code, Codex, Gemini CLI, and other AI coding agents, curated in one place.
       Browse without installing anything, then <strong class="font-semibold text-ink-800 dark:text-ink-100">copy the original</strong> and use it as-is.</span>
       <span data-lang="ko">Claude Code · Codex · Gemini CLI 등 AI 코딩 에이전트에 바로 붙여 넣는 프롬프트·스킬·훅·설정을 한곳에 모았습니다.
       설치 없이 둘러보고, 마음에 드는 항목의 <strong class="font-semibold text-ink-800 dark:text-ink-100">원문을 복사</strong>해 그대로 쓰세요.</span>
     </p>
 
-    <div class="mt-7 flex flex-wrap items-center gap-3">
+    <div class="mt-5 flex flex-wrap items-center gap-3">
       <a href="#catalog" class="btn btn-primary px-5 py-2.5 text-sm">
         <span data-lang="en">Browse catalog</span><span data-lang="ko">카탈로그 둘러보기</span>
         <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
@@ -30,24 +29,14 @@ const base = import.meta.env.BASE_URL.replace(/\/$/, '');
       </a>
     </div>
 
-    <dl class="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm">
-      <div class="flex items-baseline gap-1.5">
-        <dt class="font-mono text-xl font-semibold text-ink-900 dark:text-ink-50">{total}</dt>
-        <dd class="text-ink-500"><span data-lang="en">items</span><span data-lang="ko">개 항목</span></dd>
-      </div>
-      <div class="flex items-baseline gap-1.5">
-        <dt class="font-mono text-xl font-semibold text-ink-900 dark:text-ink-50">{categoryCount}</dt>
-        <dd class="text-ink-500"><span data-lang="en">categories</span><span data-lang="ko">개 카테고리</span></dd>
-      </div>
-      <div class="flex items-baseline gap-1.5">
-        <dt class="font-mono text-xl font-semibold text-accent-700 dark:text-accent-400">OSS</dt>
-        <dd class="text-ink-500"><span data-lang="en">mostly open source</span><span data-lang="ko">대부분 오픈소스</span></dd>
-      </div>
-    </dl>
+    <p class="mt-5 text-sm text-ink-500 dark:text-ink-400">
+      <span data-lang="en">{total} items · {categoryCount} categories · mostly open source</span>
+      <span data-lang="ko">{total}개 항목 · {categoryCount}개 카테고리 · 대부분 오픈소스</span>
+    </p>
   </div>
 
   <!-- Terminal demo: the browse → copy → paste flow (brand memory moment) -->
-  <div class="pc-term" aria-hidden="true">
+  <div class="pc-term hidden lg:block" aria-hidden="true">
     <div class="pc-term-bar">
       <span class="pc-term-dot bg-[#ff5f57]"></span>
       <span class="pc-term-dot bg-[#febc2e]"></span>

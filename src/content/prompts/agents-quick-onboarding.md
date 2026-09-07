@@ -1,8 +1,8 @@
 ---
 title: pi 온보딩 한 방 설치
 title_en: One-shot pi setup
-summary: "pi를 기본 코딩 에이전트로 설치하고, cskwork/pi-setup-public을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하며, 기본 시스템 프롬프트 cskwork/THE-SYSTEM-PROMPT를 `~/.agents/AGENTS.md`로 받아 모든 에이전트에 연결하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
-summary_en: "One paste-and-go prompt that installs pi, syncs the canonical cskwork/pi-setup-public repository, and restores its settings, agents, skills, and model profiles. It also fetches the default system prompt from cskwork/THE-SYSTEM-PROMPT into `~/.agents/AGENTS.md` and links that one file into every coding agent on the machine, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
+summary: "pi를 기본 코딩 에이전트로 설치하거나 최신 버전으로 업데이트하고, cskwork/pi-setup-public을 정본으로 동기화해 설정·에이전트·스킬·모델 프로파일을 복원하며, 기본 시스템 프롬프트 cskwork/THE-SYSTEM-PROMPT를 `~/.agents/AGENTS.md`로 받아 모든 에이전트에 연결하는 복사-붙여넣기 프롬프트. 기본 모델 GLM-5.3-Flash는 텍스트와 이미지를 직접 입력받는다."
+summary_en: "One paste-and-go prompt that installs or updates pi, syncs the canonical cskwork/pi-setup-public repository, and restores its settings, agents, skills, and model profiles. It also fetches the default system prompt from cskwork/THE-SYSTEM-PROMPT into `~/.agents/AGENTS.md` and links that one file into every coding agent on the machine, and uses GLM-5.3-Flash's native multimodal input without a separate vision add-on."
 tags: [onboarding, pi, pi-setup, agents-md, system-prompt, glm-5.3-flash, multimodal, dotfiles, idempotent]
 source: https://github.com/cskwork/pi-setup-public
 author: cskwork
@@ -13,20 +13,24 @@ use_case_en: "Restore pi on a new machine or resync an existing installation fro
 
 ## 한 줄
 
-기본 하네스(에이전트를 실행하는 틀)는 **pi**다. 아래 프롬프트 하나가 Node.js와 pi를 확인하고,
+기본 하네스(에이전트를 실행하는 틀)는 **pi**다. 아래 프롬프트 하나가 Node.js를 확인하고 pi를 설치하거나 최신 버전으로 업데이트한 뒤,
 [`cskwork/pi-setup-public`](https://github.com/cskwork/pi-setup-public)을 `~/pi-setup-public`에 동기화한 뒤 공식
 `install.sh`로 설정 전체를 복원한다.
 
 ## 무엇을 하는가
 
-1. Node.js 22+와 `pi`를 확인하고, 빠졌을 때만 설치한다.
+1. Node.js가 pi의 설치 조건을 충족하는지 확인한다. pi가 없으면 설치하고, 이미 있으면 최신 버전으로 업데이트한 뒤 전후 버전을 확인한다.
 2. `~/pi-setup-public`을 정본 저장소와 `git pull --ff-only`로 동기화한다.
 3. `models.json`에서 `glm-5.3-flash`가 `text`와 `image` 입력을 모두 선언했는지 확인한다.
 4. 설치기를 실행해 `~/.pi/agent/` 설정·에이전트·스킬·프로파일을 연결한다.
 5. 기본 시스템 프롬프트를 [`cskwork/THE-SYSTEM-PROMPT`](https://github.com/cskwork/THE-SYSTEM-PROMPT)에서
    `~/.agents/AGENTS.md`로 받고, 그 한 파일을 Claude Code·Codex·Gemini·OpenCode·pi 설정 경로에 심링크한다.
-   어느 에이전트로 들어가도 같은 계약을 읽는다.
+   실행 시점의 GitHub 최신 원문을 그대로 사용하고, 기존 파일이 다르면 먼저 백업한다.
+   설치 후 원문과 바이트 단위로 비교해 어느 에이전트로 들어가도 같은 계약을 읽는지 확인한다.
 6. 인증, 모델 목록, 패키지, 텍스트 왕복, 가능한 경우 이미지 입력까지 실제 명령으로 검증한다.
+
+기본 설치에는 **Impeccable**을 포함합니다. `supergoal`, `superdesign`, `superoffice`,
+`superhacker`는 온보딩 기본 설치에서 제외합니다. 별도로 설치해 둔 사용자 소유 스킬을 삭제하지 않습니다.
 
 ## 함정
 
@@ -49,17 +53,22 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - Supported: macOS, Linux, and Windows.
    - On Windows, prefer PowerShell for bootstrap commands. pi itself uses Git Bash internally.
 
-2. Ensure Node.js 22+ and npm are available.
+2. Ensure Node.js 22.19+ and npm are available.
    - First run `node -v` and `npm -v`.
-   - If Node is missing or older than 22, use the platform package manager when available.
-   - If no safe package manager is available, stop and tell me to install Node 22 from https://nodejs.org.
+   - If Node is missing or older than 22.19, use the platform package manager when available.
+   - If no safe package manager is available, stop and tell me to install a supported Node.js LTS release from https://nodejs.org.
 
-3. Ensure pi is installed.
-   - Check with `pi --version`.
-   - If missing, run:
-     `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`
-   - Re-run `pi --version`. If the command is still missing, report the npm global prefix and ask me to
-     open a new terminal. Do not patch PATH silently.
+3. Install pi if missing, or update an existing pi installation to the latest release.
+   - Record the current version with `pi --version` when available.
+   - Read the published release and its Node.js requirement:
+     `npm view @earendil-works/pi-coding-agent version engines --json`
+     If the current Node.js version does not satisfy that requirement, upgrade Node.js before continuing.
+   - Run this command for both a new installation and an existing installation:
+     `npm install -g --ignore-scripts @earendil-works/pi-coding-agent@latest`
+   - Re-run `pi --version` and compare it with the published release. Report the before/after versions;
+     if they are equal, report that pi was already current. Do not call an unsuccessful update complete.
+   - If the command is still missing, report the npm global prefix and ask me to open a new terminal.
+     Do not patch PATH silently.
 
 4. Clone or update pi-setup at `~/pi-setup-public`.
    - Canonical remote: `https://github.com/cskwork/pi-setup-public.git`.
@@ -72,6 +81,9 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
 5. Validate the checked-out setup before installing.
    - `models.json` must declare model id `glm-5.3-flash` with input types `text` and `image`.
    - The configured default model must be `glm-5.3-flash` on provider `zai`.
+   - Confirm `skills/impeccable/SKILL.md` and its companion `reference/` and `scripts/` directories exist.
+   - Confirm the bundled `skills/` directory does not contain `supergoal`, `superdesign`, `superoffice`,
+     or `superhacker`; these are not part of the default onboarding installation.
    - If any check fails, stop installation and report that pi-setup is stale. Do not invent a local workaround.
 
 6. Run the repository installer.
@@ -79,16 +91,19 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - Windows PowerShell: run the documented Windows path from the repository README; do not translate the
      shell script by guessing.
    - The installer backs up replaced files and links or copies `~/.pi/agent` configuration from the repo.
+   - Include the bundled Impeccable skill through this installer, with its companion files intact.
+   - Do not separately install or update supergoal, superdesign, superoffice, or superhacker as part of
+     onboarding. Do not uninstall user-owned copies already present in other agent environments.
 
 7. Install the default system prompt and share it with every coding agent on this machine.
-   - Canonical source: https://github.com/cskwork/THE-SYSTEM-PROMPT, file `AGENTS.md`. It is the
-     operating contract: understand the intended outcome, resolve uncertainty from evidence, agree on
-     scope and observable success, then work autonomously and verify before claiming completion. It asks
-     again only for data loss, public API changes, security consequences, or migrations.
-   - Keep one canonical local copy at `~/.agents/AGENTS.md`:
-     `mkdir -p ~/.agents`
-     `curl -fsSL https://raw.githubusercontent.com/cskwork/THE-SYSTEM-PROMPT/main/AGENTS.md -o ~/.agents/AGENTS.md`
-     If that file already exists and differs, move it to a timestamped backup first and report the path.
+   - Canonical source: https://github.com/cskwork/THE-SYSTEM-PROMPT, file `AGENTS.md` on `main`.
+   - Fetch the current source at execution time from:
+     https://raw.githubusercontent.com/cskwork/THE-SYSTEM-PROMPT/main/AGENTS.md
+     Download it to a temporary file first and check that the request succeeded and the file is nonempty.
+     Use those exact bytes, without paraphrasing, merging in older rules, or substituting pi-setup's copy.
+   - Keep the canonical local file at `~/.agents/AGENTS.md`. If an existing file differs, back it up to
+     a timestamped path before replacing it with the validated download. Report the backup path.
+     If the bytes already match, leave it unchanged.
    - Link the one file into each agent you use, and skip any directory whose agent is not installed:
      `ln -sfn ~/.agents/AGENTS.md ~/.claude/CLAUDE.md`
      `ln -sfn ~/.agents/AGENTS.md ~/.codex/AGENTS.md`
@@ -112,8 +127,11 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
    - `pi auth check --provider zai`
    - `pi --list-models zai` and confirm `glm-5.3-flash` appears.
    - Parse `~/.pi/agent/models.json` and confirm `glm-5.3-flash` has both `text` and `image` inputs.
+   - Compare `~/.agents/AGENTS.md` byte-for-byte with the GitHub download from step 7.
    - Resolve every operating-instruction link from step 7 and confirm each one points at
-     `~/.agents/AGENTS.md`.
+     `~/.agents/AGENTS.md`. For Windows copies, compare their contents with that canonical file.
+   - Verify `~/.pi/agent/skills/impeccable/SKILL.md`, `reference/`, and `scripts/` resolve to the bundled
+     skill installed in step 6. Report Impeccable as installed only when these checks pass.
    - `pi list` and report the installed package count.
    - If Z.ai auth is ready, run a text round trip:
      `pi -p "reply with exactly: PI-SETUP-OK" --no-session`
@@ -122,7 +140,7 @@ pi-setup installer explicitly owns them. Never print credentials. Report real ve
 
 10. Finish with a numbered report.
    - State the OS and shell.
-   - State the pi and Node versions.
+   - State the Node.js version and the pi version before and after installation/update.
    - State whether pi-setup was cloned, updated, or already current.
    - State which agents now read the operating instructions, and which were skipped because they are absent.
    - State whether Z.ai authentication and text/image capability were verified or remain user actions.
