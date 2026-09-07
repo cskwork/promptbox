@@ -44,7 +44,7 @@ install: 'git clone https://github.com/cskwork/superdesign-skill && ln -s "$(pwd
 ````markdown
 ---
 name: superdesign
-description: Master web/mobile designer - read intent, pulse current trends, route to the right aesthetic, ship elegant UI past a deterministic anti-slop gate. Use for "/superdesign", "design X", "make this beautiful", "landing page", "redesign UI", "design system / tokens", "critique this design", "explore directions", "generate image / icon / logo".
+description: Create, redesign, or critique web and mobile interfaces with static design gates and rendered verification. Also supports design tokens, visual direction exploration, and standalone images, icons, or logos.
 ---
 
 # /superdesign - intent-driven elegance
@@ -79,15 +79,15 @@ Tie-breaks (one mode wins): "critique and fix" -> REDESIGN (CRITIQUE never edits
 
 ## Default loop (CREATE / REDESIGN) - role-separated
 
-Author-independent roles. Single surface -> inline, switch role with a fresh re-read. 2+ surfaces or a parallel asset batch -> orchestrate agents, one Designer per surface; scaffolding may fan out, look-and-feel stays deep-and-narrow.
+Keep Designer and critic roles separate. A single surface runs inline with a fresh re-read for critique. Delegate independent surfaces or asset work only when it reduces total work; surface count alone does not require agents. Preserve static and rendered verification for each built surface.
 
-**Vault** = one work dir per surface, default `.superdesign/<surface>/`: holds `design-brief.md`, `trend-pulse.md`, `claims.md`, `contrast-pairs.json` (start each from `templates/`). `preflight-gate.sh <vault> <source files>` reads it - no vault, no gate. Create it at step 1.
+**Vault** = one work dir per surface, default `.superdesign/<surface>/`: holds `design-brief.md`, `trend-pulse.md`, `claims.md`, `contrast-pairs.json` (start each from `templates/`; the pairs seed is `templates/contrast-pairs.example.json`). `templates/preflight-gate.sh <vault> <source files>` reads it - no vault, no gate. Create it at step 1.
 
 1. **Read (brief).** Infer kind, audience, vibe, references, brand, quiet constraints (a11y/regulation override aesthetics). State: `Reading this as: <kind> for <audience>, <vibe> language, leaning <system or family>.` Two reads diverge -> ask ONE question; else do not ask; non-interactive -> conservative read + logged assumption. Record in the vault. (`reference/design-brief.md`)
 2. **Trend pulse.** `WebSearch` current trend lane by default; on failure use `reference/trend-snapshot.md` (dated) and warn it may be stale. Reuse a same-kind pulse <=30 days old instead of re-searching (note the reuse). Keep only intent-serving trends. Record dated in the vault `trend-pulse.md`. (`reference/trend-research.md`)
-3. **Direction.** Set dials `DESIGN_VARIANCE` / `MOTION_INTENSITY` / `VISUAL_DENSITY`. Pick official design system OR one aesthetic family (`reference/aesthetics.md`) OR one trend lane - never mix. Pick medium, load `web.md` or `mobile.md`.
+3. **Direction.** Set dials `DESIGN_VARIANCE` / `MOTION_INTENSITY` / `VISUAL_DENSITY` - scale and baseline in `reference/taste-core.md`. Pick official design system OR one aesthetic family (`reference/aesthetics.md`) OR one trend lane - never mix. Pick medium, load `reference/web.md` or `reference/mobile.md`. Done when three dial values, one system/family/lane, and the medium are all named.
 4. **Build (Designer).** Implement to `reference/taste-core.md` (always authority) + chosen family/medium. Assets via `reference/assets.md`. Engagement-bearing brief (Read names a primary action - sign up/buy/book/subscribe) -> also `reference/engagement.md`. Data-dense business app (admin/dashboard/console/internal tool) -> also `reference/dashboard.md` (density-first dials, app shell, no marketing hero). Enforce anti-default + reduced-motion + computed contrast. No self-approval; append `claims.md` per surface with a `Framings:` line. (`agents/designer.md`)
-5. **Critique (independent; no design edits).** Re-read `taste-core.md` + `impeccable-rules.md`. Enumerate every text/bg pair into vault `contrast-pairs.json`. Run `templates/preflight-gate.sh` (-> `anti-slop-gate.mjs` + `contrast-gate.mjs`) on the source, then render the surface with `playwright-cli` (`reference/playwright-cli.md`), write the `## Render` block, and run `templates/render-gate.sh`. Log every violation. (`agents/design-critic.md`)
+5. **Critique (independent; no design edits).** Re-read `reference/taste-core.md` + `reference/impeccable-rules.md`. Enumerate every text/bg pair into vault `contrast-pairs.json`. Run `templates/preflight-gate.sh` (-> `anti-slop-gate.mjs` + `contrast-gate.mjs`) on the source, then render the surface with `playwright-cli` (`reference/playwright-cli.md`), write the `## Render` block, and run `templates/render-gate.sh`. Log every violation. (`agents/design-critic.md`)
 6. **Verify.** Fix each violation, smallest change; re-run BOTH gates (preflight + render) until green. Report passes with output. Fresh violation loops critique -> fix; stop on green. Cap: 3 critique->fix cycles; same rule still failing -> stop, report remaining violations honestly.
 
 Roles -> personas: build=`agents/designer.md`, critique=`agents/design-critic.md`, trends=`agents/trend-scout.md`, assets=`agents/asset-producer.md`.
@@ -99,8 +99,8 @@ No-build modes (SYSTEM/CRITIQUE/EXPLORE/ASSET): load the mode's reference file, 
 | Mode | Deliverable | Verified by |
 |---|---|---|
 | CREATE / REDESIGN | surface code + vault | `templates/preflight-gate.sh` (static) AND `templates/render-gate.sh` (rendered via playwright-cli) green, output reported |
-| SYSTEM | token file + one-screen usage example | `contrast-gate.mjs` on every pair; `anti-slop-gate.mjs` on the sample |
-| CRITIQUE | findings report (severity, file:line, fix, verdict) | detectors ran on the input; URL/HTML input also rendered + `render-gate.sh` (screenshot-only input cannot render - note it); zero edits |
+| SYSTEM | token file + one-screen usage example | `templates/contrast-gate.mjs` on every pair; `templates/anti-slop-gate.mjs` on the sample |
+| CRITIQUE | findings report (severity, file:line, fix, verdict) | detectors ran on the input; URL/HTML input also rendered + `templates/render-gate.sh` (screenshot-only input cannot render - note it); zero edits |
 | EXPLORE | 2-4 divergent directions + one recommendation | directions genuinely differ; nothing built |
 | ASSET | asset file(s) + manifest (tier used, substitutions) | links resolve; palette matches; placeholders flagged |
 
@@ -118,12 +118,7 @@ No-build modes (SYSTEM/CRITIQUE/EXPLORE/ASSET): load the mode's reference file, 
 | `reference/mobile.md` | Build: mobile/native (iOS HIG, Material 3, RN/SwiftUI/Compose) |
 | `reference/engagement.md` | Build: conversion/engagement craft when the brief names a primary action (SaaS/consumer/commerce/marketing) |
 | `reference/dashboard.md` | Build: data-dense business app / admin / dashboard / internal tool (density-first overlay; no marketing hero) |
-| `reference/playwright-cli.md` | Critique: the only render driver - render the built surface, then run `render-gate.sh` |
-| `reference/assets.md` | Build / ASSET: image + SVG fallback chain |
-| `reference/redesign.md` | REDESIGN: audit-first protocol |
-| `reference/design-system.md` | SYSTEM: tokens, scales, theming |
-| `reference/critique.md` | CRITIQUE: review-only flow |
-| `reference/explore.md` | EXPLORE: divergent directions |
+| `reference/playwright-cli.md` | Critique: the only render driver - render the built surface, then run `templates/render-gate.sh` |
 | `reference/sources.md` | Install commands, sources, attribution |
 
 ## Final checklist
@@ -131,8 +126,8 @@ No-build modes (SYSTEM/CRITIQUE/EXPLORE/ASSET): load the mode's reference file, 
 - [ ] Mode + medium stated; brief read one line; trends pulsed + dated (or snapshot fallback disclosed)
 - [ ] One accent, one type system, one radius, one theme strategy; dials declared
 - [ ] Real/generated assets (no div-mockups); reduced-motion + WCAG AA honored
-- [ ] Engagement-bearing brief -> `reference/engagement.md` applied (primary action obvious, useful states, real-data social proof, outcome-led CTA); editorial/portfolio left alone
-- [ ] Data-dense business app (admin/dashboard/console/internal tool) -> `reference/dashboard.md` applied (no marketing hero; app shell + command palette; KPI north-star with deltas; tabular numerals; colorblind-safe status; per-widget loading/empty/error; tables virtualized past ~50 rows)
+- [ ] Engagement-bearing brief -> `reference/engagement.md` applied (primary action obvious, useful states, real-data proof, outcome-led CTA); editorial/portfolio left alone
+- [ ] Data-dense business app (admin/dashboard/console/internal tool) -> `reference/dashboard.md` applied (no marketing hero; app shell + density dials VAR 3-5/MOT 2-3/DEN 6-8; KPI north-star with deltas; tabular numerals; colorblind-safe status; per-widget loading/empty/error; tables virtualized past ~50 rows)
 - [ ] Mode contract met: build modes -> `templates/preflight-gate.sh` (static) AND `templates/render-gate.sh` (rendered via playwright-cli) green with output reported; other modes -> their verified-by row
 - [ ] Smallest change for intent; surrounding style matched; no unrequested rewrites
 - [ ] Any external publish / destructive step had explicit consent

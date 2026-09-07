@@ -56,7 +56,7 @@ metadata:
   privacy: local-read-only
   network: none
   state: ~/.prompter
-  subagents: preferred
+  subagents: optional
 ---
 
 # Prompter
@@ -79,7 +79,7 @@ Read `references/routes.md` at the matching section, plus the listed files. `ref
 1. Session evidence is read-only. Do not modify, resume, compact, export through a network service, or delete source sessions.
 2. Persist only compact decision rules and source fingerprints. Never persist full transcripts, copied code, credentials, tool output, or private file contents.
 3. Explicit focus supplied with `prompt/init` or `prompt/update` is the strongest evidence.
-4. One read-only explorer per detected harness when subagents are available; bounded sequential analysis otherwise.
+4. Analyze bounded evidence directly. Delegate disjoint sanitized slices only when this reduces work or adds useful independent review; keep the same read-only limits.
 5. A candidate reply is never consent. Show it and stop.
 6. Continue only after an exact case-insensitive `y` or `yes` to the currently displayed, unchanged candidate.
 7. Never infer authorization for destructive, irreversible, security-sensitive, production, publishing, purchasing, credential, legal, medical, or financial actions.

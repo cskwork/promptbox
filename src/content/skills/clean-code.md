@@ -65,216 +65,49 @@ $clean-code 레거시 주문 가격 책정 모듈을 동작은 바꾸지 않고 
 ````markdown
 ---
 name: clean-code
-description: Safely refactor legacy code for readability and maintainability without changing its behavior. Use when asked to clean up, simplify, rename, untangle, restructure, reduce technical debt, or make existing code easier to change. First retain passing characterization tests for the unchanged legacy behavior; for an API, then ask whether to preserve v1 in place or leave v1 untouched and build a side-by-side v2; only then implement small verified refactors.
-license: MIT
-compatibility: Requires repository access and the ability to run the project's tests and relevant verification commands.
-metadata:
-  version: "1.0.0"
+description: Refactor legacy code for readability and maintainability while preserving observable behavior and externally consumed contracts.
 ---
 
 # Clean Code
 
-Refactor legacy code so that a future maintainer can understand and change it with less risk. Preserve observable behavior unless the user explicitly approves a behavior change.
+Make the requested code easier to understand and change. Preserve observable behavior unless the user authorizes a behavior change. Prefer precise names, simpler local control flow, cohesive ownership, and removal of proven duplication over new abstractions.
 
-## Operating priorities
+## Establish the boundary
 
-Apply these priorities in order:
+Read relevant repository instructions, inspect the working tree, and discover verification commands from configuration and CI. Trace the target, its callers, state changes, and external effects. Record the relevant test baseline, including pre-existing failures; preserve unrelated work.
 
-1. Preserve behavior with evidence.
-2. Use precise, domain-oriented names.
-3. Keep related logic easy to read in one place.
-4. Reduce branching, duplication, hidden state, and change coupling.
-5. Introduce abstractions only when they remove demonstrated complexity.
-6. Prefer a focused diff over a broad rewrite.
+State the scope, observable behavior to preserve, and the evidence that will protect it. Reuse scope already established in the conversation. Keep bug fixes, new features, upgrades, and unrelated formatting outside a behavior-preserving refactor unless the user includes them.
 
-Do not optimize for the number of methods, classes, files, patterns, or lines. Excessive extraction can make code harder to understand by forcing readers to jump between files.
+## Protect current behavior
 
-## Non-negotiable rules
+Use [characterization-tests.md](../../references/characterization-tests.md) when existing tests do not protect behavior at risk. Add retained tests through a stable observable seam and run them against unchanged production code before refactoring. Cover meaningful boundaries, errors, output shape, side effects, and consumer-dependent legacy quirks. Control nondeterminism only where needed.
 
-- Do not change production behavior before retained characterization tests pass against the unchanged legacy code.
-- Keep the characterization tests as permanent legacy regression tests. Do not delete or weaken them after the refactor.
-- Do not combine a refactor with a bug fix, feature change, dependency upgrade, or unrelated formatting pass.
-- If the target is an API and the versioning strategy is unresolved, complete the characterization-test gate and then ask the API versioning question before implementation.
-- Work in small, reversible batches. Run the narrowest relevant tests after every batch.
-- Preserve surprising behavior as legacy behavior unless the user explicitly authorizes changing it.
-- Never hide pre-existing failures, skip tests, relax assertions, or claim a green suite that was not run successfully.
-- Respect repository-local instructions, architecture, naming conventions, and user changes already present in the working tree.
+Reuse adequate existing coverage instead of adding tests that repeat it. Do not weaken assertions or replace behavioral tests with implementation mirrors. When unrelated tests already fail, record that baseline and verify the affected behavior without claiming the whole repository is green.
 
-## Workflow
+## Preserve API contracts
 
-### 1. Establish the refactoring boundary
+For an externally consumed endpoint, library, CLI, event, or data contract, default to preserving the existing interface while refactoring internals. An ordinary behavior-preserving refactor does not require a new version or a repeated approval question.
 
-Before editing:
+If the requested result requires a contract change or the user wants v1 frozen, resolve the versioning choice before those changes; consult [api-versioning.md](../../references/api-versioning.md). Honor an existing choice:
 
-1. Read repository instructions and nearby documentation, including files such as `AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING.md`, ADRs, and module READMEs when present.
-2. Inspect the working tree. Do not overwrite or reformat unrelated user changes.
-3. Discover the repository's test, lint, type-check, build, and integration commands from configuration and CI files rather than guessing.
-4. Trace the complete call path through the requested code, its callers, consumers, state changes, and external effects.
-5. Identify the observable seam through which behavior can be tested.
-6. Determine whether the target is an API: HTTP/RPC/GraphQL endpoints, a published library or SDK, a public CLI, an event/message contract, or another externally consumed interface.
-7. Run the existing relevant tests and, when practical, the full suite. Record all pre-existing failures exactly.
-8. State the intended scope and the behavior that must remain unchanged.
+- **Preserve v1:** protect the public contract with tests and refactor behind it.
+- **Side-by-side v2:** keep v1 production files untouched, use the repository’s versioning mechanism, and retain v1 tests. Do not deprecate or redirect v1 or modify it for code sharing without authorization.
 
-Completion criteria:
+## Choose and apply the smallest useful change
 
-- The target, callers, consumers, observable behavior, verification commands, and baseline state are known.
-- No production code has been changed.
+For each change, identify the observed friction, smallest transformation, protecting check, and effect on navigation. Consult [refactoring-heuristics.md](../../references/refactoring-heuristics.md) when choosing a transformation.
 
-### 2. Lock current behavior with retained characterization tests
+Prefer renaming and simplifying local control flow before extracting or moving logic. Consolidate duplicated responsibilities only when sharing improves locality. A new abstraction must remove more complexity than its files, interfaces, and navigation add; existing variation or coupling must justify it.
 
-Read characterization-tests.md, then add tests that describe what the legacy code actually does today.
+Work in small coherent batches. Inspect the diff and run focused checks after each batch. Correct or revert a new regression without discarding unrelated changes. Avoid wholesale rewrites unless requested and adequately protected.
 
-Requirements:
+Do not alter validation, authorization, transactions, errors, logging, serialization, accessibility, or trust-boundary behavior as a simplification shortcut. Do not add dependencies, wrappers, interfaces, or extension points without a demonstrated need.
 
-1. Test through the most stable observable seam available. Prefer a public function, service boundary, endpoint, command, event, or persisted effect over private methods.
-2. Add coverage for the main path, important boundaries, error behavior, output shape, and meaningful side effects.
-3. Capture legacy quirks explicitly when consumers may depend on them. Label them as legacy behavior; do not silently correct them.
-4. Make the tests deterministic. Control time, randomness, environment, network, filesystem, and concurrency only as needed.
-5. Follow repository conventions while making the tests easy to retain and recognize. Prefer a `legacy` or `characterization` suite, directory, tag, or filename where the test framework permits it.
-6. Run the new tests against the unchanged production code. They must pass before refactoring begins.
-7. Confirm the production diff is still empty after this step, apart from test fixtures or test-only support.
+## Verify and report
 
-Do not write assertions that merely repeat the implementation. Assert externally observable results and effects.
+Use [verification-and-reporting.md](../../references/verification-and-reporting.md) for the final review. Run required checks for the touched surface and broaden coverage when shared behavior or compatibility risk warrants it. Reuse evidence for unchanged state; rerun after relevant changes or unresolved failures.
 
-If unrelated tests already fail, preserve the exact baseline and require the newly added characterization suite to pass. Do not misrepresent the entire repository as green.
+Compare against the baseline. Check the diff for contract changes, changed defaults or side effects, weakened tests, unrelated edits, and unjustified abstractions. Under side-by-side v2, verify v1 production files remain untouched.
 
-Completion criteria:
-
-- Retained characterization tests pass on the unchanged legacy implementation.
-- The tests cover the behavior at risk from the planned refactor.
-- Production code remains unchanged.
-
-### 3. Apply the API versioning gate
-
-Perform this step only when the target is an API and the user has not already selected a versioning strategy.
-
-Ask exactly one decision question:
-
-> I found an externally consumed API. Should I **(A)** refactor its internals while preserving the existing v1 contract, or **(B)** leave the v1 production implementation untouched and add a side-by-side v2 implementation? I recommend **[A or B]** because **[one concrete repository-specific reason]**.
-
-Stop before implementation until the user answers. Do not repeat the question if the user already gave a clear choice.
-
-Then follow api-versioning.md:
-
-- **A — preserve v1 in place:** refactor internals only; contract tests must prove the v1 interface and behavior remain compatible.
-- **B — add v2 beside v1:** do not edit v1 production code; add a separate v2 entry point and implementation using the repository's existing versioning mechanism. Tests and documentation may be added around v1 without changing it.
-
-Completion criteria:
-
-- The API strategy is explicit and recorded before production changes.
-
-### 4. Design the smallest useful refactor
-
-Read refactoring-heuristics.md.
-
-Create a concise change plan. For each proposed edit, record:
-
-| Observed friction | Evidence in the code | Smallest transformation | Protecting test | Navigation impact |
-|---|---|---|---|---|
-
-Plan in this order:
-
-1. Improve misleading or vague names using the domain language already present in requirements, tests, and neighboring code.
-2. Simplify local control flow with guard clauses, clearer conditions, explicit intermediate values, and removal of dead branches.
-3. Remove proven duplication and unnecessary indirection.
-4. Move behavior toward the data or concept it naturally belongs to when this improves cohesion.
-5. Extract a method, class, module, or pattern only when the extraction has a precise name and reduces demonstrated complexity or change coupling.
-
-Every new abstraction must answer:
-
-- What concrete problem does this solve now?
-- Which likely change becomes localized?
-- Does the reader gain more than the navigation cost introduced?
-- Can the same result be achieved with a rename, deletion, or small local rewrite?
-
-If those answers are weak, do not introduce the abstraction.
-
-Completion criteria:
-
-- Every planned change is behavior-preserving, test-protected, and justified by observed friction.
-
-### 5. Implement in small behavior-preserving batches
-
-Use this preferred sequence:
-
-1. Rename for meaning.
-2. Clarify variables, conditions, and data flow.
-3. Remove dead code and redundant wrappers.
-4. Consolidate real duplication.
-5. Improve ownership and locality.
-6. Extract or move cohesive logic only when earned.
-7. Apply a design pattern only when real variation or coupling justifies its added indirection.
-
-For each batch:
-
-1. Make one coherent transformation.
-2. Inspect the diff for accidental scope expansion.
-3. Run the narrow characterization tests and relevant unit tests.
-4. Keep the batch only when behavior remains protected and readability or change cost measurably improves.
-5. Revert or correct the latest batch immediately if a previously passing test fails unexpectedly.
-
-Constraints:
-
-- Do not perform a wholesale rewrite unless the user explicitly requests one and the retained tests protect the full contract.
-- Do not add speculative interfaces, factories, adapters, base classes, configuration, or extension points for hypothetical future needs.
-- Do not split cohesive single-use logic across files merely to make functions shorter.
-- Do not alter validation, authorization, transactions, error mapping, logging, accessibility, or other trust-boundary behavior as a simplification shortcut.
-- Do not add a dependency when the repository, language, or platform already provides a clear solution.
-- Under the v2 strategy, keep v1 production files untouched even when sharing code would be convenient, unless the user separately approves modifying v1.
-
-Completion criteria:
-
-- The production diff is focused.
-- Relevant tests pass after each batch.
-- The result is easier to read locally and easier to change along the identified change axis.
-
-### 6. Verify the completed refactor
-
-Read verification-and-reporting.md.
-
-Run all commands applicable to the touched area:
-
-1. Retained legacy characterization tests.
-2. Relevant unit, integration, contract, and end-to-end tests.
-3. The full test suite when practical.
-4. Linting, formatting checks, static analysis, and type checking.
-5. Build or packaging commands.
-6. Security, performance, concurrency, migration, or compatibility checks when the refactor touches those risks.
-7. `git diff --check` or the repository equivalent.
-
-Compare final results with the recorded baseline. There must be no new unexplained failures.
-
-Review the final diff for:
-
-- accidental API or schema changes;
-- changed defaults, ordering, error behavior, side effects, serialization, or null handling;
-- disabled, weakened, or over-mocked tests;
-- unrelated formatting or dependency changes;
-- unnecessary files, wrappers, abstractions, comments, or compatibility shims;
-- v1 production changes when the selected strategy was side-by-side v2.
-
-Completion criteria:
-
-- Verification evidence is recorded accurately.
-- No new regression is known.
-- Any command not run is named with the reason.
-
-### 7. Report the result
-
-Use this structure:
-
-```markdown
-## Refactor completed
-
-- **Scope:**
-- **API strategy:** Not applicable | v1 preserved in place | side-by-side v2
-- **Legacy characterization tests retained:**
-- **Main readability and change-cost improvements:**
-- **Verification commands and results:**
-- **Known behavior intentionally preserved:**
-- **Unverified risks or pre-existing failures:**
-- **Follow-up:** Only work justified by a current requirement
-```
-
-Separate verified facts from assumptions. Do not state that behavior is unchanged solely because the code looks equivalent; cite the tests and checks that support the conclusion.
+Report the main readability improvement, retained behavior, verification results, and any pre-existing failures or unverified risks. State API strategy only when relevant. Test and runtime evidence support compatibility claims; visual inspection alone does not prove equivalence.
 ````

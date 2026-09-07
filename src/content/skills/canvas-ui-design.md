@@ -37,7 +37,7 @@ install: "npx shadcn@latest add @canvas-ui/liquid-react"
 ````markdown
 ---
 name: canvas-ui-design
-description: Design and build expressive website interfaces with Canvas UI (github.com/DavidHDev/canvas-ui) — 33 canvas-drawn WebGL effects shipped for React, Solid, Preact, Vue, Svelte, and vanilla JS. Use when creating a new website, redesigning an existing one, or refining its UI; when the user asks for a tactile, memorable, non-generic interface; or when they mention Canvas UI, canvasui.dev, or page-level liquid, glass, glitch, VHS, ASCII, particle, or shader effects.
+description: Integrate Canvas UI effects into a website when the user requests Canvas UI or a specific canvas/WebGL interaction. Covers effect selection, registry components, framework or vanilla integration, and accessible fallbacks; ordinary UI work does not require this library.
 ---
 
 # Canvas UI Design
@@ -46,8 +46,7 @@ Treat `https://github.com/DavidHDev/canvas-ui` as the primary creative reference
 the UI: install its components and read their source rather than writing your own
 shader or canvas code.
 
-Read [REFERENCE.md](REFERENCE.md) before picking an effect, and again before wiring
-one up — it carries the full component catalog, the effect-picking table, the
+Read [REFERENCE.md](REFERENCE.md) when selecting or wiring an effect — it carries the full component catalog, the effect-picking table, the
 registry naming scheme, and the vanilla factory contract the JSX example below
 does not cover.
 
@@ -111,10 +110,8 @@ import { Liquid } from "@/components/canvasui/Liquid";
 ## Browser support
 
 The html-in-canvas components read the live DOM as a texture. That API needs Chrome
-with `chrome://flags/#canvas-draw-element`, or an origin trial token so visitors need
-no flag. Everywhere else they degrade to a **WebGL overlay** — the effect renders, but
-it no longer distorts the page content. The five 3D object components render fully in
-every browser with no flag.
+with a compatible html-in-canvas capability (check the installed version and current upstream requirements). On unsupported browsers they are intended to degrade to a **WebGL overlay** — the effect renders, but
+it no longer distorts the page content. Check the selected component's WebGL/browser support rather than promising every browser works.
 
 Design for the fallback as the default state. The flagged version is the upgrade.
 
