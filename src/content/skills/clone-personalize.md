@@ -59,68 +59,128 @@ install: "git clone https://github.com/cskwork/clone-personalize ~/.claude/skill
 ````markdown
 ---
 name: clone-personalize
-description: Clone an AI product (GitHub repo or live site) into a local workspace and personalize every paid/API-keyed AI backend so it runs on the user's installed CLIs (Claude Code, Codex, Gemini) and logged-in browser sessions instead. Use when the user says "clone X and make it use my CLIs", "personalize this AI app to my accounts", "OAuth-replace this app", or gives a GitHub/site URL plus a list of CLI substitutions.
-argument-hint: "<source-url> [--site-clone] [--map chat=claude,image=codex,video=gemini-omni] [--out <dir>]"
-level: 3
+description: Clones an AI product — GitHub repo or live site — into a local fork and adapts selected AI API calls to verified installed CLIs or authorized browser bridges. Use when the user gives a repo URL plus a CLI substitution spec, wants a local clone of a live AI site, wants API-key dependencies stripped from an AI app, or says "personalize", "OAuth-replace", or "make it use my logged-in account".
 ---
 
-<Purpose>
+
+# clone-personalize
+
+## Purpose
+
 Take any third-party AI product and produce a locally-running, personally-authenticated fork of it. Two source modes:
 
 1. **Repo mode** (default) — source is a Git repository. Clone it, then rewire its AI calls.
 2. **Site-clone mode** — source is only a live website (no public source). Reverse-engineer the UX/functionality from the live site and re-implement it locally end-to-end.
 
-In both modes, every paid AI API call (OpenAI, Anthropic, Google AI Studio, Replicate, third-party SaaS) is replaced with one of the user's installed CLIs or a browser-session bridge. The result runs without API keys.
-</Purpose>
+Replace the calls included in the user's mapping. A requested full replacement requires an inventory with every call replaced or a documented gap; do not claim the fork is API-key-free until that scope is verified. Preserve unrelated services and account boundaries.
 
-<Use_When>
+## Use When
+
 - User gives a GitHub URL + a personalization spec ("make it use Gemini for X, Codex for Y, Claude Code for Z")
 - User gives only a live site URL and wants a local clone with full functionality
 - User wants to strip API-key dependencies from an AI app and route through CLI/browser instead
 - User says "personalize", "OAuth-replace", "make it use my logged-in account"
-</Use_When>
 
-<Do_Not_Use_When>
+## Do Not Use When
+
 - Source is a non-AI app — just use `git clone` directly
 - User wants to use their own API keys (no personalization needed)
 - Target requires a paid CLI the user does not have installed (verify first)
 - A skill purpose-built for that specific product already exists
-</Do_Not_Use_When>
 
-<Contract>
+## Contract
+
 - **Never invent CLI commands** — verify `claude --help`, `codex --help`, `gemini --help` (or `which`) before mapping. If a CLI is missing, report it and ask before substituting.
 - **Never hardcode secrets** — the whole point is to remove them. If the original needs an API key, the rewrite must remove the env var read, not paper over it.
 - **Preserve original UX** — the user wants the same product, just on their accounts. Do not redesign UI or rename features.
 - **Document every substitution** in `PERSONALIZATION.md` at the workspace root: original call site → CLI replacement → invocation contract.
-- **Failure mode for site-clone**: if a feature cannot be reverse-engineered with confidence, list it as a known gap rather than silently dropping it.
-</Contract>
+- **Surface gaps, never drop them silently** — in either mode, any feature that cannot be reverse-engineered or substituted with confidence is listed as a known gap in `PERSONALIZATION.md`. Silent feature loss is the worst failure mode here.
 
-<Workflow>
+## Capability Routing
 
-**Step 0 — Verify installed CLIs.** `which claude codex gemini`, capture versions. If missing, stop and ask.
+Candidate routes to verify (the user's `--map` takes precedence; a CLI name does not prove a modality is supported):
 
-**Step 1 — Resolve source.** Repo URL → `git clone` into `--out`. Site URL only → fetch landing + primary routes, extract stack hints / feature inventory / data flow.
+| Capability | Default CLI | Rationale |
+|---|---|---|
+| Chat / text generation / reasoning | `claude` (Claude Code) | Verify task/output support and authorization |
+| Code generation / structured edits | `codex` (Codex CLI) | Verify the installed execution contract |
+| Image generation | `codex` with image mode, or browser bridge | Codex CLI image gen; fall back to logged-in web UI via `mcp__claude-in-chrome__*` |
+| Video generation | `gemini` (Gemini CLI / Gemini Omni) | Gemini handles multimodal output |
+| Audio / TTS / STT | `gemini` or browser bridge | Gemini multimodal; else logged-in service |
+| Web search / grounding | `gemini` (built-in grounding) or WebSearch | |
+| Embeddings | local model (sentence-transformers) or `gemini` | Avoid paid embedding APIs |
+| OAuth-gated SaaS (Drive, Notion, Slack…) | `mcp__claude-in-chrome__*` bridge | Reuses the user's logged-in browser session |
 
-**Step 2 — Inventory AI call sites.** Grep for vendor SDKs (`openai`, `anthropic`, `@google/generative-ai`, `replicate`, `runwayml`, `elevenlabs`, `fal-ai`, `stability`, `cohere`, raw `fetch('https://api.*')`). Build a file:line → vendor → capability → IO-shape table.
+When the user provides a `--map` argument, it takes precedence. When the original product hardcodes a vendor (e.g. "must be GPT-4o"), substitute the **default-routed CLI** for that capability and note the swap in `PERSONALIZATION.md`.
 
-**Step 3 — Plan substitutions.** Write to `PERSONALIZATION.md` BEFORE editing.
+## Workflow
 
-**Step 4 — Build CLI-bridge layer.** `lib/ai-cli/{claude,codex,gemini}.{ts,py}`. Each adapter spawns the CLI as subprocess, streams IO, normalizes output to the SDK's original shape.
+**Step 0 — Verify installed CLIs.**
+Run `which claude codex gemini` and capture versions. Check only required routes. If one is missing, continue unaffected inventory/work and ask only if an alternative changes the agreed mapping.
 
-**Step 5 — Rewire call sites.** Replace SDK imports with bridge adapters. Keep signatures stable. Remove vendor env vars from `.env.example`.
+**Step 1 — Resolve source.**
+- Repo URL → `git clone` into `--out` (default: `./<repo-name>-personal/`).
+- Site URL only → create `./<host>-clone/`, fetch the landing page and primary user-facing routes (`ctx_fetch_and_index` if the harness exposes it, else the harness's web-fetch tool), extract: stack hints (framework, build tool), feature inventory (every interactive element), data flow (what the page sends to which endpoints).
 
-**Step 6 — Site-clone reconstruction (site mode only).** Scaffold same framework, recreate routes, wire bridges. Behavioral parity, not pixel parity (unless asked).
+**Step 2 — Inventory AI call sites.**
+Repo mode: grep for vendor SDK imports and HTTP calls — `openai`, `anthropic`, `@google/generative-ai`, `replicate`, `runwayml`, `elevenlabs`, `fal-ai`, `stability`, `cohere`, raw `fetch('https://api.*')`. Build a table: file:line → vendor → capability → input/output shape. The inventory is complete when every grep hit is either a row in the table or marked non-AI.
 
-**Step 7 — Verify locally.** Run dev command, exercise each substituted capability once, record in `PERSONALIZATION.md` → Verification.
+Site-clone mode: derive the AI call inventory from the feature inventory — every "generate" / "summarize" / "create" affordance maps to one capability.
 
-**Step 8 — Report.** Workspace path, substitution table, verified capabilities, known gaps, how to run.
+**Step 3 — Plan substitutions.**
+For each AI call site, pick a CLI per `## Capability Routing` above. Write the plan to `PERSONALIZATION.md` *before* editing — let the user catch wrong mappings cheaply.
 
-</Workflow>
+**Step 4 — Build a thin CLI-bridge layer.**
+Create `lib/ai-cli/` (or the project's idiomatic location) with one adapter per CLI: `claude.ts`, `codex.ts`, `gemini.ts`. Each adapter:
+- Spawns the CLI as a subprocess (`child_process.spawn` / `subprocess.run`)
+- Streams stdin → CLI, captures stdout
+- Normalizes output to the shape the original SDK returned
+- Handles auth-failure / quota exhaustion by surfacing a clear error, not silent fallback
 
-<Required_Artifacts>
-- `PERSONALIZATION.md` (substitution plan, capability map, verification log, gaps)
-- `lib/ai-cli/` adapter modules
-- `.env.example` pruned
-- Original source preserved in git history
-</Required_Artifacts>
+For browser bridges, verify a runtime-accessible interface exists. Host-agent MCP tools are not automatically callable from the forked app. Do not claim integration merely because the current agent can click the website; implement a permitted adapter or document the missing runtime bridge.
+
+**Step 5 — Rewire call sites.**
+Replace vendor SDK imports with the bridge adapter. Keep function signatures stable so call-site changes are mechanical. Remove env-var reads for vendor API keys. Update `.env.example` to drop the removed keys. Done when every row of the Step 2 inventory is rewired or listed as a known gap, and re-running the Step 2 grep finds no vendor SDK import outside `lib/ai-cli/`.
+
+**Step 6 — Site-clone reconstruction (site mode only).**
+After Steps 2-5 cover the AI logic, reconstruct the UX: scaffold the same framework the site appears to use (Next.js / Vite / SvelteKit / etc.), recreate the routes/pages from the feature inventory, wire the AI bridges in. Aim for behavioral parity, not pixel parity, unless the user asks for the latter.
+
+**Step 7 — Verify locally.**
+Run the app's standard dev command (`npm run dev` / `pnpm dev` / `python manage.py runserver` / etc.). For each substituted capability, exercise it once and capture: invocation log, CLI exit code, output sample. Record in `PERSONALIZATION.md` under "Verification".
+
+**Step 8 — Report.**
+Final report to the user:
+- Where the workspace lives
+- Substitution table (call site → CLI)
+- Verified capabilities
+- Known gaps (especially in site-clone mode)
+- How to run the app
+
+## Required Artifacts
+
+At workspace root:
+- `PERSONALIZATION.md` — substitution plan, capability map, verification log, known gaps
+- `lib/ai-cli/` (or idiomatic equivalent) — CLI adapter modules
+- `.env.example` — pruned to remove vendor API keys
+- Original source preserved in git history (do not rewrite history of the clone)
+
+## Execution Policy
+
+- **One adapter per CLI, not per call site.** Reuse beats sprawl.
+- **Repo mode:** confine edits to the agreed backend substitution and required wiring. **Site mode:** implement only the agreed reconstruction scope. Preserve unrelated work in both.
+- **Match existing style** of the cloned repo (formatter, lint config, naming).
+- **Browser bridge is a fallback**, not a default. Prefer a real CLI when one exists for the capability.
+- **Respect rate limits and authorization.** A logged-in account does not authorize uploads, messages, publishing, or unbounded spending. Prefer sequential capability checks and bound retries to the task.
+
+## Reference Example
+
+Input: `clone https://github.com/HKUDS/ViMax but make it use gemini-omni for video, codex for image gen, claude for chat. Use installed CLIs and logged-in browser sessions.`
+
+Resolution:
+- Source mode: repo
+- Map: `chat=claude, image=codex, video=gemini-omni`
+- Workspace: `./ViMax-personal/`
+- Adapters: `lib/ai-cli/{claude,codex,gemini}.{ts,py}` (match repo language)
+- Browser bridge: any OAuth-gated upload/share step
+- PERSONALIZATION.md documents every swap
 ````

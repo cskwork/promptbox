@@ -1,103 +1,42 @@
 ---
 title: claude-code-workflow-cheatsheet
-summary: "어떤 명령어를 언제 써야 할지 매번 까먹는 문제를 해결 — 자주 쓰는 작업 순서를 정리해 Claude가 모든 세션 시작 때 알려주게 한다. 인기 도구 모음 5종 기본 설정 제공."
-summary_en: "Stop forgetting which commands to run — pin a workflow cheat sheet so Claude reminds you at the start of every session. Includes 5 built-in presets."
+summary: "설치된 명령어에 맞는 작업 순서 요약표를 Claude Code 공지 설정에 추가하는 스킬의 호환 항목입니다."
+summary_en: "A compatibility entry for the workflow cheat sheet skill, using the same maintained source."
 tags: [skill, claude-code, workflow, settings, company-announcements, cheatsheet, cskwork]
-source: https://github.com/cskwork/claude-code-workflow-cheatsheet
+source: "https://github.com/cskwork/claude-code-workflow-cheatsheet"
 author: cskwork
 license: MIT
 order: 42
-trigger: "slash command 잊어버려 / setup-announcements / workflow cheatsheet / 매 세션마다 워크플로우 리마인드 / harness preset"
-install: "cp -r ~/Downloads/Code/claude-code-workflow-cheatsheet ~/.claude/skills/company-announcements"
+trigger: "/claude-code-workflow-cheatsheet · workflow cheatsheet · 작업 순서 요약표 · harness preset"
+install: "git clone https://github.com/cskwork/claude-code-workflow-cheatsheet.git && mkdir -p ~/.claude/skills && cp -R claude-code-workflow-cheatsheet/skills/claude-code-workflow-cheatsheet ~/.claude/skills/"
 hidden: true
 ---
 
 ## 한 줄
 
-40개 넘는 슬래시 커맨드를 깔아놓고 정작 3개만 쓰는 문제를 해결 — Claude Code가 매번 띄워주는 공지 자리(`companyAnnouncements`)에 "이 작업엔 이 순서" 식의 워크플로우 안내를 넣어, 세션을 열 때마다 Claude가 그대로 보게 한다.
-*EN: Turn Claude's per-session announcement field into a permanent reminder of which commands to chain for each task.*
+설치된 명령어에 맞는 workflow cheatsheet(작업 순서 요약표)를 Claude Code 공지 설정에 추가합니다. 기존 설정과 공지 내용을 보존합니다.
 
-## 언제 쓰는가
+## 통합된 목록
 
-- Superpowers · Everything Claude Code · Oh My Claude Code · Matt Pocock skills 같은 하니스(harness, Claude Code 위에 명령·스킬을 얹는 도구 모음)를 깔았는데 명령어를 자꾸 잊는다
-- 팀이 권장 워크플로우 체인(`/plan -> /tdd -> /code-review -> /verify`)을 공통으로 쓰게 하고 싶다
-- 신규 합류자에게 매번 "어떤 슬래시 쓰지?" 설명하는 게 지친다
+같은 스킬을 가리키는 기존 [claude-code-announcements 항목](../claude-code-announcements/)을 목록에서 사용합니다. 이 주소와 원문은 호환성을 위해 유지합니다. 템플릿은 원본 저장소의 설치 안내에 따라 함께 설치합니다.
 
-## 무엇을 하는가
-
-1. `~/.claude/commands/`와 프로젝트 `.claude/commands/`를 스캔해 설치된 슬래시 커맨드 인벤토리
-2. 카테고리별 워크플로우 체인으로 분류 (Dev / Quality / Docs / Learn / Session / Meta …)
-3. `[Workflows]` / `[OMC]` / `[Superpowers]` / `[Matt]` 접두사로 라벨링된 한 줄짜리 cheatsheet(빠르게 훑어보는 요약표) 생성
-4. `~/.claude/settings.json`의 `companyAnnouncements`에 단일 string(하나의 문자열)으로 박아넣음 (`\n`으로 라인 분리)
-
-## 함정
-
-- `companyAnnouncements`가 **배열에 여러 string**이면 Claude Code가 세션마다 **랜덤 하나**만 고른다. 매 세션 전부 보이게 하려면 **단일 배열 원소** + `\n` 줄바꿈으로 합쳐야 한다
-- Matt Pocock 프리셋은 사전에 `npx skills add https://github.com/mattpocock/skills` + `/setup-matt-pocock-skills` 1회 실행 필요
-- OMCC 매직 키워드(`autopilot:`, `ralph:`, `ulw`)는 슬래시 커맨드가 아니라 Claude Code 프롬프트 — 셸 명령으로 오해 금지
-
-## 5개 하니스 프리셋
-
-| Harness | Preset ID | 스타일 |
-|---|---|---|
-| Everything Claude Code (ECC) | `ecc` | `/plan`, `/tdd`, `/verify` 표준 슬래시 |
-| Oh My Claude Code (OMCC) | `omcc` | 네임스페이스 `/oh-my-claudecode:*` + 매직 키워드 |
-| Superpowers (obra) | `superpowers` | 스킬 기반 `/brainstorming`, `/writing-plans` |
-| Matt Pocock skills | `mattpocock` | `/diagnosing-bugs`, `/tdd`, `/to-spec`, `/to-tickets`, `/triage` |
-| Vanilla Claude Code | `minimal` | 내장 `/plan`, `/code-review` |
-| Custom | `custom` | 사용자가 직접 선택 |
-
-## 사용법
-
-```bash
-# 1. 스킬 설치
-cp -r . ~/.claude/skills/company-announcements
-
-# 2. Claude Code에서
-/setup-announcements                         # 설치된 커맨드 auto-detect
-/setup-announcements --harness superpowers   # Superpowers 프리셋
-/setup-announcements --harness ecc           # Everything Claude Code 프리셋
-/setup-announcements --harness omcc          # Oh My Claude Code 프리셋
-/setup-announcements --harness mattpocock    # Matt Pocock skills 프리셋
-/setup-announcements --harness minimal       # Vanilla 프리셋
-/setup-announcements --harness custom        # 대화형 선택
-```
-
-또는 수동 — `templates/*.json`에서 `companyAnnouncements` 배열을 꺼내 `~/.claude/settings.json`에 paste.
-
-## 문법 컨벤션
-
-| 기호 | 의미 | 예 |
-|---|---|---|
-| `->` | 순차 단계 | `/plan -> /tdd -> /verify` |
-| `\|` | 대안 커맨드 | `/verify \| /quality-gate` |
-| `,` | 관련 커맨드 | `/save-session, /resume-session` |
-
-## 원문 SKILL.md (전문)
+## 스킬 원문
 
 ````markdown
+---
+name: claude-code-workflow-cheatsheet
+description: Configure a persistent workflow cheat sheet for Claude Code’s startup announcements using an installed-command inventory or a named harness preset.
+---
+
 # Company Announcements Skill
 
 Configure `companyAnnouncements` in `~/.claude/settings.json` with workflow cheat sheets tailored to your installed harness and commands.
 
-## What It Does
+## Steps
 
-1. **Detects** installed slash commands in `~/.claude/commands/` and project `.claude/commands/`
-2. **Categorizes** them into workflow chains (dev, debug, docs, learning, etc.)
-3. **Generates** a `companyAnnouncements` block for `settings.json`
-4. Cross-platform: macOS, Windows, Linux compatible
-
-## Usage
-
-```
-/setup-announcements                        # Auto-detect installed commands
-/setup-announcements --harness ecc          # ECC (Everything Claude Code) preset
-/setup-announcements --harness omcc         # Oh My Claude Code preset
-/setup-announcements --harness superpowers  # Superpowers (obra) preset
-/setup-announcements --harness mattpocock   # Matt Pocock's engineering skills preset
-/setup-announcements --harness minimal      # Vanilla Claude Code preset
-/setup-announcements --harness custom       # Interactive custom selection
-```
+1. **Pick the preset.** Take the preset ID named in the request — `ecc`, `omcc`, `superpowers`, `mattpocock`, `minimal`, or `custom`. With none named, list `~/.claude/commands/` and the project's `.claude/commands/`, then match what is installed against the harness table below. Done when one preset ID is chosen and named back to the user.
+2. **Collect the workflow lines.** For a named harness preset, copy the `companyAnnouncements` value from `templates/<preset>.json` beside this SKILL.md verbatim. For `custom`, use the commands the user picks; for auto-detect, use the commands you found — building lines from the pattern blocks below in the Output Format shape. Done when every detected command sits in a line or was dropped on purpose.
+3. **Configure settings.json.** Merge the result into `companyAnnouncements` in `~/.claude/settings.json`, leaving the file’s other keys intact and preserving unrelated existing announcement text in the combined string unless replacement was requested. Done when the file still parses as JSON and `companyAnnouncements` holds exactly one string.
 
 ## Supported Harnesses
 
@@ -106,7 +45,7 @@ Configure `companyAnnouncements` in `~/.claude/settings.json` with workflow chea
 | Everything Claude Code (ECC) | Standard slash: `/plan`, `/tdd`, `/verify` | orchestrate, TDD, multi-model, eval | `ecc` |
 | Oh My Claude Code (OMCC) | Namespaced: `/oh-my-claudecode:autopilot` + magic keywords: `autopilot:`, `ralph:`, `ulw` | autopilot, team, ralph, ultrawork | `omcc` |
 | Superpowers (obra) | Skill-based: `/brainstorming`, `/writing-plans`, `/executing-plans` | brainstorm, plan, TDD, review, worktrees | `superpowers` |
-| Matt Pocock's skills | Engineering slash: `/diagnose`, `/tdd`, `/to-spec`, `/to-tickets`, `/triage` | setup, plan, bug, feature, triage, architecture | `mattpocock` |
+| Matt Pocock's skills | Engineering slash: `/diagnose`, `/tdd`, `/to-prd`, `/to-issues`, `/triage` | setup, plan, bug, feature, triage, architecture | `mattpocock` |
 | Vanilla Claude Code | Built-in only: `/plan`, `/code-review` | plan, review | `minimal` |
 | Custom | User-selected | Any combination | `custom` |
 
@@ -174,11 +113,11 @@ Meta:       /writing-skills, /using-superpowers
 Disciplined engineering workflows. Install: `npx skills add https://github.com/mattpocock/skills`, then `/setup-matt-pocock-skills` once per repo (one-time scaffolding — kept out of the persistent cheatsheet so it doesn't add noise after the first run).
 
 ```
-Plan:       /grill-with-docs -> /to-spec -> /to-tickets
+Plan:       /grill-with-docs -> /to-prd -> /to-issues
 Bug:        /diagnose (6-phase: feedback loop -> reproduce -> hypothesise -> instrument -> fix+regression -> cleanup)
 Feature:    /tdd (vertical tracer bullets) | /prototype (LOGIC or UI)
 Triage:     /triage — sort new issues into needs-info / ready-for-agent / ready-for-human / wontfix; run when issues pile up or before handing one to an agent
-Explore:    /improve-codebase-architecture
+Explore:    /zoom-out | /improve-codebase-architecture
 ```
 
 ### Vanilla Claude Code (Minimal)
@@ -193,18 +132,13 @@ Session:    /save-session, /resume-session
 
 ## Output Format
 
-The skill generates a JSON array for `companyAnnouncements` in settings.json. Each entry is one workflow category line:
-- Prefixed with `[Workflows]` (ECC/minimal), `[OMC]` (OMCC), `[Superpowers]` (obra), or `[Matt]` (mattpocock)
+`companyAnnouncements` takes a `string[]`, and Claude Code shows one randomly chosen element per session. Keep every workflow category line in a **single element**, separated by `\n` — the shape each file in `templates/` already uses.
+
+- Prefix each line with `[Workflows]` (ECC/minimal), `[OMC]` (OMCC), `[Superpowers]` (obra), or `[Matt]` (mattpocock)
 - Arrow `->` for sequential steps
-- Comma `,` for alternatives
-- Pipe `|` to separate sub-categories
+- Comma `,` for related commands
+- Pipe `|` for alternatives and sub-category breaks
 - Max ~120 chars per line for readability
-
-## Cross-Platform Notes
-
-- All commands use forward slashes (Claude Code convention, not OS paths)
-- No shell-specific syntax in announcement strings
-- JSON uses escaped quotes for inner quotes: `\"desc\"`
-- Works identically on macOS (zsh/bash), Windows (PowerShell/cmd), Linux (bash/zsh)
-- Magic keywords (OMCC) work on all platforms -- they are Claude Code prompts, not shell commands
+- JSON escapes inner quotes: `\"desc\"`
+- Entries are Claude Code prompt text, not shell commands or OS paths: forward-slash commands and OMCC magic keywords (`autopilot:`, `ulw`) go in verbatim and read the same on macOS, Windows, and Linux
 ````

@@ -56,69 +56,54 @@ install: "git clone https://github.com/cskwork/stitch-landing-skill ~/.claude/sk
 ````markdown
 ---
 name: stitch-landing
-description: Turn any project README into a deployed GitHub Pages landing page via Stitch MCP. Use when the user asks to "make a landing page", "deploy on GitHub Pages", "use Stitch to design a landing", or wants a hosted marketing/preview page generated from existing repo context. Triggers — "landing page", "github pages", "stitch landing", "ship a landing", "랜딩 페이지", "랜딩 만들어", "stitch로 디자인".
+description: Build a project landing page from its README and screenshots using Stitch for design, with optional authorized GitHub Pages delivery. Use when the user asks for this Stitch-based workflow; generic landing-page requests need not use Stitch or publish.
 ---
 
 # stitch-landing
 
-End-to-end skill that takes a project (README + screenshots) and ships a deployed landing page on GitHub Pages, using Stitch MCP for the design pass and Tailwind CDN for the production output.
+Turn source-backed project content into a landing page using Stitch's design output as a reference. Deliver the requested artifact; deployment phases apply only when the user authorized hosting/publishing.
 
-## When to use
+## Phase 1 — Read the repo
 
-- User has a repo with a README and asks for a landing page hosted on GitHub Pages.
-- User says "use Stitch to design", or wants a marketing/preview page they can share.
-- Project already has screenshots, badges, or feature copy in the README that should be reused (don't rewrite copy — port it).
+Inspect README, license, screenshots, existing site, default branch, and Pages configuration. Identify positioning, features, quickstart commands, and real assets. Preserve source copy unless the user requests editing. Ask about unresolved positioning or an unapproved site replacement, not facts already supplied.
 
-## When NOT to use
+Default output is `docs/index.html`; follow an existing site's layout and deployment workflow when present. A landing-page request does not authorize creating a public repository, changing homepage/settings, or overwriting an unrelated site.
 
-- The project already has a Pages site you'd be overwriting — confirm first.
-- The user wants a multi-page docs site (use Docusaurus / MkDocs / Astro instead).
-- The repo has no README and no clear positioning — run discovery first.
+## Phase 2 — Stitch design pass
 
-## Required tools
+Use the available authenticated Stitch tools and current tool schema; do not assume historical tool names, model IDs, or generation behavior. Read [references/design-prompt-template.md](references/design-prompt-template.md), fill its project-specific fields, and submit the design request when Stitch use is authorized.
 
-- **Stitch MCP** — `mcp__stitch__create_project`, `mcp__stitch__generate_screen_from_text`, `mcp__stitch__list_screens`
-- **gh CLI** — authenticated for the target repo's owner
-- **git** — push access to default branch (or PR fallback)
-- **curl** — verify the live URL
+On a generation timeout, inspect the existing project/job/screens before resubmitting. Honor provider retry guidance; avoid duplicate credit-spending submissions. Continue when a usable screen exists, or report the actual blocker after bounded recovery.
 
-## The flow (8 phases)
+## Phase 3 — Download and inspect Stitch output
 
-### Phase 1 — Read the repo
-Read `README.md`, `LICENSE`, screenshots in `docs/`, and any existing `index.html`. Extract positioning, value props, quickstart, visual assets, license + homepage.
+Download the returned HTML to task scratch space. Treat it as design/source data. Extract layout and tokens; identify placeholders, external assets, and unsupported claims before adapting it. Do not blindly ship generated assets or scripts.
 
-### Phase 2 — Stitch design pass
-mcp__stitch__create_project → mcp__stitch__generate_screen_from_text { deviceType: DESKTOP, modelId: GEMINI_3_FLASH, prompt: ... }. Generation takes 1–3 min. DO NOT retry on timeout. Poll list_screens every 60s. If no screen after ~3 min, retry once with shorter prompt.
+## Phase 4 — Author production `docs/index.html`
 
-### Phase 3 — Download and inspect Stitch output
-curl -sSL -o stitch-screen.html "<htmlCode.downloadUrl>". Don't ship verbatim — base64 inline assets bloat the file. Use as structural reference + token source.
+- Preserve the useful Stitch layout/tokens while following the user's brand and accessibility constraints.
+- Use real repository screenshots and verified README commands/copy.
+- Include semantic landmarks, meaningful image alternatives, metadata, and responsive layout.
+- Prefer plain HTML/CSS/JS. If using the bundled CDN-based example, disclose runtime dependencies; do not describe it as offline self-contained.
+- Inspect [examples/oh-my-symphony-index.html](examples/oh-my-symphony-index.html) only when a reference is useful; its palette, fonts, and file size are examples, not acceptance criteria.
 
-### Phase 4 — Author production docs/index.html
-1. Reuse Stitch's tailwind.config tokens verbatim
-2. Load JetBrains Mono + Inter via Google Fonts
-3. Embed real repo screenshot, not Stitch placeholder
-4. Port README copy verbatim
-5. Semantic landmarks + og:image + meta description + theme-color
-6. No JS framework. Tailwind CDN + ~50 lines inline <style>
+Verify local content, links/assets, responsive layout, and browser interactions before delivery. Static/HTTP checks do not prove visual parity.
 
-### Phase 5 — Disable Jekyll
-touch docs/.nojekyll
+## Phase 5 — Disable Jekyll
 
-### Phase 6 — Enable GitHub Pages
-gh api -X POST repos/<owner>/<repo>/pages -f 'source[branch]=main' -f 'source[path]=/docs'
-gh api -X PATCH repos/<owner>/<repo> -f homepage='https://<owner>.github.io/<repo>/'
+For an authorized branch-based Pages site serving plain static files from `/docs`, add `docs/.nojekyll` when needed. Preserve a deliberate existing Jekyll or Actions build workflow.
 
-### Phase 7 — Commit and push
-Standard git commit + push. If main blocked by auto-mode classifier, ask via AskUserQuestion: (a) push to main, (b) feature branch + PR, (c) stop.
+## Phase 6 — Enable GitHub Pages
 
-### Phase 8 — Verify the live site
-sleep 30 (let Pages build)
-gh api repos/<owner>/<repo>/pages/builds/latest --jq '{status, commit, error}'
-curl -sI https://<owner>.github.io/<repo>/
-curl -s  https://<owner>.github.io/<repo>/ | grep -E '(<title>|<your tagline>)'
+Only within the requested delivery scope, inspect current Pages source and enable/configure the agreed branch/path. The bundled [scripts/enable-pages.sh](scripts/enable-pages.sh) also updates the repository homepage: inspect its behavior and ensure both changes are authorized before running it. Do not assume `main` is the default branch.
 
-## Deliverables
-- docs/index.html (~25-30K)
-- docs/.nojekyll
-- Pages enabled, homepage set, commit pushed, HTTP 200
+## Phase 7 — Commit and push
+
+Follow repository delivery rules, stage only named page/assets/config files, and use the authorized branch or PR route. Reuse approval already given for unchanged scope; an actual permission denial is a blocker to explain, not a reason to request broad standing permissions or bypass review.
+
+## Phase 8 — Verify the live site
+
+For a requested deployment, verify the Pages build's revision and status, then fetch the actual content and inspect the live page in a browser. A 200 or matching title alone does not prove layout or interactions. Inspect the build error before retrying.
+
+[scripts/verify-pages.sh](scripts/verify-pages.sh) provides bounded build polling and HTTP/content checks; it does not replace revision comparison or browser evidence. Report the actual completed scope, output/live URL, checks, and any remaining blocker. For local-only work, stop after the verified page artifact.
 ````
