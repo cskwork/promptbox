@@ -8,15 +8,20 @@ source: https://github.com/cursor/plugins/tree/main/pstack/skills/unslop
 author: Lauren Tan (poteto)
 license: MIT
 order: 20
-trigger: "글을 쓸 때 항상. description이 'Must always apply'라서 보고서·커밋 메시지·주석·문서 등 모든 산문에 상시 적용된다."
+trigger: "Unslop을 명시적으로 요청할 때. 기본 글쓰기는 Humanizer 사용."
 install: "/add-plugin pstack (Cursor). 다른 하네스는 SKILL.md만 스킬 디렉터리에 복사한다."
 ---
+
+## 사용 정책
+
+기본 글쓰기는 [Humanizer](https://cskwork.github.io/promptbox/skills/humanizer/)를 사용합니다.
+Unslop은 명시적으로 요청할 때만 적용합니다. 아래 코드 블록은 upstream 원문을 보존한 것입니다.
 
 ## 한 줄
 
 LLM이 쓴 글에서 나는 특유의 냄새를 31개 항목으로 이름 붙이고, 각각을 어떻게 고치는지까지 적어 둔
-편집 스킬이다. pstack 플러그인의 일부이고, description이 `Must always apply`라 에이전트가 산문을
-쓸 때마다 걸린다.
+편집 스킬이다. pstack 플러그인의 일부다. 아래 원문에는 상시 적용 문구가 남아 있으므로,
+복사해 사용할 때도 위의 선택 적용 정책을 함께 확인한다.
 
 ## 언제 쓰는가
 
